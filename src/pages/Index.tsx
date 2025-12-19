@@ -1,5 +1,5 @@
 import { useState } from "react";
-import TabBar, { TabType } from "@/components/TabBar";
+import { BottomNav, type TabType } from "@/components/BottomNav";
 import { GiftsPage } from "@/components/pages/GiftsPage";
 import { LeaderboardPage } from "@/components/pages/LeaderboardPage";
 import { ProfilePage } from "@/components/pages/ProfilePage";
@@ -27,7 +27,7 @@ const Index = () => {
         <div className="content-area scroll-smooth scrollbar-hide pt-2">
           {renderPage()}
         </div>
-        <TabBar value={activeTab} onChange={setActiveTab} />
+        <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
     </AdaptivityProvider>
   );

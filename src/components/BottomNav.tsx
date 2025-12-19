@@ -3,7 +3,7 @@ import GiftIcon from "@/assets/tabbar/Gift.svg";
 import LeaderboardIcon from "@/assets/tabbar/Earth.svg";
 import ProfileIcon from "@/assets/tabbar/Contacts.Fill.Circle.svg";
 
-type TabType = "gifts" | "leaderboard" | "profile";
+export type TabType = "gifts" | "leaderboard" | "profile";
 
 interface BottomNavProps {
   activeTab: TabType;

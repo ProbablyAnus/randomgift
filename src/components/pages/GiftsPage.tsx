@@ -315,7 +315,7 @@ export const GiftsPage: FC = () => {
                 </span>
               </div>
               {/* Chance at bottom center */}
-              <span className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[14px] font-medium text-muted-foreground">{prize.chance}</span>
+              <span className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[16px] font-medium text-muted-foreground">{prize.chance}</span>
             </div>
           ))}
         </div>

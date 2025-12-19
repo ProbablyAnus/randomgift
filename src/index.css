@@ -798,3 +798,71 @@ html, body, #root {
 }
 .star-badge--tight{ padding:7px 12px; }
 .star-badge--big{ padding:9px 16px; }
+
+/* === Final contest palette + price pill alignment === */
+:root {
+  --tg-button: #0080FA;
+  --tg-button-text: #FFFFFF;
+  --tg-hint: #959595;
+}
+
+:root[data-theme="light"] {
+  --app-bg: #FFFFFF;
+  --app-card: #EFEFF3;
+  --tabbar-bg: rgba(241, 241, 242, 0.75);
+  --tg-text: #000000;
+  --tg-hint: #959595;
+}
+
+:root[data-theme="dark"] {
+  --app-bg: #1C1C1E;
+  --app-card: #2C2C2E;
+  --tabbar-bg: rgba(30, 30, 30, 0.75);
+  --tg-text: #FFFFFF;
+  --tg-hint: #8E8E93;
+}
+
+.cbc-tabbar__item {
+  color: var(--tg-hint) !important;
+}
+
+.cbc-tabbar__item[data-active] {
+  color: var(--tg-button) !important;
+}
+
+.tg-tab {
+  gap: 4px !important;
+}
+
+.tg-tab__text {
+  line-height: 1 !important;
+}
+
+.star-icon,
+.tg-tab__star {
+  width: 1em !important;
+  height: 1em !important;
+  display: inline-block !important;
+}
+
+.price-row {
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.star-badge {
+  width: fit-content !important;
+  padding: 4px 10px !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--tg-text) 12%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--tg-text) 18%, transparent) !important;
+  color: var(--tg-text) !important;
+  font-weight: 500 !important;
+  line-height: 1 !important;
+}
+
+.star-badge--center {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+}

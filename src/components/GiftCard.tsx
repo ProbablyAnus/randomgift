@@ -1,7 +1,8 @@
 import { FC } from "react";
 import StarSvg from "@/assets/gifts/star-badge.svg";
 interface GiftCardProps {
-  icon: string;
+  iconPng: string;
+  iconWebp?: string;
   label?: string;
   price: number;
   isSelected?: boolean;
@@ -9,7 +10,7 @@ interface GiftCardProps {
   chance?: string;
 }
 
-export const GiftCard: FC<GiftCardProps> = ({ icon, label, price, isSelected, onClick, chance }) => {
+export const GiftCard: FC<GiftCardProps> = ({ iconPng, iconWebp, label, price, isSelected, onClick, chance }) => {
   return (
     <button
       onClick={onClick}
@@ -19,7 +20,10 @@ export const GiftCard: FC<GiftCardProps> = ({ icon, label, price, isSelected, on
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-0.5 h-8 bg-primary/50" />
       )}
       <span className="mb-3 flex items-center justify-center">
-        <img src={icon} alt={label || "Подарок"} className="h-[78px] w-[78px] drop-shadow-lg" />
+        <picture>
+          {iconWebp && <source srcSet={iconWebp} type="image/webp" />}
+          <img src={iconPng} alt={label || "Подарок"} className="h-[78px] w-[78px] drop-shadow-lg" />
+        </picture>
       </span>
       <div className="star-badge star-badge--center star-badge--big">
         <span className="price-row">

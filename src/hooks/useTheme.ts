@@ -2,11 +2,7 @@ import { useEffect, useState } from "react";
 
 export type Theme = "light" | "dark";
 
-const STORAGE_KEY = "theme";
-
 const getInitialTheme = (): Theme => {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved === "light" || saved === "dark") return saved;
   const scheme = window.Telegram?.WebApp?.colorScheme;
   return scheme === "dark" ? "dark" : "light";
 };
@@ -50,9 +46,21 @@ export default function useTheme() {
   const toggleTheme = () => setThemeState((t) => (t === "dark" ? "light" : "dark"));
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, theme);
     apply(theme);
   }, [theme]);
+
+  useEffect(() => {
+    const tg = window.Telegram?.WebApp;
+    if (!tg?.onEvent) return undefined;
+
+    const syncTheme = () => {
+      const scheme = tg.colorScheme;
+      setThemeState(scheme === "dark" ? "dark" : "light");
+    };
+
+    tg.onEvent("themeChanged", syncTheme);
+    return () => tg.offEvent?.("themeChanged", syncTheme);
+  }, []);
 
   return { theme, setTheme, toggleTheme };
 }

@@ -40,9 +40,9 @@ function resolveTheme(mode: ThemeMode): "light" | "dark" {
 const DEFAULT_THEME = {
   light: {
     bg: "#FFFFFF",
-    secondary: "#F1F1F2",
+    secondary: "#EFEFF3",
     text: "#000000",
-    hint: "#8E8E93",
+    hint: "#9E9EA1",
     link: "#007AFF",
     header: "#F1F1F2",
     bottom: "#F1F1F2",
@@ -78,6 +78,13 @@ const toRgba = (color: string, alpha: number) => {
     const g = parseInt(hex.slice(2, 4), 16);
     const b = parseInt(hex.slice(4, 6), 16);
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+  if (hex.length === 8) {
+    const r = parseInt(hex.slice(0, 2), 16);
+    const g = parseInt(hex.slice(2, 4), 16);
+    const b = parseInt(hex.slice(4, 6), 16);
+    const a = parseInt(hex.slice(6, 8), 16) / 255;
+    return `rgba(${r}, ${g}, ${b}, ${a})`;
   }
   return color;
 };
@@ -154,7 +161,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       root.style.setProperty("--tg-hint", hintColor);
       root.style.setProperty("--tg-link", linkColor);
       root.style.setProperty("--tg-accent", accentText);
-      root.style.setProperty("--tg-header-bg", headerBg);
+      root.style.setProperty("--tg-header-bg", toRgba(headerBg, 0.75));
       root.style.setProperty("--tg-bottom-bar-bg", bottomBarBg);
       root.style.setProperty("--tg-section-bg", sectionBg);
       root.style.setProperty("--tg-section-header-text", sectionHeaderText);

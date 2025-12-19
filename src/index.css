@@ -39,7 +39,7 @@
 
 :root[data-theme="light"] {
   --app-bg: #FFFFFF;
-  --app-card: #F1F1F2;
+  --app-card: #EFEFF3;
   --tabbar-bg: rgba(241, 241, 242, 0.75);
   --tg-text: #000000;
 }
@@ -263,7 +263,7 @@
 
 :root[data-theme="light"] {
   --app-bg: #FFFFFF;
-  --app-card: #F1F1F2;
+  --app-card: #EFEFF3;
   --tabbar-bg: rgba(241, 241, 242, 0.75);
   --tg-text: #000000;
 }

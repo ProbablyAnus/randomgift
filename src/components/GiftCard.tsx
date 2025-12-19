@@ -13,7 +13,6 @@ export const GiftCard: FC<GiftCardProps> = ({ icon, label, price, isSelected, on
   return (
     <button
       onClick={onClick}
-      style={{ background: "rgba(44, 44, 46, 1)" }}
       className={`gift-card ${isSelected ? "gift-card-selected" : ""}`}
     >
       {isSelected && (

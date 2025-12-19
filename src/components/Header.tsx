@@ -7,7 +7,7 @@ interface HeaderProps {
 
 export const Header: FC<HeaderProps> = ({ title }) => {
   return (
-    <header className="tg-header" style={{ background: "rgba(28, 28, 30, 1)" }}>
+    <header className="tg-header">
       <button className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors">
         <X size={24} />
       </button>

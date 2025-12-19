@@ -354,8 +354,6 @@ html, body {
   border-color: rgba(255,255,255,0.12);
 }
 .tg-tab__star {
-  width: 18px;
-  height: 18px;
   display: inline-block;
 }
 
@@ -425,7 +423,9 @@ html, body {
 }
 
 /* Star icon sizing: match digits */
-.star-icon, .tg-tab__star {
+.star-icon,
+.tg-tab__star,
+.star-badge .star-icon {
   width: 1em !important;
   height: 1em !important;
 }
@@ -486,11 +486,6 @@ html, body, #root {
   background: rgba(44, 44, 46, 1) !important;
 }
 
-.tg-tab__star {
-  width: 18px !important;
-  height: 18px !important;
-}
-
 .tg-tab__text {
   line-height: 1 !important;
 }
@@ -507,13 +502,6 @@ html, body, #root {
   color: #FFC107 !important;
   font-size: 15px !important;
   font-weight: 600 !important;
-}
-
-.star-icon,
-.star-badge .star-icon,
-.price-row .star-icon {
-  width: 1em !important;
-  height: 1em !important;
 }
 
 /* Gift cards */
@@ -539,11 +527,6 @@ html, body, #root {
   display: flex !important;
   justify-content: center !important;
 }
-.star-icon {
-  width: 1em !important;
-  height: 1em !important;
-}
-
 /* =========================
    FINAL OVERRIDES (Reference-like)
    ========================= */
@@ -583,11 +566,6 @@ html, body, #root {
   padding: 0 20px !important;
   border-radius: 9999px !important;
   background: rgba(44, 44, 46, 1) !important;
-}
-
-.tg-tab__star {
-  width: 1em !important;
-  height: 1em !important;
 }
 
 .tg-tab__text {
@@ -653,14 +631,6 @@ html, body, #root {
   line-height: 1 !important;
 }
 
-.star-icon,
-.star-badge .star-icon,
-.price-row .star-icon,
-.tg-tab__star {
-  width: 1em !important;
-  height: 1em !important;
-}
-
 .price-row { gap: 6px !important; }
 
 
@@ -685,7 +655,6 @@ html, body, #root {
   transform: none !important;
 }
 .tg-tab:active { transform: none !important; }
-.tg-tab__star { width: 22px; height: 22px; }
 .tg-tab__text {
   font-size: 22px;
   line-height: 18px;
@@ -715,15 +684,6 @@ html, body, #root {
 .star-badge--big {
   padding: 7px 12px;
 }
-.star-icon {
-  width: 18px;
-  height: 18px;
-}
-.star-badge--big .star-icon {
-  width: 20px;
-  height: 20px;
-}
-
 /* Disable press-move for tabs specifically (keep cards ok) */
 .tg-tab.touch-feedback,
 .tg-tab:active {
@@ -845,6 +805,3 @@ html, body, #root {
 }
 .star-badge--tight{ padding:7px 12px; }
 .star-badge--big{ padding:9px 16px; }
-.star-icon{ width:22px; height:22px; }
-.star-badge--tight .star-icon{ width:20px; height:20px; }
-.star-badge--big .star-icon{ width:24px; height:24px; }

@@ -1,0 +1,325 @@
+import { FC, useState, useRef } from "react";
+import { PriceTabs } from "../PriceTabs";
+import StarSvg from "@/assets/gifts/star-badge.svg";
+import { Switch } from "@/components/ui/switch";
+import { RefreshCw } from "lucide-react";
+import { useAdaptivity } from "@/hooks/useAdaptivity";
+import champagne from "@/assets/gifts/crown.svg";
+import diamond from "@/assets/gifts/diamond.svg";
+import giftBox from "@/assets/gifts/gift-box.svg";
+import heartBox from "@/assets/gifts/heart-box.svg";
+import ring from "@/assets/gifts/ring.svg";
+import rocket from "@/assets/gifts/star.svg";
+import rose from "@/assets/gifts/rose.svg";
+import teddyBear from "@/assets/gifts/teddy-bear.svg";
+import trophy from "@/assets/gifts/trophy.svg";
+
+const prices = [25, 50, 100];
+
+type RouletteGift = { icon: string; label: string; price: number; chance: number };
+type WinPrize = { icon: string; label: string; price: number; chance: string };
+
+// Roulette gifts for spinning
+const rouletteGifts: RouletteGift[] = [
+  { icon: heartBox, label: "Сердце", price: 15, chance: 27 },
+  { icon: trophy, label: "Кубок", price: 100, chance: 6 },
+  { icon: giftBox, label: "Коробка", price: 25, chance: 17.5 },
+  { icon: teddyBear, label: "Медвежонок", price: 15, chance: 27 },
+  { icon: ring, label: "Кольцо", price: 100, chance: 6 },
+  { icon: rose, label: "Роза", price: 25, chance: 17.5 },
+];
+
+// Win prizes for bottom section
+const allWinPrizes: WinPrize[] = [
+  { icon: diamond, label: "Алмаз", price: 100, chance: "1%" },
+  { icon: trophy, label: "Кубок", price: 100, chance: "1%" },
+  { icon: ring, label: "Кольцо", price: 100, chance: "1%" },
+  { icon: heartBox, label: "Сердце", price: 15, chance: "27%" },
+  { icon: teddyBear, label: "Мишка", price: 15, chance: "27%" },
+  { icon: giftBox, label: "Коробка", price: 25, chance: "17.5%" },
+  { icon: rose, label: "Роза", price: 25, chance: "17.5%" },
+  { icon: rocket, label: "Ракета", price: 250, chance: "0.4%" },
+  { icon: champagne, label: "Шампанское", price: 500, chance: "0.1%" },
+];
+
+// Create extended array for smooth roulette spinning
+const createExtendedRoulette = (gifts: RouletteGift[]) => {
+  const extended: RouletteGift[] = [];
+  for (let i = 0; i < 10; i++) {
+    extended.push(...gifts);
+  }
+  return extended;
+};
+
+const extendedRoulette = createExtendedRoulette(rouletteGifts);
+
+// Select winner based on chances
+const selectWinnerByChance = () => {
+  const totalChance = rouletteGifts.reduce((sum, g) => sum + g.chance, 0);
+  const random = Math.random() * totalChance;
+  let cumulative = 0;
+
+  for (let i = 0; i < rouletteGifts.length; i++) {
+    cumulative += rouletteGifts[i].chance;
+    if (random <= cumulative) {
+      return i;
+    }
+  }
+  return 0;
+};
+
+export const GiftsPage: FC = () => {
+  const { sizeX, platform } = useAdaptivity();
+  const [selectedPrice, setSelectedPrice] = useState(25);
+  const [demoMode, setDemoMode] = useState(false);
+  const [isSpinning, setIsSpinning] = useState(false);
+  const [wonPrize, setWonPrize] = useState<{ icon: string; label: string; price: number } | null>(null);
+  const [showResult, setShowResult] = useState(false);
+  const rouletteRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Reference-like card sizing (closer to Telegram Quick Gift)
+  // User request: roulette cards slightly narrower, and a bit taller
+  const cardWidth = sizeX === "compact" ? 145 : 165;
+  const cardHeight = sizeX === "compact" ? 156 : 176;
+  const cardGap = 12;
+  
+  const handleGetGift = () => {
+    if (isSpinning) return;
+    
+    setIsSpinning(true);
+    setWonPrize(null);
+    setShowResult(false);
+    
+    // Select winner based on chances
+    const winnerIndex = selectWinnerByChance();
+    const winner = rouletteGifts[winnerIndex];
+    
+    // Calculate spin position
+    const itemWidth = cardWidth + cardGap; // card width + gap
+    const containerWidth = containerRef.current?.offsetWidth || 360;
+    // Slightly bias to the right to match the in-app pointer positioning
+    const centerOffset = (containerWidth / 2) - (cardWidth / 2) + 6;
+    
+    // Land on winner in the middle of extended array
+    const targetIndex = (rouletteGifts.length * 5) + winnerIndex;
+    const targetPosition = (targetIndex * itemWidth) - centerOffset;
+    
+    if (rouletteRef.current) {
+      // Reset position instantly
+      rouletteRef.current.style.transition = 'none';
+      rouletteRef.current.style.transform = 'translateX(0)';
+      
+      // Force reflow
+      void rouletteRef.current.offsetHeight;
+      
+      // Start spin animation with platform-specific easing
+      const easing = platform === "ios" 
+        ? 'cubic-bezier(0.25, 0.1, 0.25, 1)' 
+        : 'cubic-bezier(0.15, 0.7, 0.4, 1)';
+      
+      requestAnimationFrame(() => {
+        if (rouletteRef.current) {
+          rouletteRef.current.style.transition = `transform 4s ${easing}`;
+          rouletteRef.current.style.transform = `translateX(-${targetPosition}px)`;
+        }
+      });
+    }
+
+    setTimeout(() => {
+      setIsSpinning(false);
+      setWonPrize(winner);
+      setShowResult(true);
+      
+      // Haptic feedback on supported devices
+      if (navigator.vibrate) {
+        navigator.vibrate([50, 30, 100]);
+      }
+      
+      setTimeout(() => {
+        setShowResult(false);
+      }, 3000);
+    }, 4000);
+  };
+
+  // Button text based on state
+  const getButtonContent = () => {
+    if (isSpinning) {
+      return (
+        <RefreshCw size={26} className="animate-spin text-primary-foreground" />
+      );
+    }
+
+    if (demoMode) {
+      return <span className="text-primary-foreground font-semibold text-lg">Испытать удачу!</span>;
+    }
+
+    return (
+      <>
+        <span className="text-lg">Получить подарок</span>
+        <img src={StarSvg} alt="Stars" className="star-icon" />
+        <span className="text-lg font-semibold">{selectedPrice}</span>
+      </>
+    );
+  };
+
+  return (
+    <div className="flex-1 pb-6">
+      <PriceTabs
+        prices={prices}
+        selectedPrice={selectedPrice}
+        onSelect={setSelectedPrice}
+      />
+
+      {/* Roulette Section */}
+      <div className="relative mt-7 mb-6">
+        {/* Center Pointer */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex flex-col items-center">
+          {/* Top triangle */}
+          <div
+            className="w-0 h-0"
+            style={{
+              borderLeft: "8px solid transparent",
+              borderRight: "8px solid transparent",
+              borderTop: "0px solid transparent",
+              borderBottom: "10px solid color-mix(in srgb, #007AFF 85%, transparent)",
+              filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.35))",
+            }}
+          />
+          <div className="w-0.5 rounded-full gpu-accelerated" style={{ height: `${cardHeight}px`, background: "color-mix(in srgb, #007AFF 65%, transparent)" }} />
+          {/* Bottom triangle */}
+          <div
+            className="w-0 h-0"
+            style={{
+              borderLeft: "8px solid transparent",
+              borderRight: "8px solid transparent",
+              borderTop: "10px solid color-mix(in srgb, #007AFF 85%, transparent)",
+              borderBottom: "0px solid transparent",
+              filter: "drop-shadow(0 -2px 6px rgba(0,0,0,0.35))",
+            }}
+          />
+        </div>
+
+        {/* Roulette Container */}
+        <div 
+          ref={containerRef}
+          className="relative overflow-hidden"
+          style={{ height: `${cardHeight + 18}px` }}
+        >
+          {/* Gradient overlays */}
+          <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[#1C1C1E] to-transparent z-10" />
+          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#1C1C1E] to-transparent z-10" />
+          
+          {/* Scrolling roulette */}
+          <div
+            ref={rouletteRef}
+            className="flex h-full items-center pl-4 gpu-accelerated"
+            style={{ width: "fit-content", gap: `${cardGap}px` }}
+          >
+            {extendedRoulette.map((gift, index) => (
+              <div
+                key={index}
+                className="flex-shrink-0 rounded-[12px] px-[10px] relative touch-feedback"
+                style={{ 
+                  width: cardWidth, 
+                  height: cardHeight,
+                  backgroundColor: "rgba(44, 44, 46, 1)",
+                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.25)"
+                }}
+              >
+                {/* Centered icon - takes most of the space */}
+                <div className="absolute inset-0 flex items-center justify-center pb-6">
+                  <img src={gift.icon} alt={gift.label} className="w-[92px] h-[92px] drop-shadow-lg" />
+                </div>
+                {/* Price badge centered at bottom */}
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 star-badge star-badge--center star-badge--tight">
+                  <span className="price-row">
+                    <img src={StarSvg} alt="Stars" className="star-icon" />
+                    <span className="text-[16px] font-normal">{gift.price}</span>
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Win Result Overlay */}
+        {showResult && wonPrize && (
+          <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none">
+            <div className="bg-card/95 backdrop-blur-sm rounded-[12px] px-8 py-6 shadow-lg animate-scale-in border border-primary/30">
+              <div className="flex flex-col items-center gap-3">
+                <img src={wonPrize.icon} alt={wonPrize.label} className="w-[92px] h-[92px] animate-bounce drop-shadow-xl" />
+                <p className="text-foreground font-semibold text-xl">Вы выиграли!</p>
+                <div className="star-badge">
+                  <img src={StarSvg} alt="Stars" className="star-icon" />
+                  {wonPrize.price}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Demo Mode Toggle */}
+      <div className="flex items-center justify-between px-4 pt-3 pb-4">
+        <span className="text-foreground text-lg">Демо режим</span>
+        <Switch checked={demoMode} onCheckedChange={setDemoMode} />
+      </div>
+
+      {/* Get Gift Button */}
+      <div className="px-4 pb-4">
+        <button
+          onClick={handleGetGift}
+          disabled={isSpinning}
+          className="primary-button touch-feedback"
+        >
+          {getButtonContent()}
+        </button>
+      </div>
+
+      {/* Win Prizes Section - Horizontal Scroll */}
+      <div className="pt-4">
+        <p className="text-sm uppercase tracking-wide text-muted-foreground mb-4 px-4 font-medium">
+          ВЫ МОЖЕТЕ ВЫИГРАТЬ
+        </p>
+        
+        <div 
+          className="flex gap-3 overflow-x-auto px-4 pb-4 scrollbar-hide scroll-smooth"
+          style={{ 
+            scrollSnapType: "x mandatory",
+            scrollPaddingLeft: 16,
+          }}
+        >
+          {allWinPrizes.map((prize, index) => (
+            <div
+              key={index}
+              className="flex-shrink-0 rounded-[12px] relative touch-feedback"
+              style={{
+                scrollSnapAlign: "start",
+                width: sizeX === "compact" ? 135 : 155,
+                // User request: bottom cards a touch shorter
+                height: sizeX === "compact" ? 156 : 176,
+                backgroundColor: "rgba(44, 44, 46, 1)",
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.25)"
+              }}
+            >
+              {/* Centered icon */}
+              <div className="absolute inset-0 flex items-center justify-center pb-9">
+                <img src={prize.icon} alt={prize.label} className="w-[72px] h-[72px] drop-shadow-lg" />
+              </div>
+              {/* Price badge centered */}
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 star-badge star-badge--center star-badge--tight">
+                <span className="price-row">
+                  <img src={StarSvg} alt="Stars" className="star-icon" />
+                  <span className="text-[17px] font-normal">{prize.price}</span>
+                </span>
+              </div>
+              {/* Chance at bottom center */}
+              <span className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[14px] font-medium text-muted-foreground">{prize.chance}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};

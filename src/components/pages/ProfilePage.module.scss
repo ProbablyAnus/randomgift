@@ -1,0 +1,48 @@
+.page {
+  padding: 16px 16px 96px;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+}
+
+.content {
+  margin-top: 16px;
+}
+
+.themeToggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.themeBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 0;
+  background: rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.themeBtn img {
+  width: 20px;
+  height: 20px;
+  opacity: 0.9;
+}
+
+.active {
+  background: rgba(0, 128, 250, 0.20);
+  outline: 1px solid rgba(0, 128, 250, 0.45);
+}

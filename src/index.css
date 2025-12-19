@@ -757,6 +757,30 @@ html, body, #root {
   padding: 14px;
 }
 
+/* === Price lock: prevent layout shift for tabs and button === */
+.tg-tab {
+  min-width: 88px;
+  padding: 0 16px !important;
+  box-sizing: border-box;
+}
+
+.tg-tab--active {
+  padding: 0 16px !important;
+}
+
+.tg-tab__text {
+  min-width: 3ch;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.primary-button .price-value {
+  display: inline-block;
+  min-width: 3ch;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
 
 /* === REF pill style + star sizes === */
 .star-badge{

@@ -332,8 +332,13 @@ html, body {
 /* Top price tabs (star selection) */
 .tg-tabs {
   display: flex;
-  gap: 8px;
-  padding: 10px 16px;
+  justify-content: center;
+  gap: 12px;
+  margin: 14px auto 24px;
+  padding: 0;
+  width: 100%;
+  max-width: 393px;
+  background: transparent;
   overflow-x: auto;
 }
 .tg-tab {
@@ -371,15 +376,6 @@ html, body {
 }
 
 /* Top price tabs: centered rounded pill like Quick Gift */
-.tg-tabs {
-  width: fit-content;
-  max-width: calc(100% - 32px);
-  margin: 12px auto 8px;
-  padding: 6px;
-  border-radius: 9999px;
-  background: rgba(44, 44, 46, 0.6);
-  overflow-x: auto;
-}
 .tg-tab {
   height: 40px;
   padding: 0 16px;
@@ -402,16 +398,6 @@ html, body {
 }
 
 /* Top price tabs: no container background, active pill only */
-.tg-tabs {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin: 12px auto 8px;
-  padding: 0;
-  background: rgba(28, 28, 30, 1) !important;
-  width: 100%;
-  max-width: 393px;
-}
 .tg-tab {
   height: 40px;
   padding: 0 18px;
@@ -458,14 +444,6 @@ html, body, #root {
 /* === Final UI tuning (match reference) === */
 
 /* Top star price tabs: no container bg, only active pill, larger star+digits */
-.tg-tabs {
-  display: flex !important;
-  justify-content: center !important;
-  gap: 12px !important;
-  padding: 0 !important;
-  margin: 12px auto 8px !important;
-  background: transparent !important;
-}
 
 .tg-tab {
   height: 44px !important;
@@ -549,16 +527,6 @@ html, body, #root {
    ========================= */
 
 /* Top star amount tabs (match reference sizing) */
-.tg-tabs {
-  display: flex !important;
-  justify-content: center !important;
-  gap: 12px !important;
-  margin: 14px auto 10px !important;
-  padding: 0 !important;
-  width: 100% !important;
-  max-width: 393px !important;
-  background: transparent !important;
-}
 
 .tg-tab {
   /* Requested: no pill for inactive tabs */
@@ -622,9 +590,6 @@ html, body, #root {
    REQUESTED TWEAKS (latest)
    ========================= */
 
-/* More space between star tabs and roulette */
-.tg-tabs { margin-bottom: 16px !important; }
-
 /* Top star amount tabs: no pills for inactive, pill only for active */
 .tg-tab {
   height: 44px !important;
@@ -667,10 +632,6 @@ html, body, #root {
 /* === Overrides: Star tabs, pills, and crypto-bot-contest TabBar === */
 
 /* Star amount tabs: bigger star, no press movement */
-.tg-tabs {
-  gap: 10px;
-  padding: 12px 16px 0;
-}
 .tg-tab {
   display: inline-flex;
   align-items: center;

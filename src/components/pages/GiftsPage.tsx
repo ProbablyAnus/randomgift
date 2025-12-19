@@ -78,10 +78,9 @@ export const GiftsPage: FC = () => {
   const rouletteRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Reference-like card sizing (closer to Telegram Quick Gift)
-  // User request: roulette cards slightly narrower, and a bit taller
-  const cardWidth = sizeX === "compact" ? 145 : 165;
-  const cardHeight = sizeX === "compact" ? 156 : 176;
+  const baseCardWidth = sizeX === "compact" ? 135 : 155;
+  const baseCardHeight = sizeX === "compact" ? 156 : 176;
+  const rouletteCardWidth = baseCardWidth;
   const cardGap = 12;
   
   const handleGetGift = () => {
@@ -96,10 +95,10 @@ export const GiftsPage: FC = () => {
     const winner = rouletteGifts[winnerIndex];
     
     // Calculate spin position
-    const itemWidth = cardWidth + cardGap; // card width + gap
+    const itemWidth = rouletteCardWidth + cardGap; // card width + gap
     const containerWidth = containerRef.current?.offsetWidth || 360;
     // Slightly bias to the right to match the in-app pointer positioning
-    const centerOffset = (containerWidth / 2) - (cardWidth / 2) + 6;
+    const centerOffset = (containerWidth / 2) - (rouletteCardWidth / 2) + 6;
     
     // Land on winner in the middle of extended array
     const targetIndex = (rouletteGifts.length * 5) + winnerIndex;
@@ -186,7 +185,7 @@ export const GiftsPage: FC = () => {
               filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.35))",
             }}
           />
-          <div className="w-0.5 rounded-full gpu-accelerated" style={{ height: `${cardHeight}px`, background: "color-mix(in srgb, #007AFF 65%, transparent)" }} />
+          <div className="w-0.5 rounded-full gpu-accelerated" style={{ height: `${baseCardHeight}px`, background: "color-mix(in srgb, #007AFF 65%, transparent)" }} />
           {/* Bottom triangle */}
           <div
             className="w-0 h-0"
@@ -204,7 +203,7 @@ export const GiftsPage: FC = () => {
         <div 
           ref={containerRef}
           className="relative overflow-hidden"
-          style={{ height: `${cardHeight + 18}px` }}
+          style={{ height: `${baseCardHeight + 18}px` }}
         >
           {/* Gradient overlays */}
           <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[#1C1C1E] to-transparent z-10" />
@@ -221,8 +220,8 @@ export const GiftsPage: FC = () => {
                 key={index}
                 className="flex-shrink-0 rounded-[12px] px-[10px] relative touch-feedback"
                 style={{ 
-                  width: cardWidth, 
-                  height: cardHeight,
+                  width: rouletteCardWidth, 
+                  height: baseCardHeight,
                   backgroundColor: "rgba(44, 44, 46, 1)",
                   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.25)"
                 }}
@@ -296,9 +295,8 @@ export const GiftsPage: FC = () => {
               className="flex-shrink-0 rounded-[12px] relative touch-feedback"
               style={{
                 scrollSnapAlign: "start",
-                width: sizeX === "compact" ? 135 : 155,
-                // User request: bottom cards a touch shorter
-                height: sizeX === "compact" ? 156 : 176,
+                width: baseCardWidth,
+                height: baseCardHeight,
                 backgroundColor: "rgba(44, 44, 46, 1)",
                 boxShadow: "0 2px 8px rgba(0, 0, 0, 0.25)"
               }}

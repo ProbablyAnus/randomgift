@@ -17,6 +17,8 @@ const RootApp = () => {
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <RootApp />
+    <SettingsProvider>
+      <RootApp />
+    </SettingsProvider>
   </StrictMode>,
 );

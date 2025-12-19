@@ -11,7 +11,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between; /* per spec */
-  background: #1C1C1E;
+  background: var(--tabbar-bg);
   opacity: 1;
 }
 
@@ -24,7 +24,7 @@
   padding: 0 12px;
   border-radius: 10px;
   background: transparent;
-  color: #FFFFFF;
+  color: var(--tg-text);
   text-decoration: none;
   border: none;
   cursor: pointer;
@@ -33,14 +33,14 @@
 /* Active tab */
 .tab-bar .tab-btn.is-active,
 .tab-bar .tab-btn[aria-current="page"] {
-  background: #007AFF;
-  color: #FFFFFF;
+  background: var(--tg-button);
+  color: var(--tg-button-text);
 }
 
 /* Cards background mapped to secondary bg */
 .card,
 .card-surface {
-  background: #2C2C2E;
+  background: var(--app-card);
 }
 
 /* CTA button: "попробовать/получить подарок" (361x50) */
@@ -53,8 +53,8 @@
   gap: 10px;
   padding: 10px;
   border-radius: 12px;
-  background: #007AFF;
-  color: #FFFFFF;
+  background: var(--tg-button);
+  color: var(--tg-button-text);
   border: none;
   cursor: pointer;
 }

@@ -27,15 +27,17 @@ const apply = (theme: Theme) => {
   // Telegram chrome colors
   const tg = window.Telegram?.WebApp;
   if (tg) {
-    if (theme === "dark") {
-      tg.setHeaderColor?.("#1C1C1E");
-      tg.setBackgroundColor?.("#1C1C1E");
-      tg.setBottomBarColor?.("#1E1E1E");
-    } else {
-      tg.setHeaderColor?.("#F1F1F2");
-      tg.setBackgroundColor?.("#FFFFFF");
-      tg.setBottomBarColor?.("#F1F1F2");
-    }
+    const params = tg.themeParams as Partial<{
+      bg_color: string;
+      header_bg_color: string;
+      bottom_bar_bg_color: string;
+    }> | undefined;
+    const header = params?.header_bg_color ?? (theme === "dark" ? "#1E1E1E" : "#F1F1F2");
+    const bg = params?.bg_color ?? (theme === "dark" ? "#1C1C1E" : "#FFFFFF");
+    const bottom = params?.bottom_bar_bg_color ?? (theme === "dark" ? "#1E1E1E" : "#F1F1F2");
+    tg.setHeaderColor?.(header);
+    tg.setBackgroundColor?.(bg);
+    tg.setBottomBarColor?.(bottom);
   }
 };
 

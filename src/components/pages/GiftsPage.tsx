@@ -181,18 +181,21 @@ export const GiftsPage: FC = () => {
               borderLeft: "8px solid transparent",
               borderRight: "8px solid transparent",
               borderTop: "0px solid transparent",
-              borderBottom: "10px solid color-mix(in srgb, #007AFF 85%, transparent)",
+              borderBottom: "10px solid color-mix(in srgb, var(--tg-button) 85%, transparent)",
               filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.35))",
             }}
           />
-          <div className="w-0.5 rounded-full gpu-accelerated" style={{ height: `${baseCardHeight}px`, background: "color-mix(in srgb, #007AFF 65%, transparent)" }} />
+          <div
+            className="w-0.5 rounded-full gpu-accelerated"
+            style={{ height: `${baseCardHeight}px`, background: "color-mix(in srgb, var(--tg-button) 65%, transparent)" }}
+          />
           {/* Bottom triangle */}
           <div
             className="w-0 h-0"
             style={{
               borderLeft: "8px solid transparent",
               borderRight: "8px solid transparent",
-              borderTop: "10px solid color-mix(in srgb, #007AFF 85%, transparent)",
+              borderTop: "10px solid color-mix(in srgb, var(--tg-button) 85%, transparent)",
               borderBottom: "0px solid transparent",
               filter: "drop-shadow(0 -2px 6px rgba(0,0,0,0.35))",
             }}
@@ -206,8 +209,14 @@ export const GiftsPage: FC = () => {
           style={{ height: `${baseCardHeight + 18}px` }}
         >
           {/* Gradient overlays */}
-          <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[#1C1C1E] to-transparent z-10" />
-          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#1C1C1E] to-transparent z-10" />
+          <div
+            className="absolute left-0 top-0 bottom-0 w-8 z-10"
+            style={{ background: "linear-gradient(to right, var(--backgroundColor), transparent)" }}
+          />
+          <div
+            className="absolute right-0 top-0 bottom-0 w-8 z-10"
+            style={{ background: "linear-gradient(to left, var(--backgroundColor), transparent)" }}
+          />
           
           {/* Scrolling roulette */}
           <div
@@ -222,7 +231,7 @@ export const GiftsPage: FC = () => {
                 style={{ 
                   width: rouletteCardWidth, 
                   height: baseCardHeight,
-                  backgroundColor: "rgba(44, 44, 46, 1)",
+                  backgroundColor: "var(--app-card)",
                   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.25)"
                 }}
               >

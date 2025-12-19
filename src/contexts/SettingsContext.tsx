@@ -3,23 +3,6 @@ import { initTelegramWebApp } from "@/hooks/useTelegramWebApp";
 
 export type ThemeMode = "auto" | "light" | "dark";
 
-type TelegramThemeParams = Partial<{
-  bg_color: string;
-  text_color: string;
-  hint_color: string;
-  link_color: string;
-  button_color: string;
-  button_text_color: string;
-  secondary_bg_color: string;
-  header_bg_color: string;
-  bottom_bar_bg_color: string;
-  accent_text_color: string;
-  section_bg_color: string;
-  section_header_text_color: string;
-  subtitle_text_color: string;
-  destructive_text_color: string;
-}>;
-
 type SettingsContextValue = {
   theme: ThemeMode;
   setTheme: (theme: ThemeMode) => void;
@@ -89,11 +72,6 @@ const toRgba = (color: string, alpha: number) => {
   return color;
 };
 
-const getColor = (params: TelegramThemeParams | undefined, key: keyof TelegramThemeParams, fallback: string) => {
-  const value = params?.[key];
-  return typeof value === "string" && value.trim().length > 0 ? value : fallback;
-};
-
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<ThemeMode>(() => {
     const saved = localStorage.getItem(THEME_KEY) as ThemeMode | null;
@@ -116,22 +94,20 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       const resolved = resolveTheme(theme);
       const root = document.documentElement;
       const defaults = DEFAULT_THEME[resolved];
-      const themeParams = tg?.themeParams as TelegramThemeParams | undefined;
-
-      const bgColor = getColor(themeParams, "bg_color", defaults.bg);
-      const textColor = getColor(themeParams, "text_color", defaults.text);
-      const hintColor = getColor(themeParams, "hint_color", defaults.hint);
-      const linkColor = getColor(themeParams, "link_color", defaults.link);
-      const buttonColor = getColor(themeParams, "button_color", defaults.button);
-      const buttonTextColor = getColor(themeParams, "button_text_color", defaults.buttonText);
-      const secondaryBg = getColor(themeParams, "secondary_bg_color", defaults.secondary);
-      const headerBg = getColor(themeParams, "header_bg_color", defaults.header);
-      const bottomBarBg = getColor(themeParams, "bottom_bar_bg_color", defaults.bottom);
-      const accentText = getColor(themeParams, "accent_text_color", linkColor);
-      const sectionBg = getColor(themeParams, "section_bg_color", secondaryBg);
-      const sectionHeaderText = getColor(themeParams, "section_header_text_color", textColor);
-      const subtitleText = getColor(themeParams, "subtitle_text_color", hintColor);
-      const destructiveText = getColor(themeParams, "destructive_text_color", "#FF3B30");
+      const bgColor = defaults.bg;
+      const textColor = defaults.text;
+      const hintColor = defaults.hint;
+      const linkColor = defaults.link;
+      const buttonColor = defaults.button;
+      const buttonTextColor = defaults.buttonText;
+      const secondaryBg = defaults.secondary;
+      const headerBg = defaults.header;
+      const bottomBarBg = defaults.bottom;
+      const accentText = defaults.link;
+      const sectionBg = defaults.secondary;
+      const sectionHeaderText = defaults.text;
+      const subtitleText = defaults.hint;
+      const destructiveText = "#FF3B30";
 
       // Tailwind darkMode: ["class"] support
       root.classList.toggle("dark", resolved === "dark");
@@ -188,8 +164,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       if (theme === "auto") apply();
     };
 
-    tg?.onEvent?.("themeChanged", onThemeChanged);
-    return () => tg?.offEvent?.("themeChanged", onThemeChanged);
+    const themeEvents = ["themeChanged", "theme_changed"];
+    themeEvents.forEach((event) => tg?.onEvent?.(event, onThemeChanged));
+    return () => themeEvents.forEach((event) => tg?.offEvent?.(event, onThemeChanged));
   }, [theme]);
 
   const value: SettingsContextValue = { theme, setTheme, resolvedTheme };

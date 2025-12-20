@@ -916,13 +916,22 @@ html, body, #root {
 
 .star-icon,
 .button-price-icon {
-  width: 1.1em !important;
-  height: 1.1em !important;
+  width: 1.2em !important;
+  height: 1.2em !important;
 }
 
 .tg-tab__star {
   width: 1.35em !important;
   height: 1.35em !important;
+}
+
+.price-row {
+  gap: 2px !important;
+}
+
+.price-row .star-icon {
+  width: 1.2em !important;
+  height: 1.2em !important;
 }
 
 .primary-button {
@@ -936,6 +945,12 @@ html, body, #root {
   align-items: center;
   gap: 10px;
   animation: button-fade-in 220ms ease;
+}
+
+.button-price {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .button-price-icon {

@@ -855,8 +855,7 @@ html, body, #root {
   line-height: 1 !important;
 }
 
-.star-icon,
-.tg-tab__star {
+.star-icon {
   width: 1em !important;
   height: 1em !important;
   display: inline-block !important;
@@ -865,6 +864,8 @@ html, body, #root {
 .tg-tab__star {
   width: 1.15em !important;
   height: 1.15em !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
 }
 
 .price-row {

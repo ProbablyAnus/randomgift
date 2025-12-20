@@ -216,18 +216,18 @@ export const GiftsPage: FC = () => {
         >
           {/* Gradient overlays */}
           <div
-            className="absolute left-0 top-0 bottom-0 w-8 z-10 pointer-events-none"
+            className="absolute left-0 top-0 bottom-0 w-14 z-10 pointer-events-none"
             style={{ background: "linear-gradient(to right, var(--app-bg), transparent)" }}
           />
           <div
-            className="absolute right-0 top-0 bottom-0 w-8 z-10 pointer-events-none"
+            className="absolute right-0 top-0 bottom-0 w-14 z-10 pointer-events-none"
             style={{ background: "linear-gradient(to left, var(--app-bg), transparent)" }}
           />
           
           {/* Scrolling roulette */}
           <div
             ref={rouletteRef}
-            className="flex h-full items-center pl-4 gpu-accelerated"
+            className="flex h-full items-center gpu-accelerated"
             style={{ width: "fit-content", gap: `${cardGap}px` }}
           >
             {extendedRoulette.map((gift, index) => (
@@ -304,14 +304,13 @@ export const GiftsPage: FC = () => {
         </p>
         
         <div 
-          className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide scroll-smooth"
+          className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide scroll-smooth px-4"
           style={{ 
             scrollSnapType: "x mandatory",
             scrollPaddingLeft: 16,
             scrollPaddingRight: 16,
           }}
         >
-          <div className="w-4 flex-shrink-0" aria-hidden="true" />
           {allWinPrizes.map((prize, index) => (
             <div
               key={index}
@@ -342,7 +341,6 @@ export const GiftsPage: FC = () => {
               <span className="absolute bottom-2 left-1/2 -translate-x-1/2 chance-text">{prize.chance}</span>
             </div>
           ))}
-          <div className="w-4 flex-shrink-0" aria-hidden="true" />
         </div>
       </div>
     </div>

@@ -909,9 +909,9 @@ html, body, #root {
 }
 
 .tg-tab {
-  height: 46px !important;
-  padding: 0 16px !important;
-  font-size: 19px !important;
+  height: 40px !important;
+  padding: 0 14px !important;
+  font-size: 18px !important;
 }
 
 .star-icon,

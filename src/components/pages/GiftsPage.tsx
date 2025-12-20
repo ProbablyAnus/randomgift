@@ -4,52 +4,39 @@ import StarSvg from "@/assets/gifts/star-badge.svg";
 import { Switch } from "@/components/ui/switch";
 import { RefreshCw } from "lucide-react";
 import { useAdaptivity } from "@/hooks/useAdaptivity";
-import champagnePng from "@/assets/gift/crown.png";
-import champagneWebp from "@/assets/gift/crown.webp";
-import diamondPng from "@/assets/gift/diamond.png";
-import diamondWebp from "@/assets/gift/diamond.webp";
-import giftBoxPng from "@/assets/gift/gift-box.png";
-import giftBoxWebp from "@/assets/gift/gift-box.webp";
-import heartBoxPng from "@/assets/gift/heart-box.png";
-import heartBoxWebp from "@/assets/gift/heart-box.webp";
-import ringPng from "@/assets/gift/ring.png";
-import ringWebp from "@/assets/gift/ring.webp";
-import rocketPng from "@/assets/gift/star.png";
-import rocketWebp from "@/assets/gift/star.webp";
-import rosePng from "@/assets/gift/rose.png";
-import roseWebp from "@/assets/gift/rose.webp";
-import teddyBearPng from "@/assets/gift/teddy-bear.png";
-import teddyBearWebp from "@/assets/gift/teddy-bear.webp";
-import trophyPng from "@/assets/gift/trophy.png";
-import trophyWebp from "@/assets/gift/trophy.webp";
+import diamondPng from "@/assets/gifts/diamond.png";
+import giftBoxPng from "@/assets/gifts/gift.png";
+import heartBoxPng from "@/assets/gifts/heart.png";
+import ringWebp from "@/assets/gifts/ring.webp";
+import rosePng from "@/assets/gifts/rose.png";
+import teddyBearWebp from "@/assets/gifts/teddy.webp";
+import trophyPng from "@/assets/gifts/trophy.png";
 
 const prices = [25, 50, 100];
 
-type GiftIcon = { png: string; webp: string };
+type GiftIcon = { src: string; webp?: string };
 type RouletteGift = { icon: GiftIcon; label: string; price: number; chance: number };
 type WinPrize = { icon: GiftIcon; label: string; price: number; chance: string };
 
 // Roulette gifts for spinning
 const rouletteGifts: RouletteGift[] = [
-  { icon: { png: heartBoxPng, webp: heartBoxWebp }, label: "Сердце", price: 15, chance: 27 },
-  { icon: { png: trophyPng, webp: trophyWebp }, label: "Кубок", price: 100, chance: 6 },
-  { icon: { png: giftBoxPng, webp: giftBoxWebp }, label: "Коробка", price: 25, chance: 17.5 },
-  { icon: { png: teddyBearPng, webp: teddyBearWebp }, label: "Медвежонок", price: 15, chance: 27 },
-  { icon: { png: ringPng, webp: ringWebp }, label: "Кольцо", price: 100, chance: 6 },
-  { icon: { png: rosePng, webp: roseWebp }, label: "Роза", price: 25, chance: 17.5 },
+  { icon: { src: heartBoxPng }, label: "Сердце", price: 15, chance: 27 },
+  { icon: { src: trophyPng }, label: "Кубок", price: 100, chance: 6 },
+  { icon: { src: giftBoxPng }, label: "Коробка", price: 25, chance: 17.5 },
+  { icon: { src: teddyBearWebp }, label: "Медвежонок", price: 15, chance: 27 },
+  { icon: { src: ringWebp }, label: "Кольцо", price: 100, chance: 6 },
+  { icon: { src: rosePng }, label: "Роза", price: 25, chance: 17.5 },
 ];
 
 // Win prizes for bottom section
 const allWinPrizes: WinPrize[] = [
-  { icon: { png: diamondPng, webp: diamondWebp }, label: "Алмаз", price: 100, chance: "1%" },
-  { icon: { png: trophyPng, webp: trophyWebp }, label: "Кубок", price: 100, chance: "1%" },
-  { icon: { png: ringPng, webp: ringWebp }, label: "Кольцо", price: 100, chance: "1%" },
-  { icon: { png: heartBoxPng, webp: heartBoxWebp }, label: "Сердце", price: 15, chance: "27%" },
-  { icon: { png: teddyBearPng, webp: teddyBearWebp }, label: "Мишка", price: 15, chance: "27%" },
-  { icon: { png: giftBoxPng, webp: giftBoxWebp }, label: "Коробка", price: 25, chance: "17.5%" },
-  { icon: { png: rosePng, webp: roseWebp }, label: "Роза", price: 25, chance: "17.5%" },
-  { icon: { png: rocketPng, webp: rocketWebp }, label: "Ракета", price: 250, chance: "0.4%" },
-  { icon: { png: champagnePng, webp: champagneWebp }, label: "Шампанское", price: 500, chance: "0.1%" },
+  { icon: { src: diamondPng }, label: "Алмаз", price: 100, chance: "1%" },
+  { icon: { src: trophyPng }, label: "Кубок", price: 100, chance: "1%" },
+  { icon: { src: ringWebp }, label: "Кольцо", price: 100, chance: "1%" },
+  { icon: { src: heartBoxPng }, label: "Сердце", price: 15, chance: "27%" },
+  { icon: { src: teddyBearWebp }, label: "Мишка", price: 15, chance: "27%" },
+  { icon: { src: giftBoxPng }, label: "Коробка", price: 25, chance: "17.5%" },
+  { icon: { src: rosePng }, label: "Роза", price: 25, chance: "17.5%" },
 ];
 
 // Create extended array for smooth roulette spinning
@@ -245,8 +232,8 @@ export const GiftsPage: FC = () => {
                 {/* Centered icon - takes most of the space */}
                 <div className="absolute inset-0 flex items-center justify-center pb-6">
                   <picture>
-                    <source srcSet={gift.icon.webp} type="image/webp" />
-                    <img src={gift.icon.png} alt={gift.label} className="w-[92px] h-[92px] drop-shadow-lg" />
+                    {gift.icon.webp && <source srcSet={gift.icon.webp} type="image/webp" />}
+                    <img src={gift.icon.src} alt={gift.label} className="w-[92px] h-[92px] drop-shadow-lg" />
                   </picture>
                 </div>
                 {/* Price badge centered at bottom */}
@@ -267,8 +254,8 @@ export const GiftsPage: FC = () => {
             <div className="bg-card/95 backdrop-blur-sm rounded-[12px] px-8 py-6 shadow-lg animate-scale-in border border-primary/30">
               <div className="flex flex-col items-center gap-3">
                 <picture>
-                  <source srcSet={wonPrize.icon.webp} type="image/webp" />
-                  <img src={wonPrize.icon.png} alt={wonPrize.label} className="w-[92px] h-[92px] animate-bounce drop-shadow-xl" />
+                  {wonPrize.icon.webp && <source srcSet={wonPrize.icon.webp} type="image/webp" />}
+                  <img src={wonPrize.icon.src} alt={wonPrize.label} className="w-[92px] h-[92px] animate-bounce drop-shadow-xl" />
                 </picture>
                 <p className="text-foreground font-semibold text-xl">Вы выиграли!</p>
                 <div className="star-badge">
@@ -326,8 +313,8 @@ export const GiftsPage: FC = () => {
               {/* Centered icon */}
               <div className="absolute inset-0 flex items-center justify-center pb-9">
                 <picture>
-                  <source srcSet={prize.icon.webp} type="image/webp" />
-                  <img src={prize.icon.png} alt={prize.label} className="w-[72px] h-[72px] drop-shadow-lg" />
+                  {prize.icon.webp && <source srcSet={prize.icon.webp} type="image/webp" />}
+                  <img src={prize.icon.src} alt={prize.label} className="w-[72px] h-[72px] drop-shadow-lg" />
                 </picture>
               </div>
               {/* Price badge centered */}

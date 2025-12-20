@@ -665,6 +665,7 @@ html, body, #root {
 
   display: flex;
   font-size: 10px;
+  line-height: 1.2;
   font-weight: 500;
   user-select: none;
   padding-bottom: calc(20px + var(--safe-area-bottom, 0px));
@@ -678,9 +679,10 @@ html, body, #root {
   flex-direction: column;
   justify-content: center;
   gap: 4px;
-  color: var(--tg-hint, #959595);
+  color: #959595;
   border: 0;
   background: transparent;
+  transition: color 180ms ease;
 }
 
 .cbc-tabbar__iconWrap {
@@ -690,13 +692,13 @@ html, body, #root {
   align-items: center;
   justify-content: center;
 }
-.cbc-tabbar__iconWrap img {
-  width: 24px;
-  height: 24px;
+.cbc-tabbar__lottie {
+  width: 26px;
+  height: 26px;
   filter: drop-shadow(0 1px 0 rgba(0,0,0,0.15));
 }
 .cbc-tabbar__item[data-active] {
-  color: var(--tg-button);
+  color: #0080fa;
 }
 .cbc-tabbar__item[data-active] .cbc-tabbar__label {
   animation: cbc-label 250ms;

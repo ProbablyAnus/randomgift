@@ -846,9 +846,13 @@ html, body, #root {
 }
 
 .tg-tab {
-  gap: 4px !important;
+  gap: 2px !important;
   flex-direction: row !important;
   white-space: nowrap !important;
+  height: 40px !important;
+  padding: 0 12px !important;
+  font-size: 17px !important;
+  min-width: 80px !important;
 }
 
 .tg-tab__text {
@@ -865,16 +869,17 @@ html, body, #root {
 
 .price-row {
   align-items: center !important;
-  gap: 4px !important;
+  gap: 2px !important;
 }
 
 .star-badge {
   width: fit-content !important;
-  padding: 4px 10px !important;
+  padding: 6px 16px 6px 12px !important;
+  gap: 2px !important;
   border-radius: 999px !important;
-  background: color-mix(in srgb, var(--tg-text) 12%, transparent) !important;
-  border: 1px solid color-mix(in srgb, var(--tg-text) 18%, transparent) !important;
-  color: var(--tg-text) !important;
+  background: #007AFF !important;
+  border: 1px solid #007AFF !important;
+  color: #FFFFFF !important;
   font-weight: 500 !important;
   line-height: 1 !important;
 }

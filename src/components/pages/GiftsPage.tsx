@@ -180,7 +180,7 @@ export const GiftsPage: FC = () => {
       />
 
       {/* Roulette Section */}
-      <div className="relative mb-6">
+      <div className="relative mb-3">
         {/* Center Pointer */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex flex-col items-center">
           {/* Top triangle */}
@@ -245,14 +245,14 @@ export const GiftsPage: FC = () => {
                 <div className="absolute inset-0 flex items-center justify-center pb-6">
                   <picture>
                     {gift.icon.webp && <source srcSet={gift.icon.webp} type="image/webp" />}
-                    <img src={gift.icon.src} alt={gift.label} className="w-[92px] h-[92px] drop-shadow-lg" />
+                    <img src={gift.icon.src} alt={gift.label} className="w-[98px] h-[98px] drop-shadow-lg" />
                   </picture>
                 </div>
                 {/* Price badge centered at bottom */}
-                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 star-badge star-badge--center star-badge--tight">
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 star-badge star-badge--center star-badge--tight">
                   <span className="price-row">
                     <img src={StarSvg} alt="Stars" className="star-icon" />
-                    <span className="text-[16px] font-normal">{gift.price}</span>
+                    <span className="text-[15px] font-normal">{gift.price}</span>
                   </span>
                 </div>
               </div>
@@ -281,7 +281,7 @@ export const GiftsPage: FC = () => {
       </div>
 
       {/* Demo Mode Toggle */}
-      <div className="flex items-center justify-between px-4 pt-3 pb-4">
+      <div className="flex items-center justify-between px-4 pt-2 pb-4">
         <span className="text-foreground text-lg">Демо режим</span>
         <Switch checked={demoMode} onCheckedChange={setDemoMode} className="demo-switch" />
       </div>
@@ -327,14 +327,14 @@ export const GiftsPage: FC = () => {
               <div className="absolute inset-0 flex items-center justify-center pb-12">
                 <picture>
                   {prize.icon.webp && <source srcSet={prize.icon.webp} type="image/webp" />}
-                  <img src={prize.icon.src} alt={prize.label} className="w-[72px] h-[72px] drop-shadow-lg" />
+                  <img src={prize.icon.src} alt={prize.label} className="w-[78px] h-[78px] drop-shadow-lg" />
                 </picture>
               </div>
               {/* Price badge centered */}
-              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 star-badge star-badge--center star-badge--tight">
+              <div className="absolute bottom-9 left-1/2 -translate-x-1/2 star-badge star-badge--center star-badge--tight">
                 <span className="price-row">
                   <img src={StarSvg} alt="Stars" className="star-icon" />
-                  <span className="text-[17px] font-normal">{prize.price}</span>
+                  <span className="text-[16px] font-normal">{prize.price}</span>
                 </span>
               </div>
               {/* Chance at bottom center */}

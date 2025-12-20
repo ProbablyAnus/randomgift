@@ -849,6 +849,10 @@ html, body, #root {
   gap: 2px !important;
   flex-direction: row !important;
   white-space: nowrap !important;
+  height: 40px !important;
+  padding: 0 12px !important;
+  font-size: 17px !important;
+  min-width: 80px !important;
 }
 
 .tg-tab__text {

@@ -846,7 +846,7 @@ html, body, #root {
 }
 
 .tg-tab {
-  gap: 4px !important;
+  gap: 2px !important;
   flex-direction: row !important;
   white-space: nowrap !important;
 }
@@ -865,12 +865,13 @@ html, body, #root {
 
 .price-row {
   align-items: center !important;
-  gap: 4px !important;
+  gap: 2px !important;
 }
 
 .star-badge {
   width: fit-content !important;
   padding: 4px 10px !important;
+  gap: 2px !important;
   border-radius: 999px !important;
   background: color-mix(in srgb, var(--tg-text) 12%, transparent) !important;
   border: 1px solid color-mix(in srgb, var(--tg-text) 18%, transparent) !important;

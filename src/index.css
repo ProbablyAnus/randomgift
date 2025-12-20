@@ -601,29 +601,43 @@ html, body, #root {
 
 /* === Overrides: Star tabs, pills, and crypto-bot-contest TabBar === */
 
-/* Star amount tabs: bigger star, no press movement */
+/* Star amount tabs: bigger star, tabbar-like press animation */
 .tg-tab {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   padding: 10px 14px;
-  border-radius: 14px;
+  border-radius: 9999px;
   background: transparent;
   color: var(--tg-text);
   border: 1px solid transparent;
-  transition: background-color 160ms ease, border-color 160ms ease;
+  transition: transform 150ms ease, opacity 150ms ease;
+  font-size: 22px !important;
   transform: none !important;
 }
-.tg-tab:active { transform: none !important; }
+.tg-tab:active { transform: scale(0.96) !important; }
+.tg-tab:focus,
+.tg-tab:focus-visible {
+  outline: none;
+}
 .tg-tab__text {
-  font-size: 22px;
+  font-size: 1em;
   line-height: 18px;
   font-weight: 700; /* only tabs bold */
 }
 .tg-tab--active {
   background: var(--tg-button);
   border-color: color-mix(in srgb, var(--tg-button) 70%, transparent);
+}
+.tg-tab--active .tg-tab__text,
+.tg-tab--active .tg-tab__star {
+  animation: tg-tab-press 220ms ease;
+}
+@keyframes tg-tab-press {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.92); }
+  100% { transform: scale(1); }
 }
 
 /* Price pills: tight by default */
@@ -646,8 +660,7 @@ html, body, #root {
   padding: 7px 12px;
 }
 /* Disable press-move for tabs specifically (keep cards ok) */
-.tg-tab.touch-feedback,
-.tg-tab:active {
+.tg-tab.touch-feedback {
   transform: none !important;
 }
 
@@ -834,6 +847,8 @@ html, body, #root {
 
 .tg-tab {
   gap: 4px !important;
+  flex-direction: row !important;
+  white-space: nowrap !important;
 }
 
 .tg-tab__text {
@@ -845,6 +860,11 @@ html, body, #root {
   width: 1em !important;
   height: 1em !important;
   display: inline-block !important;
+  vertical-align: middle !important;
+}
+.tg-tab__star {
+  width: 1.15em !important;
+  height: 1.15em !important;
 }
 
 .price-row {

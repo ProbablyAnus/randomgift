@@ -894,6 +894,11 @@ html, body, #root {
   margin: 0 auto !important;
 }
 
+.star-badge--tight {
+  padding: 4px 9px !important;
+  gap: 3px !important;
+}
+
 .chance-text {
   display: block;
   margin-top: 6px;

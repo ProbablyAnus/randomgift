@@ -189,9 +189,9 @@ export const GiftsPage: FC = () => {
             style={{
               borderLeft: "8px solid transparent",
               borderRight: "8px solid transparent",
-              borderTop: "0px solid transparent",
-              borderBottom: "10px solid color-mix(in srgb, #007AFF 85%, transparent)",
-              filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.35))",
+              borderTop: "10px solid color-mix(in srgb, #007AFF 85%, transparent)",
+              borderBottom: "0px solid transparent",
+              filter: "drop-shadow(0 -2px 6px rgba(0,0,0,0.35))",
             }}
           />
           <div className="w-0.5 rounded-full gpu-accelerated" style={{ height: `${baseCardHeight}px`, background: "color-mix(in srgb, #007AFF 65%, transparent)" }} />
@@ -201,9 +201,9 @@ export const GiftsPage: FC = () => {
             style={{
               borderLeft: "8px solid transparent",
               borderRight: "8px solid transparent",
-              borderTop: "10px solid color-mix(in srgb, #007AFF 85%, transparent)",
-              borderBottom: "0px solid transparent",
-              filter: "drop-shadow(0 -2px 6px rgba(0,0,0,0.35))",
+              borderTop: "0px solid transparent",
+              borderBottom: "10px solid color-mix(in srgb, #007AFF 85%, transparent)",
+              filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.35))",
             }}
           />
         </div>

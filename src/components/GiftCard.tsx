@@ -32,7 +32,7 @@ export const GiftCard: FC<GiftCardProps> = ({ iconPng, iconWebp, label, price, i
         </span>
       </div>
       {chance && (
-        <span className="text-xs text-muted-foreground mt-2">{chance}</span>
+        <span className="chance-text">{chance}</span>
       )}
     </button>
   );

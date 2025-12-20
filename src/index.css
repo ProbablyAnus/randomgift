@@ -334,7 +334,7 @@ html, body {
   display: flex;
   justify-content: center;
   gap: 12px;
-  margin: 14px auto 24px;
+  margin: 6px auto 24px;
   padding: 0;
   width: 100%;
   max-width: 393px;
@@ -869,13 +869,16 @@ html, body, #root {
 
 .price-row {
   align-items: center !important;
-  gap: 2px !important;
+  gap: 4px !important;
 }
 
 .star-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   width: fit-content !important;
-  padding: 6px 16px 6px 12px !important;
-  gap: 2px !important;
+  padding: 6px 12px !important;
+  gap: 4px !important;
   border-radius: 999px !important;
   background: #007AFF !important;
   border: 1px solid #007AFF !important;
@@ -885,7 +888,17 @@ html, body, #root {
 }
 
 .star-badge--center {
-  width: 100% !important;
+  width: fit-content !important;
   display: flex !important;
   justify-content: center !important;
+  margin: 0 auto !important;
+}
+
+.chance-text {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.85em;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--tg-text) 65%, transparent);
+  letter-spacing: 0.01em;
 }

@@ -209,23 +209,23 @@ export const GiftsPage: FC = () => {
         {/* Roulette Container */}
         <div 
           ref={containerRef}
-          className="relative overflow-hidden px-4"
+          className="relative overflow-hidden"
           style={{ height: `${baseCardHeight + 18}px` }}
         >
           {/* Gradient overlays */}
           <div
-            className="absolute left-4 top-0 bottom-0 w-12 z-10 pointer-events-none"
-            style={{ background: "linear-gradient(to right, var(--app-bg), transparent)", backdropFilter: "blur(10px)" }}
+            className="absolute left-0 top-0 bottom-0 w-8 z-10 pointer-events-none"
+            style={{ background: "linear-gradient(to right, var(--app-bg), transparent)" }}
           />
           <div
-            className="absolute right-4 top-0 bottom-0 w-12 z-10 pointer-events-none"
-            style={{ background: "linear-gradient(to left, var(--app-bg), transparent)", backdropFilter: "blur(10px)" }}
+            className="absolute right-0 top-0 bottom-0 w-8 z-10 pointer-events-none"
+            style={{ background: "linear-gradient(to left, var(--app-bg), transparent)" }}
           />
           
           {/* Scrolling roulette */}
           <div
             ref={rouletteRef}
-            className="flex h-full items-center gpu-accelerated"
+            className="flex h-full items-center pl-4 gpu-accelerated"
             style={{ width: "fit-content", gap: `${cardGap}px` }}
           >
             {extendedRoulette.map((gift, index) => (
@@ -302,13 +302,14 @@ export const GiftsPage: FC = () => {
         </p>
         
         <div 
-          className="flex gap-3 overflow-x-auto px-4 pb-4 scrollbar-hide scroll-smooth"
+          className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide scroll-smooth"
           style={{ 
             scrollSnapType: "x mandatory",
             scrollPaddingLeft: 16,
             scrollPaddingRight: 16,
           }}
         >
+          <div className="w-4 flex-shrink-0" aria-hidden="true" />
           {allWinPrizes.map((prize, index) => (
             <div
               key={index}
@@ -322,7 +323,7 @@ export const GiftsPage: FC = () => {
               }}
             >
               {/* Centered icon */}
-              <div className="absolute inset-0 flex items-center justify-center pb-9">
+              <div className="absolute inset-0 flex items-center justify-center pb-12">
                 <picture>
                   {prize.icon.webp && <source srcSet={prize.icon.webp} type="image/webp" />}
                   <img src={prize.icon.src} alt={prize.label} className="w-[72px] h-[72px] drop-shadow-lg" />
@@ -339,6 +340,7 @@ export const GiftsPage: FC = () => {
               <span className="absolute bottom-2 left-1/2 -translate-x-1/2 chance-text">{prize.chance}</span>
             </div>
           ))}
+          <div className="w-4 flex-shrink-0" aria-hidden="true" />
         </div>
       </div>
     </div>

@@ -905,7 +905,7 @@ html, body, #root {
 
 /* === Latest requested adjustments === */
 .tg-tabs {
-  margin-bottom: 32px !important;
+  margin-bottom: 40px !important;
 }
 
 .tg-tab {
@@ -915,10 +915,14 @@ html, body, #root {
 }
 
 .star-icon,
-.tg-tab__star,
 .button-price-icon {
   width: 1.1em !important;
   height: 1.1em !important;
+}
+
+.tg-tab__star {
+  width: 1.35em !important;
+  height: 1.35em !important;
 }
 
 .primary-button {

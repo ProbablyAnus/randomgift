@@ -288,7 +288,7 @@ export const GiftsPage: FC = () => {
               <div className="win-result-content">
                 <picture>
                   {wonPrize.icon.webp && <source srcSet={wonPrize.icon.webp} type="image/webp" />}
-                  <img src={wonPrize.icon.src} alt={wonPrize.label} className="w-[92px] h-[92px] drop-shadow-xl" />
+                  <img src={wonPrize.icon.src} alt={wonPrize.label} className="w-[120px] h-[120px] drop-shadow-xl" />
                 </picture>
                 <p className="text-foreground font-semibold text-2xl">Вы выиграли подарок!</p>
                 <p className="text-muted-foreground text-base leading-relaxed">

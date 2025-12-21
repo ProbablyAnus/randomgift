@@ -76,8 +76,8 @@ export const GiftsPage: FC = () => {
   const rouletteRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const baseCardWidth = sizeX === "compact" ? 135 : 155;
-  const baseCardHeight = sizeX === "compact" ? 156 : 176;
+  const baseCardWidth = sizeX === "compact" ? 140 : 160;
+  const baseCardHeight = sizeX === "compact" ? 162 : 184;
   const rouletteCardWidth = baseCardWidth;
   const cardGap = 12;
   

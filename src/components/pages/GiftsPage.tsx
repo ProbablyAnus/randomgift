@@ -79,7 +79,7 @@ export const GiftsPage: FC = () => {
   const baseCardWidth = sizeX === "compact" ? 135 : 155;
   const baseCardHeight = sizeX === "compact" ? 156 : 176;
   const rouletteCardWidth = baseCardWidth;
-  const cardGap = 14;
+  const cardGap = 12;
   
   const handleGetGift = () => {
     if (isSpinning) return;
@@ -304,11 +304,11 @@ export const GiftsPage: FC = () => {
         </p>
         
         <div 
-          className="flex gap-5 overflow-x-auto pb-4 scrollbar-hide scroll-smooth px-5"
+          className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide scroll-smooth px-4"
           style={{ 
             scrollSnapType: "x mandatory",
-            scrollPaddingLeft: 20,
-            scrollPaddingRight: 20,
+            scrollPaddingLeft: 16,
+            scrollPaddingRight: 16,
           }}
         >
           {allWinPrizes.map((prize, index) => (

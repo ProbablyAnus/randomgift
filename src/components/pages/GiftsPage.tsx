@@ -180,7 +180,7 @@ export const GiftsPage: FC = () => {
       />
 
       {/* Roulette Section */}
-      <div className="relative mb-3">
+      <div className="relative mb-6">
         {/* Center Pointer */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex flex-col items-center">
           {/* Top triangle */}

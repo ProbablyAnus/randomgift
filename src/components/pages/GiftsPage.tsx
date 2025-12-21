@@ -132,10 +132,6 @@ export const GiftsPage: FC = () => {
       if (navigator.vibrate) {
         navigator.vibrate([50, 30, 100]);
       }
-      
-      setTimeout(() => {
-        setShowResult(false);
-      }, 3000);
     }, 4000);
   };
 
@@ -261,19 +257,44 @@ export const GiftsPage: FC = () => {
         </div>
 
         {/* Win Result Overlay */}
-        {showResult && wonPrize && (
-          <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none">
-            <div className="bg-card/95 backdrop-blur-sm rounded-[12px] px-8 py-6 shadow-lg animate-scale-in border border-primary/30">
-              <div className="flex flex-col items-center gap-3">
+        {wonPrize && (
+          <div
+            className={`win-result-overlay ${showResult ? "is-visible" : ""}`}
+            role="dialog"
+            aria-live="polite"
+          >
+            <div className="win-result-panel">
+              <div className="win-result-content">
                 <picture>
                   {wonPrize.icon.webp && <source srcSet={wonPrize.icon.webp} type="image/webp" />}
-                  <img src={wonPrize.icon.src} alt={wonPrize.label} className="w-[92px] h-[92px] animate-bounce drop-shadow-xl" />
+                  <img src={wonPrize.icon.src} alt={wonPrize.label} className="win-result-icon" />
                 </picture>
-                <p className="text-foreground font-semibold text-xl">Вы выиграли!</p>
-                <div className="star-badge">
-                  <img src={StarSvg} alt="Stars" className="star-icon" />
-                  {wonPrize.price}
-                </div>
+                <p className="win-result-title">Вы выиграли подарок!</p>
+                <p className="win-result-description">
+                  {demoMode
+                    ? "Демо-режим нужен для тестирования шансов выпадения подарков."
+                    : "Подарок уже отправлен на ваш аккаунт."}
+                </p>
+              </div>
+              <div className="win-result-actions">
+                <button
+                  type="button"
+                  className="primary-button touch-feedback"
+                  onClick={() => {
+                    setDemoMode(false);
+                    setShowResult(false);
+                  }}
+                  disabled={!demoMode}
+                >
+                  Отключить демо-режим
+                </button>
+                <button
+                  type="button"
+                  className="secondary-button touch-feedback"
+                  onClick={() => setShowResult(false)}
+                >
+                  Закрыть
+                </button>
               </div>
             </div>
           </div>

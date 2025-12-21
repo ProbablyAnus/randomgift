@@ -9,6 +9,11 @@ your-domain.com {
     encode zstd gzip
     file_server
 
+    # Proxy API requests to the bot's aiohttp server (API_PORT, default 8080).
+    handle_path /api/* {
+        reverse_proxy localhost:8080
+    }
+
     # Optional security headers
     header {
         X-Content-Type-Options "nosniff"

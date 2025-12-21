@@ -21,6 +21,9 @@ sudo cp ./Caddyfile.prod.example /etc/caddy/Caddyfile
 sudo caddy reload --config /etc/caddy/Caddyfile
 ```
 
+The example Caddyfile also proxies `/api/*` to the bot's API server on port 8080.
+If you changed `API_PORT`, update the `reverse_proxy` target accordingly.
+
 ## 3) Run
 ```bash
 ./start.sh

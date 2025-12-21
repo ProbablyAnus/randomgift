@@ -47,6 +47,27 @@ def verify_telegram_init_data(init_data: str, bot_token: str) -> dict | None:
     return data
 
 
+def build_invoice_payload(amount: int, user_id: int) -> str:
+    return json.dumps({"amount": amount, "user_id": user_id})
+
+
+def parse_invoice_payload(payload: str) -> dict | None:
+    try:
+        data = json.loads(payload)
+    except json.JSONDecodeError:
+        return None
+
+    if not isinstance(data, dict):
+        return None
+
+    amount = data.get("amount")
+    user_id = data.get("user_id")
+    if not isinstance(amount, int) or not isinstance(user_id, int):
+        return None
+
+    return {"amount": amount, "user_id": user_id}
+
+
 async def handle_invoice(request: web.Request) -> web.Response:
     bot: Bot = request.app["bot"]
     init_data = request.headers.get("X-Telegram-Init-Data", "")
@@ -63,14 +84,17 @@ async def handle_invoice(request: web.Request) -> web.Response:
     if amount not in ALLOWED_PRICES:
         return web.json_response({"error": "unsupported_amount"}, status=400)
 
-    user_payload = ""
+    user_id: int | None = None
     if "user" in parsed:
         try:
-            user_payload = json.loads(parsed["user"]).get("id", "")
+            user_id = json.loads(parsed["user"]).get("id")
         except json.JSONDecodeError:
-            user_payload = ""
+            user_id = None
 
-    payload = f"gift:{amount}:{user_payload}"
+    if not isinstance(user_id, int):
+        return web.json_response({"error": "invalid_user"}, status=400)
+
+    payload = build_invoice_payload(amount, user_id)
     invoice_link = await bot.create_invoice_link(
         title="Random Gift",
         description=f"Покупка подарка за {amount} звезд.",
@@ -129,6 +153,27 @@ async def main() -> None:
 
     @dp.pre_checkout_query()
     async def handle_pre_checkout(pre_checkout_query: types.PreCheckoutQuery) -> None:
+        payload = parse_invoice_payload(pre_checkout_query.invoice_payload)
+        if not payload:
+            await pre_checkout_query.answer(ok=False, error_message="Некорректные данные платежа.")
+            return
+
+        if pre_checkout_query.currency != "XTR":
+            await pre_checkout_query.answer(ok=False, error_message="Неверная валюта.")
+            return
+
+        if payload["amount"] not in ALLOWED_PRICES:
+            await pre_checkout_query.answer(ok=False, error_message="Некорректная сумма.")
+            return
+
+        if pre_checkout_query.total_amount != payload["amount"]:
+            await pre_checkout_query.answer(ok=False, error_message="Несовпадение суммы.")
+            return
+
+        if pre_checkout_query.from_user.id != payload["user_id"]:
+            await pre_checkout_query.answer(ok=False, error_message="Платеж от другого пользователя.")
+            return
+
         await pre_checkout_query.answer(ok=True)
 
     @dp.message(F.successful_payment)

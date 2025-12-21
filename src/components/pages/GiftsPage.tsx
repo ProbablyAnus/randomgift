@@ -5,6 +5,7 @@ import ButtonIcon from "@/assets/gifts/svg-image-1.svg";
 import { Switch } from "@/components/ui/switch";
 import { RefreshCw } from "lucide-react";
 import { useAdaptivity } from "@/hooks/useAdaptivity";
+import { useTelegramWebApp } from "@/hooks/useTelegramWebApp";
 import diamondPng from "@/assets/gifts/diamond.png";
 import giftBoxPng from "@/assets/gifts/gift.png";
 import heartBoxPng from "@/assets/gifts/heart.png";
@@ -68,9 +69,11 @@ const selectWinnerByChance = () => {
 
 export const GiftsPage: FC = () => {
   const { sizeX, platform } = useAdaptivity();
+  const { webApp } = useTelegramWebApp();
   const [selectedPrice, setSelectedPrice] = useState(25);
   const [demoMode, setDemoMode] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [wonPrize, setWonPrize] = useState<{ icon: GiftIcon; label: string; price: number } | null>(null);
   const [showResult, setShowResult] = useState(false);
   const rouletteRef = useRef<HTMLDivElement>(null);
@@ -81,8 +84,11 @@ export const GiftsPage: FC = () => {
   const baseCardHeight = sizeX === "compact" ? 162 : 184;
   const rouletteCardWidth = baseCardWidth;
   const cardGap = 12;
+
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
+  const isBusy = isSpinning || isProcessingPayment;
   
-  const handleGetGift = () => {
+  const startSpin = () => {
     if (isSpinning) return;
 
     if (closeTimeoutRef.current) {
@@ -141,6 +147,45 @@ export const GiftsPage: FC = () => {
     }, 4000);
   };
 
+  const handlePayment = async () => {
+    if (isBusy) return;
+    if (!webApp?.openInvoice || !webApp?.initData) {
+      window.alert("Оплата доступна только внутри Telegram.");
+      return;
+    }
+
+    try {
+      setIsProcessingPayment(true);
+      const response = await fetch(`${apiBaseUrl}/api/invoice?amount=${selectedPrice}`, {
+        headers: {
+          "X-Telegram-Init-Data": webApp.initData,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Не удалось создать счет на оплату.");
+      }
+
+      const data = (await response.json()) as { invoice_link?: string };
+      if (!data.invoice_link) {
+        throw new Error("Ссылка на оплату не получена.");
+      }
+
+      webApp.openInvoice(data.invoice_link, (status) => {
+        setIsProcessingPayment(false);
+        if (status === "paid") {
+          startSpin();
+        } else if (status === "failed") {
+          window.alert("Платеж не прошел. Попробуйте снова.");
+        }
+      });
+    } catch (error) {
+      setIsProcessingPayment(false);
+      const message = error instanceof Error ? error.message : "Ошибка оплаты.";
+      window.alert(message);
+    }
+  };
+
   const closeResultPanel = () => {
     setShowResult(false);
     if (closeTimeoutRef.current) {
@@ -158,9 +203,9 @@ export const GiftsPage: FC = () => {
 
   // Button text based on state
   const getButtonContent = () => {
-    const contentKey = isSpinning ? "spinning" : demoMode ? "demo" : "gift";
+    const contentKey = isBusy ? "spinning" : demoMode ? "demo" : "gift";
 
-    if (isSpinning) {
+    if (isBusy) {
       return (
         <span key={contentKey} className="button-content">
           <RefreshCw size={26} className="animate-spin text-primary-foreground" />
@@ -298,14 +343,15 @@ export const GiftsPage: FC = () => {
                 </p>
               </div>
               <div className="win-result-actions">
-                <button
-                  type="button"
-                  className="win-result-primary-button touch-feedback"
-                  onClick={handleDisableDemo}
-                  disabled={!demoMode}
-                >
-                  Отключить демо-режим
-                </button>
+                {demoMode && (
+                  <button
+                    type="button"
+                    className="win-result-primary-button touch-feedback"
+                    onClick={handleDisableDemo}
+                  >
+                    Отключить демо-режим
+                  </button>
+                )}
                 <button
                   type="button"
                   className="win-result-secondary-button touch-feedback"
@@ -328,8 +374,8 @@ export const GiftsPage: FC = () => {
       {/* Get Gift Button */}
       <div className="px-4 pb-3 mt-2">
         <button
-          onClick={handleGetGift}
-          disabled={isSpinning}
+          onClick={demoMode ? startSpin : handlePayment}
+          disabled={isBusy}
           className="primary-button touch-feedback"
         >
           {getButtonContent()}

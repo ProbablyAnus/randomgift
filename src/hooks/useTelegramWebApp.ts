@@ -10,12 +10,14 @@ export type TelegramWebApp = {
   isExpanded?: boolean;
   version?: string;
   platform?: string;
+  initData?: string;
   isVersionAtLeast?: (version: string) => boolean;
   setHeaderColor?: (color: string) => void;
   setBackgroundColor?: (color: string) => void;
   setBottomBarColor?: (color: string) => void;
   onEvent?: (event: string, cb: () => void) => void;
   offEvent?: (event: string, cb: () => void) => void;
+  openInvoice?: (url: string, cb?: (status: "paid" | "cancelled" | "failed" | "pending") => void) => void;
   expand?: () => void;
   ready?: () => void;
 };

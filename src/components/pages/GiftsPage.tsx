@@ -180,7 +180,7 @@ export const GiftsPage: FC = () => {
       />
 
       {/* Roulette Section */}
-      <div className="relative mb-6">
+      <div className="relative mb-4">
         {/* Center Pointer */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex flex-col items-center">
           {/* Top triangle */}
@@ -281,7 +281,7 @@ export const GiftsPage: FC = () => {
       </div>
 
       {/* Demo Mode Toggle */}
-      <div className="flex items-center justify-between px-4 pt-2 pb-4">
+      <div className="flex items-center justify-between px-4 pt-1 pb-4">
         <span className="text-foreground text-lg">Демо режим</span>
         <Switch checked={demoMode} onCheckedChange={setDemoMode} className="demo-switch" />
       </div>

@@ -79,7 +79,7 @@ export const GiftsPage: FC = () => {
   const baseCardWidth = sizeX === "compact" ? 135 : 155;
   const baseCardHeight = sizeX === "compact" ? 156 : 176;
   const rouletteCardWidth = baseCardWidth;
-  const cardGap = 12;
+  const cardGap = 14;
   
   const handleGetGift = () => {
     if (isSpinning) return;
@@ -304,11 +304,11 @@ export const GiftsPage: FC = () => {
         </p>
         
         <div 
-          className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide scroll-smooth px-4"
+          className="flex gap-5 overflow-x-auto pb-4 scrollbar-hide scroll-smooth px-5"
           style={{ 
             scrollSnapType: "x mandatory",
-            scrollPaddingLeft: 16,
-            scrollPaddingRight: 16,
+            scrollPaddingLeft: 20,
+            scrollPaddingRight: 20,
           }}
         >
           {allWinPrizes.map((prize, index) => (
@@ -324,7 +324,7 @@ export const GiftsPage: FC = () => {
               }}
             >
               {/* Centered icon */}
-              <div className="absolute inset-0 flex items-center justify-center pb-12">
+              <div className="absolute inset-0 flex items-center justify-center pb-14">
                 <picture>
                   {prize.icon.webp && <source srcSet={prize.icon.webp} type="image/webp" />}
                   <img src={prize.icon.src} alt={prize.label} className="w-[78px] h-[78px] drop-shadow-lg" />

@@ -75,6 +75,7 @@ export const GiftsPage: FC = () => {
   const [showResult, setShowResult] = useState(false);
   const rouletteRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const baseCardWidth = sizeX === "compact" ? 140 : 160;
   const baseCardHeight = sizeX === "compact" ? 162 : 184;
@@ -83,6 +84,11 @@ export const GiftsPage: FC = () => {
   
   const handleGetGift = () => {
     if (isSpinning) return;
+
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
     
     setIsSpinning(true);
     setWonPrize(null);
@@ -133,6 +139,21 @@ export const GiftsPage: FC = () => {
         navigator.vibrate([50, 30, 100]);
       }
     }, 4000);
+  };
+
+  const closeResultPanel = () => {
+    setShowResult(false);
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+    }
+    closeTimeoutRef.current = setTimeout(() => {
+      setWonPrize(null);
+    }, 320);
+  };
+
+  const handleDisableDemo = () => {
+    setDemoMode(false);
+    closeResultPanel();
   };
 
   // Button text based on state
@@ -264,7 +285,7 @@ export const GiftsPage: FC = () => {
             aria-live="polite"
           >
             <div className="win-result-panel">
-              <div className="flex flex-col items-center gap-3 text-center">
+              <div className="win-result-content">
                 <picture>
                   {wonPrize.icon.webp && <source srcSet={wonPrize.icon.webp} type="image/webp" />}
                   <img src={wonPrize.icon.src} alt={wonPrize.label} className="w-[92px] h-[92px] drop-shadow-xl" />
@@ -276,19 +297,19 @@ export const GiftsPage: FC = () => {
                     : "Подарок уже отправлен на ваш аккаунт."}
                 </p>
               </div>
-              <div className="mt-6 flex flex-col gap-3">
+              <div className="win-result-actions">
                 <button
                   type="button"
-                  className="primary-button touch-feedback"
-                  onClick={() => setDemoMode(false)}
+                  className="win-result-primary-button touch-feedback"
+                  onClick={handleDisableDemo}
                   disabled={!demoMode}
                 >
                   Отключить демо-режим
                 </button>
                 <button
                   type="button"
-                  className="secondary-button touch-feedback"
-                  onClick={() => setShowResult(false)}
+                  className="win-result-secondary-button touch-feedback"
+                  onClick={closeResultPanel}
                 >
                   Закрыть
                 </button>

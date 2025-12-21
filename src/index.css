@@ -940,7 +940,9 @@ html, body, #root {
 }
 
 .primary-button {
-  height: 54px !important;
+  height: 58px !important;
+  padding: 14px 16px !important;
+  border-radius: 14px !important;
   font-size: 17px !important;
   gap: 12px !important;
 }

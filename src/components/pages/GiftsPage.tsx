@@ -298,13 +298,13 @@ export const GiftsPage: FC = () => {
       </div>
 
       {/* Win Prizes Section - Horizontal Scroll */}
-      <div className="pt-4">
-        <p className="text-sm uppercase tracking-wide text-muted-foreground mb-4 px-4 font-medium">
+      <div className="pt-3">
+        <p className="text-sm uppercase tracking-wide text-muted-foreground mb-3 px-4 font-medium">
           ВЫ МОЖЕТЕ ВЫИГРАТЬ
         </p>
         
         <div 
-          className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide scroll-smooth px-4"
+          className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide scroll-smooth px-4"
           style={{ 
             scrollSnapType: "x mandatory",
             scrollPaddingLeft: 16,

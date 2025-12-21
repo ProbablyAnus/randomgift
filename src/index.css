@@ -256,6 +256,70 @@
     cursor: not-allowed;
   }
 
+  .secondary-button {
+    width: 100%;
+    max-width: 361px;
+    height: 50px;
+    border-radius: 12px;
+    padding: 10px;
+    gap: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--app-card) 85%, transparent);
+    color: var(--tg-text);
+    border: 1px solid color-mix(in srgb, var(--app-card) 70%, transparent);
+    font-weight: 600;
+    font-size: 16px;
+    transition: transform 150ms ease, opacity 150ms ease;
+  }
+
+  .secondary-button:active {
+    transform: scale(0.99);
+  }
+
+  .secondary-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .win-result-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 30;
+    background: color-mix(in srgb, var(--app-bg) 55%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 260ms ease;
+    padding: 16px;
+  }
+
+  .win-result-overlay.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .win-result-panel {
+    width: min(360px, 100%);
+    border-radius: 20px;
+    padding: 24px 20px;
+    background: color-mix(in srgb, var(--app-card) 92%, transparent);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+    transform: translateY(18px) scale(0.98);
+    opacity: 0;
+    transition: transform 300ms ease, opacity 300ms ease;
+  }
+
+  .win-result-overlay.is-visible .win-result-panel {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+
   /* Touch feedback (kept for existing UI) */
   .touch-feedback {
     @apply transition-all duration-150 active:scale-95 active:opacity-80;

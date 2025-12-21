@@ -112,13 +112,17 @@
     width: 115px;
     height: 160px;
     border-radius: 12px;
-    padding: 10px;
+    padding: 10px 10px 6px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
     background: var(--app-card);
     transition: transform 200ms ease;
+  }
+
+  .gift-card .star-badge--center {
+    margin-top: auto;
   }
 
   .gift-card:hover {

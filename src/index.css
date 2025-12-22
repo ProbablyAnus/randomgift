@@ -64,6 +64,14 @@
     -webkit-touch-callout: none;
   }
 
+  img,
+  svg,
+  picture {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
   html {
     @apply h-full;
     -webkit-text-size-adjust: 100%;

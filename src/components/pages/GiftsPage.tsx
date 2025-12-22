@@ -407,7 +407,7 @@ export const GiftsPage: FC = () => {
         </p>
         
         <div 
-          className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide scroll-smooth"
+          className="flex gap-[10px] overflow-x-auto pb-4 scrollbar-hide scroll-smooth"
           style={{ 
             scrollSnapType: "x mandatory",
             scrollPadding: `0 ${containerPadding}px`,

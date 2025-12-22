@@ -6,6 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { RefreshCw } from "lucide-react";
 import { useAdaptivity } from "@/hooks/useAdaptivity";
 import { useTelegramWebApp } from "@/hooks/useTelegramWebApp";
+import { CARD_DIMENSIONS, ICON_SIZES } from "@/components/gifts/constants";
 import diamondPng from "@/assets/gifts/diamond.png";
 import giftBoxPng from "@/assets/gifts/gift.png";
 import heartBoxPng from "@/assets/gifts/heart.png";
@@ -80,8 +81,8 @@ export const GiftsPage: FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const baseCardWidth = sizeX === "compact" ? 140 : 160;
-  const baseCardHeight = sizeX === "compact" ? 162 : 184;
+  const baseCardWidth = sizeX === "compact" ? CARD_DIMENSIONS.compact.width : CARD_DIMENSIONS.regular.width;
+  const baseCardHeight = sizeX === "compact" ? CARD_DIMENSIONS.compact.height : CARD_DIMENSIONS.regular.height;
   const rouletteCardWidth = baseCardWidth;
   const cardGap = 12;
   const containerPadding = Math.max(12, Math.round(baseCardWidth * 0.1));
@@ -308,7 +309,12 @@ export const GiftsPage: FC = () => {
                 <div className="absolute inset-0 flex items-center justify-center pb-8">
                   <picture>
                     {gift.icon.webp && <source srcSet={gift.icon.webp} type="image/webp" />}
-                    <img src={gift.icon.src} alt={gift.label} className="w-[84px] h-[84px] drop-shadow-lg" />
+                    <img
+                      src={gift.icon.src}
+                      alt={gift.label}
+                      className="drop-shadow-lg"
+                      style={{ width: ICON_SIZES.roulette, height: ICON_SIZES.roulette }}
+                    />
                   </picture>
                 </div>
                 {/* Price badge centered at bottom */}
@@ -334,7 +340,12 @@ export const GiftsPage: FC = () => {
               <div className="win-result-content">
                 <picture>
                   {wonPrize.icon.webp && <source srcSet={wonPrize.icon.webp} type="image/webp" />}
-                  <img src={wonPrize.icon.src} alt={wonPrize.label} className="w-[120px] h-[120px] drop-shadow-xl" />
+                  <img
+                    src={wonPrize.icon.src}
+                    alt={wonPrize.label}
+                    className="drop-shadow-xl"
+                    style={{ width: ICON_SIZES.win, height: ICON_SIZES.win }}
+                  />
                 </picture>
                 <p className="text-foreground font-semibold text-2xl">Вы выиграли подарок!</p>
                 <p className="text-muted-foreground text-base leading-relaxed">
@@ -419,7 +430,12 @@ export const GiftsPage: FC = () => {
               <div className="absolute inset-0 flex items-center justify-center pb-14">
                 <picture>
                   {prize.icon.webp && <source srcSet={prize.icon.webp} type="image/webp" />}
-                  <img src={prize.icon.src} alt={prize.label} className="w-[78px] h-[78px] drop-shadow-lg" />
+                  <img
+                    src={prize.icon.src}
+                    alt={prize.label}
+                    className="drop-shadow-lg"
+                    style={{ width: ICON_SIZES.prize, height: ICON_SIZES.prize }}
+                  />
                 </picture>
               </div>
               {/* Price badge centered */}

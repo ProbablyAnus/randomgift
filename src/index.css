@@ -106,11 +106,9 @@
     padding-bottom: calc(92px + var(--safe-area-bottom));
   }
 
-  /* Gift cards (115×160, radius 12, color from tma) */
+  /* Gift cards (size comes from components) */
   .gift-card {
     position: relative;
-    width: 115px;
-    height: 160px;
     border-radius: 12px;
     padding: 10px 10px 6px;
     display: flex;

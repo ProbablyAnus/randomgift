@@ -1,11 +1,11 @@
 export const CARD_DIMENSIONS = {
-  compact: { width: 140, height: 162 },
-  regular: { width: 160, height: 184 },
+  compact: { width: 132, height: 152 },
+  regular: { width: 150, height: 170 },
 };
 
 export const ICON_SIZES = {
-  roulette: 84,
-  prize: 78,
-  card: 78,
-  win: 120,
+  roulette: 74,
+  prize: 70,
+  card: 70,
+  win: 110,
 };

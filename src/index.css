@@ -449,341 +449,6 @@ html, body {
 }
 .tabbar-button .tabbar-label { opacity: 0.4; }
 .tabbar-button.active .tabbar-label { opacity: 1; color: var(--tg-button); }
-/* Top price tabs (star selection) */
-.tg-tabs {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin: 6px auto 24px;
-  padding: 0;
-  width: 100%;
-  max-width: 393px;
-  background: transparent;
-  overflow-x: auto;
-}
-.tg-tab {
-  height: 44px;             /* чуть больше */
-  padding: 0 14px;
-  border-radius: 12px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;                 /* звезда ближе к цифрам */
-  background: transparent;
-  border: 1px solid color-mix(in srgb, var(--tg-text) 8%, transparent);
-  color: var(--tg-text);
-  white-space: nowrap;
-}
-.tg-tab--active {
-  background: color-mix(in srgb, var(--app-card) 60%, transparent);
-  border-color: color-mix(in srgb, var(--tg-text) 12%, transparent);
-}
-.tg-tab__star {
-  display: inline-block;
-}
-
-/* Header background (requested) */
-.tg-header {
-  height: 56px;
-  padding: 8px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  background: var(--tg-header-bg, var(--app-bg));
-}
-
-/* Top price tabs: centered rounded pill like Quick Gift */
-.tg-tab {
-  height: 40px;
-  padding: 0 16px;
-  border-radius: 9999px;
-  border: none;
-  background: transparent;
-}
-.tg-tab--active {
-  background: var(--app-card); /* pressed/active */
-}
-
-/* Base background */
-html, body {
-  background: var(--app-bg) !important;
-  color: var(--tg-text);
-}
-#root {
-  min-height: 100vh;
-  background: var(--app-bg) !important;
-}
-
-/* Top price tabs: no container background, active pill only */
-.tg-tab {
-  height: 40px;
-  padding: 0 18px;
-  border-radius: 9999px;
-  border: 1px solid color-mix(in srgb, var(--tg-text) 10%, transparent);
-  background: transparent;
-}
-.tg-tab--active {
-  background: color-mix(in srgb, var(--app-card) 60%, transparent);
-  border-color: color-mix(in srgb, var(--tg-text) 12%, transparent);
-}
-
-/* Star icon sizing: match digits */
-.star-icon,
-.tg-tab__star,
-.star-badge .star-icon {
-  width: 1em !important;
-  height: 1em !important;
-}
-.price-row {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-/* Gift card price badge centered */
-.star-badge--center {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-}
-
-/* === FORCE OVERRIDES (ensure changes are visible) === */
-:root {
-  /* default theme vars are overridden by SettingsProvider */
-  --app-bg: rgba(28, 28, 30, 1);
-  --app-card: rgba(44, 44, 46, 1);
-  --tabbar-bg: rgba(30, 30, 30, 0.75);
-}
-
-/* App background */
-html, body, #root {
-  background: var(--app-bg) !important;
-}
-
-/* === Final UI tuning (match reference) === */
-
-/* Top star price tabs: no container bg, only active pill, larger star+digits */
-
-.tg-tab {
-  height: 44px !important;
-  padding: 0 20px !important;
-  border-radius: 9999px !important;
-  border: none !important;
-  background: transparent !important;
-  color: var(--tg-text) !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 10px !important;
-  font-size: 18px !important;
-  font-weight: 600 !important;
-}
-
-.tg-tab--active {
-  background: var(--app-card) !important;
-}
-
-.tg-tab__text {
-  line-height: 1 !important;
-}
-
-/* Price badge on cards: pill like reference, star == digit size */
-.star-badge {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 6px !important;
-  padding: 6px 12px !important;
-  border-radius: 9999px !important;
-  background: rgba(255, 193, 7, 0.18) !important;
-  color: #FFC107 !important;
-  font-size: 15px !important;
-  font-weight: 600 !important;
-}
-
-/* Gift cards */
-.gift-card {
-  background: var(--app-card) !important;
-}
-
-/* Bottom tabbar */
-.bottom-tabbar {
-  background: var(--tabbar-bg) !important;
-  backdrop-filter: blur(100px) !important;
-  -webkit-backdrop-filter: blur(100px) !important;
-}
-
-/* Header */
-.tg-header {
-  background: var(--tg-header-bg, var(--app-bg)) !important;
-}
-
-/* Center star+price badge */
-.star-badge--center {
-  width: 100% !important;
-  display: flex !important;
-  justify-content: center !important;
-}
-/* =========================
-   FINAL OVERRIDES (Reference-like)
-   ========================= */
-
-/* Top star amount tabs (match reference sizing) */
-
-.tg-tab {
-  /* Requested: no pill for inactive tabs */
-  height: 44px !important;
-  padding: 0 10px !important;
-  border-radius: 0 !important;
-  border: none !important;
-  background: transparent !important;
-  color: var(--tg-text) !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 8px !important;
-  font-size: 18px !important;
-  /* Requested: bold digits only in tabs */
-  font-weight: 700 !important;
-  line-height: 1 !important;
-}
-
-.tg-tab--active {
-  /* Requested: pill only when active */
-  padding: 0 20px !important;
-  border-radius: 9999px !important;
-  background: var(--app-card) !important;
-}
-
-.tg-tab__text {
-  font-size: 1em !important;
-  line-height: 1 !important;
-}
-
-/* Price badge in cards (match reference pill) */
-.star-badge {
-  background: rgba(255, 193, 7, 0.18) !important;
-  color: #FFC107 !important;
-  /* Requested: tighter pill around price */
-  padding: 4px 10px !important;
-  border-radius: 9999px !important;
-  /* Requested: star + digit a bit bigger, not bold */
-  font-size: 16px !important;
-  font-weight: 400 !important;
-  line-height: 1 !important;
-}
-
-/* Price rows: star = digit size everywhere */
-.price-row {
-  gap: 6px !important;
-}
-
-/* Gift card icons a bit larger (closer to reference) */
-.gift-card img {
-  image-rendering: auto;
-}
-
-/* =========================
-   REQUESTED TWEAKS (latest)
-   ========================= */
-
-/* Top star amount tabs: no pills for inactive, pill only for active */
-.tg-tab {
-  height: 44px !important;
-  padding: 0 10px !important;
-  border: none !important;
-  background: transparent !important;
-  border-radius: 0 !important;
-  gap: 8px !important;
-  font-size: 18px !important;
-  font-weight: 700 !important; /* requested: bold only here */
-  line-height: 1 !important;
-}
-.tg-tab--active {
-  padding: 0 18px !important;
-  border-radius: 9999px !important;
-  background: color-mix(in srgb, var(--app-card) 85%, transparent) !important;
-}
-
-/* Price badge: tighter pill, star and digits same size, digits not bold */
-.star-badge {
-  padding: 4px 10px !important;
-  border-radius: 9999px !important;
-  gap: 6px !important;
-  font-size: 16px !important;
-  font-weight: 400 !important;
-  line-height: 1 !important;
-}
-
-.price-row { gap: 6px !important; }
-
-
-/* === Overrides: Star tabs, pills, and crypto-bot-contest TabBar === */
-
-/* Star amount tabs: bigger star, tabbar-like press animation */
-.tg-tab {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 14px;
-  border-radius: 9999px;
-  background: transparent;
-  color: var(--tg-text);
-  border: 1px solid transparent;
-  transition: transform 150ms ease, opacity 150ms ease;
-  font-size: 22px !important;
-  transform: none !important;
-}
-.tg-tab:active { transform: scale(0.96) !important; }
-.tg-tab:focus,
-.tg-tab:focus-visible {
-  outline: none;
-}
-.tg-tab__text {
-  font-size: 1em;
-  line-height: 18px;
-  font-weight: 700; /* only tabs bold */
-}
-.tg-tab--active {
-  background: var(--tg-button);
-  border-color: color-mix(in srgb, var(--tg-button) 70%, transparent);
-}
-.tg-tab--active .tg-tab__text,
-.tg-tab--active .tg-tab__star {
-  animation: tg-tab-press 220ms ease;
-}
-@keyframes tg-tab-press {
-  0% { transform: scale(1); }
-  50% { transform: scale(0.92); }
-  100% { transform: scale(1); }
-}
-
-/* Price pills: tight by default */
-.star-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  width: fit-content;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-.star-badge--tight {
-  padding: 5px 9px;
-}
-.star-badge--big {
-  padding: 7px 12px;
-}
-/* Disable press-move for tabs specifically (keep cards ok) */
-.tg-tab.touch-feedback {
-  transform: none !important;
-}
-
 /* Crypto-bot-contest-like tabbar (no Store) */
 .cbc-tabbar {
   z-index: 20;
@@ -892,131 +557,105 @@ html, body, #root {
   padding: 14px;
 }
 
-/* === Price lock: prevent layout shift for tabs and button === */
+/* Top price tabs + star badge (single source of truth) */
+.tg-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 6px auto 24px;
+  padding: 0;
+  width: 100%;
+  max-width: 393px;
+  background: transparent;
+  overflow-x: auto;
+}
+
 .tg-tab {
-  min-width: 88px;
-  padding: 0 16px !important;
+  height: 40px;
+  min-width: 80px;
+  padding: 0 14px;
+  border-radius: 9999px;
+  border: 1px solid color-mix(in srgb, var(--tg-text) 10%, transparent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--tg-text);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
   box-sizing: border-box;
+  transition: transform 150ms ease, opacity 150ms ease, background-color 150ms ease, border-color 150ms ease;
+}
+
+.tg-tab:active {
+  transform: scale(0.96);
+}
+
+.tg-tab:focus,
+.tg-tab:focus-visible {
+  outline: none;
 }
 
 .tg-tab--active {
-  padding: 0 16px !important;
+  background: color-mix(in srgb, var(--app-card) 85%, transparent);
+  border-color: color-mix(in srgb, var(--tg-text) 12%, transparent);
 }
 
 .tg-tab__text {
   min-width: 3ch;
   text-align: center;
   font-variant-numeric: tabular-nums;
-}
-
-.primary-button .price-value {
-  display: inline-block;
-  min-width: 3ch;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-}
-
-
-/* === REF pill style + star sizes === */
-.star-badge{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-  width: fit-content;
-  padding:8px 14px;
-  border-radius:999px;
-  background: rgba(0,0,0,0.28);
-  border: 1px solid rgba(255,255,255,0.08);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-}
-.star-badge--tight{ padding:7px 12px; }
-.star-badge--big{ padding:9px 16px; }
-
-/* === Final contest palette + price pill alignment === */
-:root {
-  --tg-button: #0080FA;
-  --tg-button-text: #FFFFFF;
-  --tg-hint: #959595;
-}
-
-:root[data-theme="light"] {
-  --app-bg: #FFFFFF;
-  --app-card: #EFEFF3;
-  --tabbar-bg: rgba(241, 241, 242, 0.75);
-  --tg-text: #000000;
-  --tg-hint: #959595;
-}
-
-:root[data-theme="dark"] {
-  --app-bg: #1C1C1E;
-  --app-card: #2C2C2E;
-  --tabbar-bg: rgba(30, 30, 30, 0.75);
-  --tg-text: #FFFFFF;
-  --tg-hint: #8E8E93;
-}
-
-.cbc-tabbar__item {
-  color: var(--tg-hint) !important;
-}
-
-.cbc-tabbar__item[data-active] {
-  color: var(--tg-button) !important;
-}
-
-.tg-tab {
-  gap: 2px !important;
-  flex-direction: row !important;
-  white-space: nowrap !important;
-  height: 40px !important;
-  padding: 0 12px !important;
-  font-size: 17px !important;
-  min-width: 80px !important;
-}
-
-.tg-tab__text {
-  line-height: 1 !important;
 }
 
 .star-icon,
 .tg-tab__star {
-  width: 1em !important;
-  height: 1em !important;
-  display: inline-block !important;
-  vertical-align: middle !important;
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .price-row {
-  align-items: center !important;
-  gap: 4px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 .star-badge {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: fit-content !important;
-  padding: 6px 12px !important;
-  gap: 4px !important;
-  border-radius: 999px !important;
-  background: #007AFF !important;
-  border: 1px solid #007AFF !important;
-  color: #FFFFFF !important;
-  font-weight: 500 !important;
-  line-height: 1 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 6px 12px;
+  gap: 4px;
+  border-radius: 999px;
+  background: #007AFF;
+  border: 1px solid #007AFF;
+  color: #FFFFFF;
+  font-weight: 500;
+  line-height: 1;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .star-badge--center {
-  width: fit-content !important;
-  display: flex !important;
-  justify-content: center !important;
-  margin: 0 auto !important;
+  width: fit-content;
+  display: flex;
+  justify-content: center;
+  margin: 0 auto;
 }
 
 .star-badge--tight {
-  padding: 4px 9px !important;
-  gap: 3px !important;
+  padding: 4px 9px;
+  gap: 3px;
+}
+
+.star-badge--big {
+  padding: 7px 12px;
 }
 
 .chance-text {
@@ -1028,33 +667,7 @@ html, body, #root {
   letter-spacing: 0.01em;
 }
 
-/* === Latest requested adjustments === */
-.tg-tabs {
-  margin-bottom: 24px !important;
-}
-
-.tg-tab {
-  height: 40px !important;
-  padding: 0 14px !important;
-  font-size: 18px !important;
-}
-
-.star-icon,
 .button-price-icon {
-  width: 1.2em !important;
-  height: 1.2em !important;
-}
-
-.tg-tab__star {
-  width: 1.7em !important;
-  height: 1.7em !important;
-}
-
-.price-row {
-  gap: 2px !important;
-}
-
-.price-row .star-icon {
   width: 1.2em !important;
   height: 1.2em !important;
 }

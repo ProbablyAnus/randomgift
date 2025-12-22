@@ -11,12 +11,23 @@ export type TelegramWebApp = {
   version?: string;
   platform?: string;
   initData?: string;
+  initDataUnsafe?: {
+    user?: {
+      id?: number;
+      username?: string;
+      first_name?: string;
+      last_name?: string;
+      photo_url?: string;
+    };
+  };
   isVersionAtLeast?: (version: string) => boolean;
   setHeaderColor?: (color: string) => void;
   setBackgroundColor?: (color: string) => void;
   setBottomBarColor?: (color: string) => void;
   onEvent?: (event: string, cb: () => void) => void;
   offEvent?: (event: string, cb: () => void) => void;
+  openTelegramLink?: (url: string) => void;
+  openLink?: (url: string) => void;
   openInvoice?: (url: string, cb?: (status: "paid" | "cancelled" | "failed" | "pending") => void) => void;
   expand?: () => void;
   ready?: () => void;

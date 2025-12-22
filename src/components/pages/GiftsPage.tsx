@@ -439,10 +439,10 @@ export const GiftsPage: FC = () => {
                 </picture>
               </div>
               {/* Price badge centered */}
-              <div className="absolute bottom-7 left-1/2 -translate-x-1/2 star-badge star-badge--center star-badge--tight">
+              <div className="absolute bottom-7 left-1/2 -translate-x-1/2 star-badge star-badge--center star-badge--big">
                 <span className="price-row">
                   <img src={StarSvg} alt="Stars" className="star-icon" />
-                  <span className="text-[14px] font-normal">{prize.price}</span>
+                  <span className="text-[15px] font-normal">{prize.price}</span>
                 </span>
               </div>
               {/* Chance at bottom center */}

@@ -4,7 +4,7 @@ export const CARD_DIMENSIONS = {
 };
 
 export const ICON_SIZES = {
-  roulette: 74,
+  roulette: 86,
   prize: 70,
   card: 70,
   win: 110,

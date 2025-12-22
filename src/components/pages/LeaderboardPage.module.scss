@@ -1,129 +1,130 @@
 .wrapper {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 16px 0 96px;
   min-height: 100%;
 }
 
 .header {
-  padding: 0 16px 4px;
+  padding: 10px 16px 8px;
 }
 
 .inputWrapper {
   position: relative;
-  color: hsl(var(--muted-foreground));
-  font-size: 15px;
+  color: #3c3c4399;
+  font-size: 17px;
 }
 
-.searchInput {
-  width: 100%;
-  padding: 8px 12px;
-  border-radius: 12px;
-  border: none;
-  outline: none;
-  background: color-mix(in srgb, var(--app-card) 85%, transparent);
-  color: hsl(var(--foreground));
+.inputWrapper * {
+  color: inherit;
   font-size: inherit;
 }
 
 .placeholder {
   position: absolute;
   inset: 0;
-  display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
   pointer-events: none;
-  transition: all 150ms ease;
+  display: flex;
+  gap: 8px;
+  align-content: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .placeholder::before {
   content: "";
-  width: 16px;
-  height: 16px;
-  display: block;
-  background-repeat: no-repeat;
+  width: 20px;
+  height: 20px;
+  background-image: url("./search.svg");
   background-position: center;
+  background-repeat: no-repeat;
   background-size: contain;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238c8c8c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+  display: block;
 }
 
-.inputWrapper[data-filled="true"] .placeholder {
-  color: transparent;
+.inputWrapper input {
+  background-color: color-mix(in srgb, var(--app-card) 85%, transparent);
+  border-radius: 10px;
+  padding: 7px;
+  border-style: none;
+  outline: none;
+  display: block;
+  width: 100%;
+  color: var(--tg-text) !important;
 }
 
-.searchInput:focus + .placeholder {
+.inputWrapper input:not([value=""]) + .placeholder {
+  color: transparent !important;
+}
+
+.inputWrapper input:focus {
+  padding-left: 32px;
+}
+
+.inputWrapper input:focus + .placeholder {
+  padding-left: 7px;
   justify-content: flex-start;
-  padding-left: 6px;
+}
+
+.avatar {
+  margin-right: 12px;
+  width: 40px;
+  height: 40px;
 }
 
 .scrollbox {
-  display: flex;
-  flex-direction: column;
-  color: hsl(var(--foreground));
+  flex: 1;
+  padding-bottom: 92px;
+  color: var(--tg-text);
 }
 
 .row {
   display: flex;
+  padding-left: 16px;
+  padding-top: 8px;
+  padding-bottom: 8px;
   align-items: center;
-  gap: 12px;
-  padding: 10px 16px;
+  position: relative;
   background: transparent;
   border: none;
   color: inherit;
-  cursor: pointer;
-  position: relative;
   text-align: left;
+  width: 100%;
+  cursor: pointer;
 }
 
 .row:not(:last-child)::after {
   position: absolute;
-  content: "";
-  height: 1px;
-  left: calc(16px + 40px + 12px);
-  right: 16px;
   bottom: 0;
-  background: color-mix(in srgb, hsl(var(--foreground)) 20%, transparent);
+  left: calc(16px + 40px + 12px);
+  background-color: #3c3c435c;
+  height: 1px;
+  content: "";
+  right: 16px;
 }
 
-.avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #ffffff;
-  font-weight: 600;
-  font-size: 16px;
-}
-
-.info {
-  flex: 1;
-  min-width: 0;
-}
-
-.name {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.scrollbox .name {
   font-weight: 500;
-  font-size: 16px;
+  font-size: 17px;
+  letter-spacing: -0.44px;
   line-height: 22px;
-  letter-spacing: -0.4px;
+  display: flex;
+  align-items: center;
 }
 
-.youTag {
-  font-size: 11px;
+.scrollbox .name span {
   font-weight: 500;
+  margin-left: 6px;
+  font-size: 11px;
   color: hsl(var(--muted-foreground));
-  background: color-mix(in srgb, hsl(var(--muted-foreground)) 20%, transparent);
-  padding: 2px 6px;
+  background-color: #8e8e9333;
+  line-height: 14px;
+  padding-left: 4px;
+  padding-right: 4px;
   border-radius: 4px;
 }
 
-.count {
+.scrollbox .count {
   color: #007aff;
   font-size: 13px;
   line-height: 16px;
@@ -133,46 +134,84 @@
   gap: 6px;
 }
 
-.count::before {
+.scrollbox .count::before {
   content: "";
   width: 12px;
   height: 12px;
-  display: inline-block;
-  background-repeat: no-repeat;
+  background-image: url("./gift.svg");
   background-position: center;
+  background-repeat: no-repeat;
   background-size: contain;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23007aff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 12 20 22 4 22 4 12'/%3E%3Crect x='2' y='7' width='20' height='5'/%3E%3Cline x1='12' y1='22' x2='12' y2='7'/%3E%3Cpath d='M12 7c0-2.2 1.8-4 4-4 0 2.2-1.8 4-4 4'/%3E%3Cpath d='M12 7c0-2.2-1.8-4-4-4 0 2.2 1.8 4 4 4'/%3E%3C/svg%3E");
 }
 
-.number {
+.scrollbox .number {
   position: absolute;
-  right: 16px;
   top: 50%;
   transform: translateY(-50%);
+  right: 16px;
   color: hsl(var(--muted-foreground));
   font-weight: 510;
   font-size: 15px;
   letter-spacing: -0.43px;
 }
 
-.number::before {
+.scrollbox .number::before {
   content: "#" attr(data-index);
 }
 
-.number[data-index="1"]::before,
-.number[data-index="2"]::before,
-.number[data-index="3"]::before {
-  font-size: 20px;
+.scrollbox .number[data-index="1"]::before,
+.scrollbox .number[data-index="2"]::before,
+.scrollbox .number[data-index="3"]::before {
+  font-size: 22px;
 }
 
-.number[data-index="1"]::before {
+.scrollbox .number[data-index="1"]::before {
   content: "🥇";
 }
 
-.number[data-index="2"]::before {
+.scrollbox .number[data-index="2"]::before {
   content: "🥈";
 }
 
-.number[data-index="3"]::before {
+.scrollbox .number[data-index="3"]::before {
   content: "🥉";
+}
+
+.noItems {
+  border-left: 16px solid transparent;
+  border-right: 16px solid transparent;
+  text-align: center;
+  color: hsl(var(--muted-foreground));
+  padding-top: 16px;
+}
+
+.noItemsTitle {
+  font-size: 15px;
+}
+
+.loader {
+  padding: 24px 16px;
+  text-align: center;
+  color: hsl(var(--muted-foreground));
+}
+
+.emptyState {
+  padding: 24px 16px;
+  text-align: center;
+}
+
+.emptyTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.emptySubtitle {
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 6px;
+}
+
+.emptyHint {
+  color: hsl(var(--muted-foreground));
+  font-size: 13px;
 }

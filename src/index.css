@@ -587,7 +587,7 @@ html, body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   background: transparent;
   color: var(--tg-text);
   font-size: 17px;
@@ -627,8 +627,8 @@ html, body {
 }
 
 .tg-tab__star {
-  width: 1.6em;
-  height: 1.6em;
+  width: 1.75em;
+  height: 1.75em;
   display: inline-block;
   vertical-align: middle;
 }
@@ -659,8 +659,8 @@ html, body {
 }
 
 .star-badge .star-icon {
-  width: 1.3em;
-  height: 1.3em;
+  width: 1.35em;
+  height: 1.35em;
 }
 
 .star-badge--center {
@@ -679,6 +679,16 @@ html, body {
 .star-badge--big {
   padding: 6px 12px;
   font-size: 16px;
+}
+
+.star-badge--tight .star-icon {
+  width: 1.45em;
+  height: 1.45em;
+}
+
+.star-badge--big .star-icon {
+  width: 1.55em;
+  height: 1.55em;
 }
 
 .chance-text {

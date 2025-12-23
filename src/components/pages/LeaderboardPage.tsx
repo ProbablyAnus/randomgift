@@ -85,9 +85,7 @@ export const LeaderboardPage: FC = () => {
   }, [apiBaseUrl]);
 
   const rankedUsers = useMemo(() => {
-    return leaderboard
-      .filter((user) => getGamesCount(user) > 0)
-      .sort((a, b) => getGamesCount(b) - getGamesCount(a));
+    return [...leaderboard].sort((a, b) => getGamesCount(b) - getGamesCount(a));
   }, [leaderboard]);
 
   const filteredUsers = useMemo(() => {
@@ -124,7 +122,7 @@ export const LeaderboardPage: FC = () => {
     return (
       <div className={styles.emptyState}>
         <div className={styles.emptyTitle}>Рейтинг пуст</div>
-        <div className={styles.emptySubtitle}>Сыграйте хотя бы один раз, чтобы появиться здесь.</div>
+        <div className={styles.emptySubtitle}>Здесь появятся участники, как только они будут загружены.</div>
         {hasError && <div className={styles.emptyHint}>Не удалось загрузить данные. Попробуйте позже.</div>}
       </div>
     );

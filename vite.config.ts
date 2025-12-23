@@ -13,6 +13,7 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "lottie-web": "lottie-web/build/player/lottie_light",
     },
   },
 }));

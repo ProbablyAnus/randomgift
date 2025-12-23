@@ -703,6 +703,10 @@ html, body {
   gap: 12px !important;
 }
 
+.gifts-primary-button {
+  max-width: 100%;
+}
+
 .button-content {
   display: inline-flex;
   align-items: center;

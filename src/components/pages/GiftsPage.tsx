@@ -86,6 +86,7 @@ export const GiftsPage: FC = () => {
   const rouletteCardWidth = baseCardWidth + 16;
   const cardGap = 10;
   const containerPadding = sizeX === "compact" ? 12 : 16;
+  const sectionPaddingStyle = { paddingInline: containerPadding };
 
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
   const isBusy = isSpinning || isProcessingPayment;
@@ -380,29 +381,26 @@ export const GiftsPage: FC = () => {
       {/* Demo Mode Toggle */}
       <div
         className="flex items-center justify-between pt-1 pb-4"
-        style={{ paddingInline: containerPadding }}
+        style={sectionPaddingStyle}
       >
         <span className="text-foreground text-lg">Демо режим</span>
         <Switch checked={demoMode} onCheckedChange={setDemoMode} className="demo-switch" />
       </div>
 
       {/* Get Gift Button */}
-      <div className="pb-3 mt-2" style={{ paddingInline: containerPadding }}>
+      <div className="pb-3 mt-2" style={sectionPaddingStyle}>
         <button
           onClick={demoMode ? startSpin : handlePayment}
           disabled={isBusy}
-          className="primary-button touch-feedback"
+          className="primary-button touch-feedback gifts-primary-button"
         >
           {getButtonContent()}
         </button>
       </div>
 
       {/* Win Prizes Section - Horizontal Scroll */}
-      <div className="pt-4">
-        <p
-          className="text-sm uppercase tracking-wide text-muted-foreground mb-2 font-medium"
-          style={{ paddingInline: containerPadding }}
-        >
+      <div className="pt-4" style={sectionPaddingStyle}>
+        <p className="text-sm uppercase tracking-wide text-muted-foreground mb-2 font-medium">
           ВЫ МОЖЕТЕ ВЫИГРАТЬ
         </p>
         
@@ -410,8 +408,7 @@ export const GiftsPage: FC = () => {
           className="flex gap-[10px] overflow-x-auto pb-4 scrollbar-hide scroll-smooth"
           style={{ 
             scrollSnapType: "x mandatory",
-            scrollPadding: `0 ${containerPadding}px`,
-            paddingInline: containerPadding,
+            scrollPadding: "0px",
           }}
         >
           {allWinPrizes.map((prize, index) => (

@@ -645,22 +645,36 @@ html, body {
   align-items: center;
   justify-content: center;
   width: fit-content;
-  padding: 5px 11px;
-  gap: 4px;
+  padding: 6px 12px;
+  gap: 6px;
   border-radius: 999px;
-  background: #007AFF;
-  border: 1px solid #007AFF;
-  color: #FFFFFF;
-  font-weight: 500;
+  background: linear-gradient(180deg, #5ec3ff 0%, #0f8de9 100%);
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  color: #ffffff;
+  font-weight: 700;
   font-size: 15px;
-  line-height: 1;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  position: relative;
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.22),
+    0 10px 22px rgba(46, 144, 239, 0.48);
+}
+
+.star-badge::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.44);
+  pointer-events: none;
 }
 
 .star-badge .star-icon {
   width: 1.3em;
   height: 1.3em;
+  flex-shrink: 0;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.18));
 }
 
 .star-badge--center {
@@ -671,13 +685,13 @@ html, body {
 }
 
 .star-badge--tight {
-  padding: 4px 10px;
-  gap: 3px;
+  padding: 5px 10px;
+  gap: 5px;
   font-size: 14px;
 }
 
 .star-badge--big {
-  padding: 6px 12px;
+  padding: 7px 14px;
   font-size: 16px;
 }
 

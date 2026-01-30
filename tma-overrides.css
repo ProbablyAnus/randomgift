@@ -6,7 +6,7 @@
 
 /* Tab Bar (393x50) */
 .tab-bar {
-  width: 393px;
+  width: 100%;
   height: 50px;
   display: flex;
   align-items: center;
@@ -45,7 +45,8 @@
 
 /* CTA button: "попробовать/получить подарок" (361x50) */
 .cta-primary {
-  width: 361px;
+  width: 100%;
+  max-width: 361px;
   height: 50px;
   display: inline-flex;
   align-items: center;

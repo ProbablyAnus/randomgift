@@ -7,10 +7,9 @@ Create `.env` in repo root:
 BOT_TOKEN=123456:AAAA...
 WEB_APP_URL=https://your-domain.com
 
-# Supabase (keep yours):
-VITE_SUPABASE_PROJECT_ID="..."
-VITE_SUPABASE_PUBLISHABLE_KEY="..."
-VITE_SUPABASE_URL="..."
+# Frontend (Vite)
+VITE_NEWS_URL="https://t.me/your_news_channel"
+VITE_SUPPORT_URL="https://t.me/your_support_account"
 ```
 
 ## 2) Caddy

@@ -298,7 +298,7 @@ export const GiftsPage: FC = () => {
             {extendedRoulette.map((gift, index) => (
               <div
                 key={index}
-                className="flex-shrink-0 rounded-[16px] px-[8px] relative pointer-events-none"
+                className="flex-shrink-0 rounded-[16px] px-[8px] pointer-events-none"
                 style={{ 
                   width: rouletteCardWidth, 
                   height: baseCardHeight,
@@ -306,24 +306,24 @@ export const GiftsPage: FC = () => {
                   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.25)"
                 }}
               >
-                {/* Centered icon - takes most of the space */}
-                <div className="absolute inset-0 flex items-center justify-center pb-8">
-                  <picture>
-                    {gift.icon.webp && <source srcSet={gift.icon.webp} type="image/webp" />}
-                    <img
-                      src={gift.icon.src}
-                      alt={gift.label}
-                      className="drop-shadow-lg"
-                      style={{ width: ICON_SIZES.roulette, height: ICON_SIZES.roulette }}
-                    />
-                  </picture>
-                </div>
-                {/* Price badge centered at bottom */}
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 star-badge star-badge--center star-badge--tight">
-                  <span className="price-row">
-                    <img src={StarSvg} alt="Stars" className="star-icon" />
-                    <span className="text-[14px] font-normal">{gift.price}</span>
-                  </span>
+                <div className="flex h-full flex-col items-center justify-center gap-2 py-3">
+                  <div className="flex flex-1 items-center justify-center">
+                    <picture>
+                      {gift.icon.webp && <source srcSet={gift.icon.webp} type="image/webp" />}
+                      <img
+                        src={gift.icon.src}
+                        alt={gift.label}
+                        className="drop-shadow-lg"
+                        style={{ width: ICON_SIZES.roulette, height: ICON_SIZES.roulette }}
+                      />
+                    </picture>
+                  </div>
+                  <div className="star-badge star-badge--center star-badge--tight">
+                    <span className="price-row">
+                      <img src={StarSvg} alt="Stars" className="star-icon" />
+                      <span className="text-[14px] font-normal">{gift.price}</span>
+                    </span>
+                  </div>
                 </div>
               </div>
             ))}
@@ -414,7 +414,7 @@ export const GiftsPage: FC = () => {
           {allWinPrizes.map((prize, index) => (
             <div
               key={index}
-              className="flex-shrink-0 rounded-[12px] relative touch-feedback"
+              className="flex-shrink-0 rounded-[12px] touch-feedback"
               style={{
                 scrollSnapAlign: "start",
                 width: baseCardWidth,
@@ -423,27 +423,28 @@ export const GiftsPage: FC = () => {
                 boxShadow: "0 2px 8px rgba(0, 0, 0, 0.25)"
               }}
             >
-              {/* Centered icon */}
-              <div className="absolute inset-0 flex items-center justify-center pb-14">
-                <picture>
-                  {prize.icon.webp && <source srcSet={prize.icon.webp} type="image/webp" />}
-                  <img
-                    src={prize.icon.src}
-                    alt={prize.label}
-                    className="drop-shadow-lg"
-                    style={{ width: ICON_SIZES.prize, height: ICON_SIZES.prize }}
-                  />
-                </picture>
+              <div className="flex h-full flex-col items-center justify-center gap-2 py-3">
+                <div className="flex flex-1 items-center justify-center">
+                  <picture>
+                    {prize.icon.webp && <source srcSet={prize.icon.webp} type="image/webp" />}
+                    <img
+                      src={prize.icon.src}
+                      alt={prize.label}
+                      className="drop-shadow-lg"
+                      style={{ width: ICON_SIZES.prize, height: ICON_SIZES.prize }}
+                    />
+                  </picture>
+                </div>
+                <div className="flex flex-col items-center gap-1 pb-1">
+                  <div className="star-badge star-badge--center star-badge--big">
+                    <span className="price-row">
+                      <img src={StarSvg} alt="Stars" className="star-icon" />
+                      <span className="text-[15px] font-normal">{prize.price}</span>
+                    </span>
+                  </div>
+                  <span className="chance-text">{prize.chance}</span>
+                </div>
               </div>
-              {/* Price badge centered */}
-              <div className="absolute bottom-7 left-1/2 -translate-x-1/2 star-badge star-badge--center star-badge--big">
-                <span className="price-row">
-                  <img src={StarSvg} alt="Stars" className="star-icon" />
-                  <span className="text-[15px] font-normal">{prize.price}</span>
-                </span>
-              </div>
-              {/* Chance at bottom center */}
-              <span className="absolute bottom-1 left-1/2 -translate-x-1/2 chance-text">{prize.chance}</span>
             </div>
           ))}
         </div>

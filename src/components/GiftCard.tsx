@@ -25,7 +25,7 @@ export const GiftCard: FC<GiftCardProps> = ({ iconPng, iconWebp, label, price, i
       {isSelected && (
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-0.5 h-8 bg-primary/50" />
       )}
-      <span className="mb-3 flex items-center justify-center">
+      <div className="flex w-full flex-1 flex-col items-center justify-center gap-2 pb-1">
         <picture>
           {iconWebp && <source srcSet={iconWebp} type="image/webp" />}
           <img
@@ -35,12 +35,12 @@ export const GiftCard: FC<GiftCardProps> = ({ iconPng, iconWebp, label, price, i
             style={{ width: ICON_SIZES.card, height: ICON_SIZES.card }}
           />
         </picture>
-      </span>
-      <div className="star-badge star-badge--center star-badge--big">
-        <span className="price-row">
-          <img src={StarSvg} alt="Stars" className="star-icon" />
-          <span className="font-semibold">{price}</span>
-        </span>
+        <div className="star-badge star-badge--center star-badge--big">
+          <span className="price-row">
+            <img src={StarSvg} alt="Stars" className="star-icon" />
+            <span className="font-semibold">{price}</span>
+          </span>
+        </div>
       </div>
       {chance && (
         <span className="chance-text">{chance}</span>

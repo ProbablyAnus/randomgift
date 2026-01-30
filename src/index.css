@@ -92,10 +92,14 @@
     -webkit-text-size-adjust: 100%;
     touch-action: manipulation;
     height: var(--tg-viewport-height, 100vh);
+    width: var(--tg-viewport-width, 100vw);
   }
 
   body {
     @apply h-full font-sans antialiased;
+    margin: 0;
+    padding: 0;
+    width: 100%;
     background: var(--app-bg);
     color: var(--tg-text);
     font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
@@ -106,6 +110,7 @@
 
   #root {
     @apply h-full;
+    width: 100%;
     min-height: var(--tg-viewport-stable-height, 100vh);
   }
 
@@ -124,6 +129,7 @@
     width: 100%;
     max-width: 100%;
     min-height: var(--tg-viewport-stable-height, 100vh);
+    height: var(--tg-viewport-stable-height, 100vh);
     padding-top: var(--content-safe-area-top);
     padding-left: var(--content-safe-area-left);
     padding-right: var(--content-safe-area-right);
@@ -134,6 +140,7 @@
   .content-area {
     @apply flex-1 overflow-y-auto;
     padding-bottom: calc(var(--app-tabbar-height) + var(--content-safe-area-bottom));
+    overflow-x: hidden;
   }
 
   /* Gift cards (size comes from components) */
@@ -144,7 +151,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: space-between;
     background: var(--app-card);
     transition: transform 200ms ease;
   }

@@ -24,7 +24,7 @@ const Index = () => {
   return (
     <AdaptivityProvider>
       <div className="app-container">
-        <div className="content-area scroll-smooth scrollbar-hide pt-2">
+        <div className="content-area scroll-smooth scrollbar-hide">
           {renderPage()}
         </div>
         <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />

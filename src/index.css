@@ -47,6 +47,7 @@
   --content-safe-area-left: var(--tg-content-safe-area-inset-left, var(--safe-area-left));
   --content-safe-area-right: var(--tg-content-safe-area-inset-right, var(--safe-area-right));
   --app-tabbar-height: 92px;
+  --app-header-height: 32px;
 }
 
 
@@ -130,7 +131,7 @@
     max-width: 100%;
     min-height: var(--tg-viewport-stable-height, 100vh);
     height: var(--tg-viewport-stable-height, 100vh);
-    padding-top: var(--content-safe-area-top);
+    padding-top: calc(var(--content-safe-area-top) + var(--app-header-height));
     padding-left: var(--content-safe-area-left);
     padding-right: var(--content-safe-area-right);
     background: var(--app-bg);

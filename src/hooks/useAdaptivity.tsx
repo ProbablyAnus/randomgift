@@ -42,28 +42,42 @@ interface AdaptivityProviderProps {
 }
 
 export const AdaptivityProvider: FC<AdaptivityProviderProps> = ({ children }) => {
+  const getViewportSize = () => {
+    const viewport = window.visualViewport;
+    const width = viewport?.width ?? window.innerWidth;
+    const height = viewport?.height ?? window.innerHeight;
+    return { width, height };
+  };
+
   const [state, setState] = useState<AdaptivityContextType>(() => ({
     platform: detectPlatform(),
-    sizeX: getSizeX(window.innerWidth),
-    sizeY: getSizeY(window.innerHeight),
-    viewportWidth: window.innerWidth,
-    viewportHeight: window.innerHeight,
+    sizeX: getSizeX(getViewportSize().width),
+    sizeY: getSizeY(getViewportSize().height),
+    viewportWidth: getViewportSize().width,
+    viewportHeight: getViewportSize().height,
     isTouch: "ontouchstart" in window,
   }));
 
   useEffect(() => {
     const handleResize = () => {
+      const { width, height } = getViewportSize();
       setState((prev) => ({
         ...prev,
-        sizeX: getSizeX(window.innerWidth),
-        sizeY: getSizeY(window.innerHeight),
-        viewportWidth: window.innerWidth,
-        viewportHeight: window.innerHeight,
+        sizeX: getSizeX(width),
+        sizeY: getSizeY(height),
+        viewportWidth: width,
+        viewportHeight: height,
       }));
     };
 
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    window.visualViewport?.addEventListener("resize", handleResize);
+    window.visualViewport?.addEventListener("scroll", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.visualViewport?.removeEventListener("resize", handleResize);
+      window.visualViewport?.removeEventListener("scroll", handleResize);
+    };
   }, []);
 
   return (

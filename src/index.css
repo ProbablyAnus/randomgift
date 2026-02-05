@@ -1119,3 +1119,73 @@ html, body, #root {
     transform: translateY(0);
   }
 }
+
+/* === Adaptive layout fixes (all devices + stable star tabs) === */
+.app-container {
+  width: 100% !important;
+  max-width: min(100vw, 560px) !important;
+  min-height: var(--tg-viewport-stable-height, 100dvh) !important;
+  height: var(--tg-viewport-stable-height, 100dvh) !important;
+  padding-left: max(var(--safe-area-left, 0px), 0px);
+  padding-right: max(var(--safe-area-right, 0px), 0px);
+}
+
+.content-area {
+  overflow-x: hidden;
+  padding-bottom: calc(96px + var(--safe-area-bottom, 0px)) !important;
+}
+
+.cbc-tabbar {
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%);
+  width: min(100vw, 560px);
+  padding-bottom: calc(18px + var(--safe-area-bottom, 0px)) !important;
+}
+
+.tg-tabs {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+  width: 100% !important;
+  max-width: 100% !important;
+  gap: 8px !important;
+  margin: 8px 0 18px !important;
+  padding: 0 12px !important;
+  overflow: visible !important;
+}
+
+.tg-tab,
+.tg-tab--active {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 40px !important;
+  padding: 0 8px !important;
+  border-radius: 999px !important;
+  gap: 6px !important;
+  justify-content: center !important;
+  font-size: clamp(16px, 4.6vw, 20px) !important;
+}
+
+.tg-tab__star {
+  width: clamp(15px, 4vw, 19px) !important;
+  height: clamp(15px, 4vw, 19px) !important;
+  flex-shrink: 0;
+}
+
+.tg-tab__text {
+  line-height: 1 !important;
+}
+
+@media (max-width: 360px) {
+  .tg-tabs {
+    padding: 0 8px !important;
+    gap: 6px !important;
+  }
+
+  .tg-tab,
+  .tg-tab--active {
+    padding: 0 6px !important;
+    font-size: 16px !important;
+  }
+}

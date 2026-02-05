@@ -642,7 +642,7 @@ html, body, #root {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 8px !important;
+  gap: 5px !important;
   font-size: 18px !important;
   /* Requested: bold digits only in tabs */
   font-weight: 700 !important;
@@ -1157,19 +1157,20 @@ html, body, #root {
 
 .tg-tab,
 .tg-tab--active {
-  width: 100% !important;
-  min-width: 0 !important;
-  height: 40px !important;
-  padding: 0 8px !important;
+  width: auto !important;
+  min-width: 72px !important;
+  justify-self: center !important;
+  height: 36px !important;
+  padding: 0 6px !important;
   border-radius: 999px !important;
-  gap: 6px !important;
+  gap: 5px !important;
   justify-content: center !important;
-  font-size: clamp(16px, 4.6vw, 20px) !important;
+  font-size: clamp(15px, 4.2vw, 18px) !important;
 }
 
 .tg-tab__star {
-  width: clamp(15px, 4vw, 19px) !important;
-  height: clamp(15px, 4vw, 19px) !important;
+  width: clamp(17px, 4.6vw, 21px) !important;
+  height: clamp(17px, 4.6vw, 21px) !important;
   flex-shrink: 0;
 }
 
@@ -1180,12 +1181,13 @@ html, body, #root {
 @media (max-width: 360px) {
   .tg-tabs {
     padding: 0 8px !important;
-    gap: 6px !important;
+    gap: 4px !important;
   }
 
   .tg-tab,
   .tg-tab--active {
-    padding: 0 6px !important;
-    font-size: 16px !important;
+    min-width: 66px !important;
+    padding: 0 5px !important;
+    font-size: 15px !important;
   }
 }

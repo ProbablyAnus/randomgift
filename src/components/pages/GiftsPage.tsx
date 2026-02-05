@@ -5,8 +5,6 @@ import ButtonIcon from "@/assets/gifts/svg-image-1.svg";
 import { Switch } from "@/components/ui/switch";
 import { RefreshCw } from "lucide-react";
 import { useAdaptivity } from "@/hooks/useAdaptivity";
-import { useTelegramWebApp } from "@/hooks/useTelegramWebApp";
-import { CARD_DIMENSIONS, ICON_SIZES } from "@/components/gifts/constants";
 import diamondPng from "@/assets/gifts/diamond.png";
 import giftBoxPng from "@/assets/gifts/gift.png";
 import heartBoxPng from "@/assets/gifts/heart.png";
@@ -69,35 +67,22 @@ const selectWinnerByChance = () => {
 };
 
 export const GiftsPage: FC = () => {
-  const { sizeX, platform, viewportWidth } = useAdaptivity();
-  const { webApp } = useTelegramWebApp();
+  const { sizeX, platform } = useAdaptivity();
   const [selectedPrice, setSelectedPrice] = useState(25);
   const [demoMode, setDemoMode] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [wonPrize, setWonPrize] = useState<{ icon: GiftIcon; label: string; price: number } | null>(null);
   const [showResult, setShowResult] = useState(false);
   const rouletteRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const baseCardWidth = sizeX === "compact" ? CARD_DIMENSIONS.compact.width : CARD_DIMENSIONS.regular.width;
-  const baseCardHeight = sizeX === "compact" ? CARD_DIMENSIONS.compact.height : CARD_DIMENSIONS.regular.height;
-  const cardGap = 10;
-  const containerPadding = sizeX === "compact" ? 12 : 16;
-  const responsiveCardWidth = Math.max(
-    112,
-    Math.min(baseCardWidth, Math.round((viewportWidth - (containerPadding * 2) - (cardGap * 2)) / 2.35))
-  );
-  const rouletteCardWidth = responsiveCardWidth + 12;
-  const rouletteIconSize = Math.max(74, Math.min(ICON_SIZES.roulette, responsiveCardWidth * 0.62));
-  const prizeIconSize = Math.max(58, Math.min(ICON_SIZES.prize, responsiveCardWidth * 0.5));
-  const sectionPaddingStyle = { paddingInline: containerPadding };
-
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
-  const isBusy = isSpinning || isProcessingPayment;
+  const baseCardWidth = sizeX === "compact" ? 140 : 160;
+  const baseCardHeight = sizeX === "compact" ? 162 : 184;
+  const rouletteCardWidth = baseCardWidth;
+  const cardGap = 12;
   
-  const startSpin = () => {
+  const handleGetGift = () => {
     if (isSpinning) return;
 
     if (closeTimeoutRef.current) {
@@ -156,45 +141,6 @@ export const GiftsPage: FC = () => {
     }, 4000);
   };
 
-  const handlePayment = async () => {
-    if (isBusy) return;
-    if (!webApp?.openInvoice || !webApp?.initData) {
-      window.alert("Оплата доступна только внутри Telegram.");
-      return;
-    }
-
-    try {
-      setIsProcessingPayment(true);
-      const response = await fetch(`${apiBaseUrl}/api/invoice?amount=${selectedPrice}`, {
-        headers: {
-          "X-Telegram-Init-Data": webApp.initData,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Не удалось создать счет на оплату.");
-      }
-
-      const data = (await response.json()) as { invoice_link?: string };
-      if (!data.invoice_link) {
-        throw new Error("Ссылка на оплату не получена.");
-      }
-
-      webApp.openInvoice(data.invoice_link, (status) => {
-        setIsProcessingPayment(false);
-        if (status === "paid") {
-          startSpin();
-        } else if (status === "failed") {
-          window.alert("Платеж не прошел. Попробуйте снова.");
-        }
-      });
-    } catch (error) {
-      setIsProcessingPayment(false);
-      const message = error instanceof Error ? error.message : "Ошибка оплаты.";
-      window.alert(message);
-    }
-  };
-
   const closeResultPanel = () => {
     setShowResult(false);
     if (closeTimeoutRef.current) {
@@ -212,9 +158,9 @@ export const GiftsPage: FC = () => {
 
   // Button text based on state
   const getButtonContent = () => {
-    const contentKey = isBusy ? "spinning" : demoMode ? "demo" : "gift";
+    const contentKey = isSpinning ? "spinning" : demoMode ? "demo" : "gift";
 
-    if (isBusy) {
+    if (isSpinning) {
       return (
         <span key={contentKey} className="button-content">
           <RefreshCw size={26} className="animate-spin text-primary-foreground" />
@@ -244,6 +190,12 @@ export const GiftsPage: FC = () => {
 
   return (
     <div className="flex-1 pb-6">
+      <PriceTabs
+        prices={prices}
+        selectedPrice={selectedPrice}
+        onSelect={setSelectedPrice}
+      />
+
       {/* Roulette Section */}
       <div className="relative mb-4">
         {/* Center Pointer */}
@@ -298,7 +250,7 @@ export const GiftsPage: FC = () => {
             {extendedRoulette.map((gift, index) => (
               <div
                 key={index}
-                className="flex-shrink-0 rounded-[16px] px-[8px] pointer-events-none"
+                className="flex-shrink-0 rounded-[12px] px-[10px] relative touch-feedback"
                 style={{ 
                   width: rouletteCardWidth, 
                   height: baseCardHeight,
@@ -306,24 +258,19 @@ export const GiftsPage: FC = () => {
                   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.25)"
                 }}
               >
-                <div className="flex h-full flex-col items-center justify-between gap-2 py-3">
-                  <div className="flex flex-1 items-center justify-center">
-                    <picture>
-                      {gift.icon.webp && <source srcSet={gift.icon.webp} type="image/webp" />}
-                      <img
-                        src={gift.icon.src}
-                        alt={gift.label}
-                        className="drop-shadow-lg"
-                        style={{ width: rouletteIconSize, height: rouletteIconSize }}
-                      />
-                    </picture>
-                  </div>
-                  <div className="star-badge star-badge--center star-badge--tight">
-                    <span className="price-row">
-                      <img src={StarSvg} alt="Stars" className="star-icon" />
-                      <span className="text-[14px] font-normal">{gift.price}</span>
-                    </span>
-                  </div>
+                {/* Centered icon - takes most of the space */}
+                <div className="absolute inset-0 flex items-center justify-center pb-8">
+                  <picture>
+                    {gift.icon.webp && <source srcSet={gift.icon.webp} type="image/webp" />}
+                    <img src={gift.icon.src} alt={gift.label} className="w-[84px] h-[84px] drop-shadow-lg" />
+                  </picture>
+                </div>
+                {/* Price badge centered at bottom */}
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 star-badge star-badge--center star-badge--tight">
+                  <span className="price-row">
+                    <img src={StarSvg} alt="Stars" className="star-icon" />
+                    <span className="text-[15px] font-normal">{gift.price}</span>
+                  </span>
                 </div>
               </div>
             ))}
@@ -341,12 +288,7 @@ export const GiftsPage: FC = () => {
               <div className="win-result-content">
                 <picture>
                   {wonPrize.icon.webp && <source srcSet={wonPrize.icon.webp} type="image/webp" />}
-                  <img
-                    src={wonPrize.icon.src}
-                    alt={wonPrize.label}
-                    className="drop-shadow-xl"
-                    style={{ width: ICON_SIZES.win, height: ICON_SIZES.win }}
-                  />
+                  <img src={wonPrize.icon.src} alt={wonPrize.label} className="w-[120px] h-[120px] drop-shadow-xl" />
                 </picture>
                 <p className="text-foreground font-semibold text-2xl">Вы выиграли подарок!</p>
                 <p className="text-muted-foreground text-base leading-relaxed">
@@ -356,15 +298,14 @@ export const GiftsPage: FC = () => {
                 </p>
               </div>
               <div className="win-result-actions">
-                {demoMode && (
-                  <button
-                    type="button"
-                    className="win-result-primary-button touch-feedback"
-                    onClick={handleDisableDemo}
-                  >
-                    Отключить демо-режим
-                  </button>
-                )}
+                <button
+                  type="button"
+                  className="win-result-primary-button touch-feedback"
+                  onClick={handleDisableDemo}
+                  disabled={!demoMode}
+                >
+                  Отключить демо-режим
+                </button>
                 <button
                   type="button"
                   className="win-result-secondary-button touch-feedback"
@@ -378,79 +319,65 @@ export const GiftsPage: FC = () => {
         )}
       </div>
 
-      <PriceTabs
-        prices={prices}
-        selectedPrice={selectedPrice}
-        onSelect={setSelectedPrice}
-      />
-
       {/* Demo Mode Toggle */}
-      <div
-        className="flex items-center justify-between pt-1 pb-4"
-        style={sectionPaddingStyle}
-      >
+      <div className="flex items-center justify-between px-4 pt-1 pb-4">
         <span className="text-foreground text-lg">Демо режим</span>
         <Switch checked={demoMode} onCheckedChange={setDemoMode} className="demo-switch" />
       </div>
 
       {/* Get Gift Button */}
-      <div className="pb-3 mt-2" style={sectionPaddingStyle}>
+      <div className="px-4 pb-3 mt-2">
         <button
-          onClick={demoMode ? startSpin : handlePayment}
-          disabled={isBusy}
-          className="primary-button touch-feedback gifts-primary-button"
+          onClick={handleGetGift}
+          disabled={isSpinning}
+          className="primary-button touch-feedback"
         >
           {getButtonContent()}
         </button>
       </div>
 
       {/* Win Prizes Section - Horizontal Scroll */}
-      <div className="pt-4" style={sectionPaddingStyle}>
-        <p className="text-sm uppercase tracking-wide text-muted-foreground mb-2 font-medium">
+      <div className="pt-2">
+        <p className="text-sm uppercase tracking-wide text-muted-foreground mb-2 px-4 font-medium">
           ВЫ МОЖЕТЕ ВЫИГРАТЬ
         </p>
         
         <div 
-          className="flex gap-[10px] overflow-x-auto pb-4 scrollbar-hide scroll-smooth"
+          className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide scroll-smooth px-4"
           style={{ 
             scrollSnapType: "x mandatory",
-            scrollPadding: "0px",
+            scrollPaddingLeft: 16,
+            scrollPaddingRight: 16,
           }}
         >
           {allWinPrizes.map((prize, index) => (
             <div
               key={index}
-              className="flex-shrink-0 rounded-[12px] touch-feedback"
+              className="flex-shrink-0 rounded-[12px] relative touch-feedback"
               style={{
                 scrollSnapAlign: "start",
-                width: responsiveCardWidth,
+                width: baseCardWidth,
                 height: baseCardHeight,
                 backgroundColor: "var(--app-card)",
                 boxShadow: "0 2px 8px rgba(0, 0, 0, 0.25)"
               }}
             >
-              <div className="flex h-full flex-col items-center justify-between gap-2 py-3">
-                <div className="flex flex-1 items-center justify-center">
-                  <picture>
-                    {prize.icon.webp && <source srcSet={prize.icon.webp} type="image/webp" />}
-                    <img
-                      src={prize.icon.src}
-                      alt={prize.label}
-                      className="drop-shadow-lg"
-                      style={{ width: prizeIconSize, height: prizeIconSize }}
-                    />
-                  </picture>
-                </div>
-                <div className="flex flex-col items-center gap-1 pb-1">
-                  <div className="star-badge star-badge--center star-badge--big">
-                    <span className="price-row">
-                      <img src={StarSvg} alt="Stars" className="star-icon" />
-                      <span className="text-[15px] font-normal">{prize.price}</span>
-                    </span>
-                  </div>
-                  <span className="chance-text">{prize.chance}</span>
-                </div>
+              {/* Centered icon */}
+              <div className="absolute inset-0 flex items-center justify-center pb-14">
+                <picture>
+                  {prize.icon.webp && <source srcSet={prize.icon.webp} type="image/webp" />}
+                  <img src={prize.icon.src} alt={prize.label} className="w-[78px] h-[78px] drop-shadow-lg" />
+                </picture>
               </div>
+              {/* Price badge centered */}
+              <div className="absolute bottom-7 left-1/2 -translate-x-1/2 star-badge star-badge--center star-badge--tight">
+                <span className="price-row">
+                  <img src={StarSvg} alt="Stars" className="star-icon" />
+                  <span className="text-[16px] font-normal">{prize.price}</span>
+                </span>
+              </div>
+              {/* Chance at bottom center */}
+              <span className="absolute bottom-1 left-1/2 -translate-x-1/2 chance-text">{prize.chance}</span>
             </div>
           ))}
         </div>

@@ -69,7 +69,7 @@ const selectWinnerByChance = () => {
 };
 
 export const GiftsPage: FC = () => {
-  const { sizeX, platform } = useAdaptivity();
+  const { sizeX, platform, viewportWidth } = useAdaptivity();
   const { webApp } = useTelegramWebApp();
   const [selectedPrice, setSelectedPrice] = useState(25);
   const [demoMode, setDemoMode] = useState(false);
@@ -83,9 +83,15 @@ export const GiftsPage: FC = () => {
 
   const baseCardWidth = sizeX === "compact" ? CARD_DIMENSIONS.compact.width : CARD_DIMENSIONS.regular.width;
   const baseCardHeight = sizeX === "compact" ? CARD_DIMENSIONS.compact.height : CARD_DIMENSIONS.regular.height;
-  const rouletteCardWidth = baseCardWidth + 16;
   const cardGap = 10;
   const containerPadding = sizeX === "compact" ? 12 : 16;
+  const responsiveCardWidth = Math.max(
+    112,
+    Math.min(baseCardWidth, Math.round((viewportWidth - (containerPadding * 2) - (cardGap * 2)) / 2.35))
+  );
+  const rouletteCardWidth = responsiveCardWidth + 12;
+  const rouletteIconSize = Math.max(74, Math.min(ICON_SIZES.roulette, responsiveCardWidth * 0.62));
+  const prizeIconSize = Math.max(58, Math.min(ICON_SIZES.prize, responsiveCardWidth * 0.5));
   const sectionPaddingStyle = { paddingInline: containerPadding };
 
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
@@ -238,12 +244,6 @@ export const GiftsPage: FC = () => {
 
   return (
     <div className="flex-1 pb-6">
-      <PriceTabs
-        prices={prices}
-        selectedPrice={selectedPrice}
-        onSelect={setSelectedPrice}
-      />
-
       {/* Roulette Section */}
       <div className="relative mb-4">
         {/* Center Pointer */}
@@ -306,7 +306,7 @@ export const GiftsPage: FC = () => {
                   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.25)"
                 }}
               >
-                <div className="flex h-full flex-col items-center justify-center gap-2 py-3">
+                <div className="flex h-full flex-col items-center justify-between gap-2 py-3">
                   <div className="flex flex-1 items-center justify-center">
                     <picture>
                       {gift.icon.webp && <source srcSet={gift.icon.webp} type="image/webp" />}
@@ -314,11 +314,11 @@ export const GiftsPage: FC = () => {
                         src={gift.icon.src}
                         alt={gift.label}
                         className="drop-shadow-lg"
-                        style={{ width: ICON_SIZES.roulette, height: ICON_SIZES.roulette }}
+                        style={{ width: rouletteIconSize, height: rouletteIconSize }}
                       />
                     </picture>
                   </div>
-                  <div className="star-badge star-badge--center star-badge--tight">
+                  <div className="star-badge star-badge--center star-badge--tight gift-price-badge">
                     <span className="price-row">
                       <img src={StarSvg} alt="Stars" className="star-icon" />
                       <span className="text-[14px] font-normal">{gift.price}</span>
@@ -378,6 +378,12 @@ export const GiftsPage: FC = () => {
         )}
       </div>
 
+      <PriceTabs
+        prices={prices}
+        selectedPrice={selectedPrice}
+        onSelect={setSelectedPrice}
+      />
+
       {/* Demo Mode Toggle */}
       <div
         className="flex items-center justify-between pt-1 pb-4"
@@ -417,13 +423,13 @@ export const GiftsPage: FC = () => {
               className="flex-shrink-0 rounded-[12px] touch-feedback"
               style={{
                 scrollSnapAlign: "start",
-                width: baseCardWidth,
+                width: responsiveCardWidth,
                 height: baseCardHeight,
                 backgroundColor: "var(--app-card)",
                 boxShadow: "0 2px 8px rgba(0, 0, 0, 0.25)"
               }}
             >
-              <div className="flex h-full flex-col items-center justify-center gap-2 py-3">
+              <div className="flex h-full flex-col items-center justify-between gap-2 py-3">
                 <div className="flex flex-1 items-center justify-center">
                   <picture>
                     {prize.icon.webp && <source srcSet={prize.icon.webp} type="image/webp" />}
@@ -431,12 +437,12 @@ export const GiftsPage: FC = () => {
                       src={prize.icon.src}
                       alt={prize.label}
                       className="drop-shadow-lg"
-                      style={{ width: ICON_SIZES.prize, height: ICON_SIZES.prize }}
+                      style={{ width: prizeIconSize, height: prizeIconSize }}
                     />
                   </picture>
                 </div>
                 <div className="flex flex-col items-center gap-1 pb-1">
-                  <div className="star-badge star-badge--center star-badge--big">
+                  <div className="star-badge star-badge--center star-badge--big gift-price-badge">
                     <span className="price-row">
                       <img src={StarSvg} alt="Stars" className="star-icon" />
                       <span className="text-[15px] font-normal">{prize.price}</span>

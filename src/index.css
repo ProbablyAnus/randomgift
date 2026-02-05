@@ -801,3 +801,50 @@ html, body {
     transform: translateY(0);
   }
 }
+
+/* Gift prices/table style aligned with design reference */
+.tg-tabs {
+  justify-content: flex-start;
+  gap: 12px;
+  margin: 8px 0 22px;
+  padding: 0 0 2px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.tg-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.tg-tab {
+  height: 36px;
+  min-width: 86px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(250, 224, 0, 0.36);
+  background: rgba(250, 224, 0, 0.11);
+  color: #f3f4f6;
+  opacity: 1;
+}
+
+.tg-tab--active {
+  border-color: rgba(250, 224, 0, 0.65);
+  background: rgba(250, 224, 0, 0.2);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.28) inset;
+}
+
+.gift-price-badge {
+  border-radius: 10px;
+  border: 1px solid rgba(250, 224, 0, 0.55);
+  background: rgba(250, 224, 0, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+  color: #fff6c8;
+}
+
+.gift-price-badge::after {
+  box-shadow: none;
+}
+
+.gift-price-badge .star-icon {
+  filter: none;
+}

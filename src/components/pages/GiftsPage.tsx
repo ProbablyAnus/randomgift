@@ -318,7 +318,7 @@ export const GiftsPage: FC = () => {
                       />
                     </picture>
                   </div>
-                  <div className="star-badge star-badge--center star-badge--tight gift-price-badge">
+                  <div className="star-badge star-badge--center star-badge--tight">
                     <span className="price-row">
                       <img src={StarSvg} alt="Stars" className="star-icon" />
                       <span className="text-[14px] font-normal">{gift.price}</span>
@@ -442,7 +442,7 @@ export const GiftsPage: FC = () => {
                   </picture>
                 </div>
                 <div className="flex flex-col items-center gap-1 pb-1">
-                  <div className="star-badge star-badge--center star-badge--big gift-price-badge">
+                  <div className="star-badge star-badge--center star-badge--big">
                     <span className="price-row">
                       <img src={StarSvg} alt="Stars" className="star-icon" />
                       <span className="text-[15px] font-normal">{prize.price}</span>

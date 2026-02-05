@@ -695,7 +695,7 @@ html, body, #root {
   border: none !important;
   background: transparent !important;
   border-radius: 0 !important;
-  gap: 8px !important;
+  gap: 4px !important;
   font-size: 18px !important;
   font-weight: 700 !important; /* requested: bold only here */
   line-height: 1 !important;
@@ -1149,7 +1149,7 @@ html, body, #root {
   align-items: center;
   width: 100% !important;
   max-width: 100% !important;
-  gap: 8px !important;
+  gap: 4px !important;
   margin: 8px 0 18px !important;
   padding: 0 12px !important;
   overflow: visible !important;
@@ -1163,25 +1163,27 @@ html, body, #root {
   height: 36px !important;
   padding: 0 6px !important;
   border-radius: 999px !important;
-  gap: 5px !important;
+  gap: 4px !important;
   justify-content: center !important;
-  font-size: clamp(15px, 4.2vw, 18px) !important;
+  font-size: clamp(14px, 4vw, 16px) !important;
+  font-weight: 400 !important;
 }
 
 .tg-tab__star {
-  width: clamp(17px, 4.6vw, 21px) !important;
-  height: clamp(17px, 4.6vw, 21px) !important;
+  width: clamp(20px, 5.4vw, 24px) !important;
+  height: clamp(20px, 5.4vw, 24px) !important;
   flex-shrink: 0;
 }
 
 .tg-tab__text {
   line-height: 1 !important;
+  font-weight: 400 !important;
 }
 
 @media (max-width: 360px) {
   .tg-tabs {
     padding: 0 8px !important;
-    gap: 4px !important;
+    gap: 2px !important;
   }
 
   .tg-tab,

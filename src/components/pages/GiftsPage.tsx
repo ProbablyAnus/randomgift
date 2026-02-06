@@ -353,7 +353,7 @@ export const GiftsPage: FC = () => {
           {allWinPrizes.map((prize, index) => (
             <div
               key={index}
-              className="flex-shrink-0 rounded-[12px] relative touch-feedback"
+              className="win-prize-card flex-shrink-0 rounded-[12px] relative touch-feedback"
               style={{
                 scrollSnapAlign: "start",
                 width: baseCardWidth,
@@ -370,7 +370,7 @@ export const GiftsPage: FC = () => {
                 </picture>
               </div>
               {/* Price badge centered */}
-              <div className="absolute bottom-7 left-1/2 -translate-x-1/2 star-badge star-badge--center star-badge--tight">
+              <div className="absolute bottom-7 left-1/2 -translate-x-1/2 star-badge star-badge--center star-badge--bottom">
                 <span className="price-row">
                   <img src={StarSvg} alt="Stars" className="star-icon" />
                   <span className="text-[16px] font-normal">{prize.price}</span>

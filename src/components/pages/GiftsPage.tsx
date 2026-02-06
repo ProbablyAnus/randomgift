@@ -266,13 +266,11 @@ export const GiftsPage: FC = () => {
 
       const data = (await response.json()) as { invoiceLink?: string };
       if (!data.invoiceLink) {
-        toast("Счет на оплату недоступен.");
         return null;
       }
 
       return data.invoiceLink;
     } catch (error) {
-      toast("Ошибка соединения при оплате.");
       return null;
     }
   };
@@ -289,21 +287,12 @@ export const GiftsPage: FC = () => {
     if (!invoiceLink) return;
 
     if (!webApp?.openInvoice) {
-      toast("Оплата доступна только в Telegram.");
       return;
     }
 
     webApp.openInvoice(invoiceLink, (status) => {
       if (status === "paid") {
         startSpin();
-        return;
-      }
-      if (status === "cancelled") {
-        toast("Оплата отменена.");
-        return;
-      }
-      if (status === "failed") {
-        toast("Оплата не прошла.");
         return;
       }
     });

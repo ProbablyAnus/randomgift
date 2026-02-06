@@ -5,39 +5,74 @@ import ButtonIcon from "@/assets/gifts/svg-image-1.svg";
 import { Switch } from "@/components/ui/switch";
 import { RefreshCw } from "lucide-react";
 import { useAdaptivity } from "@/hooks/useAdaptivity";
-import diamondPng from "@/assets/gifts/diamond.png";
-import giftBoxPng from "@/assets/gifts/gift.png";
-import heartBoxPng from "@/assets/gifts/heart.png";
-import ringWebp from "@/assets/gifts/ring.webp";
-import rosePng from "@/assets/gifts/rose.png";
-import teddyBearWebp from "@/assets/gifts/teddy.webp";
-import trophyPng from "@/assets/gifts/trophy.png";
+import bouquetSvg from "@/assets/gifts/bouquet.svg";
+import cakeSvg from "@/assets/gifts/cake.svg";
+import champagneSvg from "@/assets/gifts/champagne.svg";
+import diamondSvg from "@/assets/gifts/diamond.svg";
+import elkaSvg from "@/assets/gifts/elka.svg";
+import giftBoxSvg from "@/assets/gifts/gift-box.svg";
+import heartBoxSvg from "@/assets/gifts/heart-box.svg";
+import newTeddySvg from "@/assets/gifts/newteddy.svg";
+import ringSvg from "@/assets/gifts/ring.svg";
+import rocketSvg from "@/assets/gifts/rocket.svg";
+import roseSvg from "@/assets/gifts/rose.svg";
+import teddyBearSvg from "@/assets/gifts/teddy-bear.svg";
+import trophySvg from "@/assets/gifts/trophy.svg";
 
-const prices = [25, 50, 100];
+const prices = [15, 25, 50, 100];
 
-type GiftIcon = { src: string; webp?: string };
+type GiftIcon = { src: string };
 type RouletteGift = { icon: GiftIcon; label: string; price: number; chance: number };
 type WinPrize = { icon: GiftIcon; label: string; price: number; chance: string };
 
+const chanceWeightByPrice: Record<number, number> = {
+  15: 27,
+  25: 17.5,
+  50: 10,
+  100: 6,
+};
+
+const chanceLabelByPrice: Record<number, string> = {
+  15: "27%",
+  25: "17.5%",
+  50: "6%",
+  100: "1%",
+};
+
+const giftsCatalog = [
+  { icon: heartBoxSvg, label: "Сердце", price: 15 },
+  { icon: teddyBearSvg, label: "Медвежонок", price: 15 },
+  { icon: giftBoxSvg, label: "Коробка", price: 25 },
+  { icon: roseSvg, label: "Роза", price: 25 },
+  { icon: elkaSvg, label: "Ёлка", price: 50 },
+  { icon: newTeddySvg, label: "Мишка", price: 50 },
+  { icon: cakeSvg, label: "Торт", price: 50 },
+  { icon: bouquetSvg, label: "Букет", price: 50 },
+  { icon: rocketSvg, label: "Ракета", price: 50 },
+  { icon: champagneSvg, label: "Шампанское", price: 50 },
+  { icon: trophySvg, label: "Кубок", price: 100 },
+  { icon: ringSvg, label: "Кольцо", price: 100 },
+  { icon: diamondSvg, label: "Алмаз", price: 100 },
+];
+
 // Roulette gifts for spinning
 const rouletteGifts: RouletteGift[] = [
-  { icon: { src: heartBoxPng }, label: "Сердце", price: 15, chance: 27 },
-  { icon: { src: trophyPng }, label: "Кубок", price: 100, chance: 6 },
-  { icon: { src: giftBoxPng }, label: "Коробка", price: 25, chance: 17.5 },
-  { icon: { src: teddyBearWebp }, label: "Медвежонок", price: 15, chance: 27 },
-  { icon: { src: ringWebp }, label: "Кольцо", price: 100, chance: 6 },
-  { icon: { src: rosePng }, label: "Роза", price: 25, chance: 17.5 },
+  ...giftsCatalog.map((gift) => ({
+    icon: { src: gift.icon },
+    label: gift.label,
+    price: gift.price,
+    chance: chanceWeightByPrice[gift.price] ?? 1,
+  })),
 ];
 
 // Win prizes for bottom section
 const allWinPrizes: WinPrize[] = [
-  { icon: { src: diamondPng }, label: "Алмаз", price: 100, chance: "1%" },
-  { icon: { src: trophyPng }, label: "Кубок", price: 100, chance: "1%" },
-  { icon: { src: ringWebp }, label: "Кольцо", price: 100, chance: "1%" },
-  { icon: { src: heartBoxPng }, label: "Сердце", price: 15, chance: "27%" },
-  { icon: { src: teddyBearWebp }, label: "Мишка", price: 15, chance: "27%" },
-  { icon: { src: giftBoxPng }, label: "Коробка", price: 25, chance: "17.5%" },
-  { icon: { src: rosePng }, label: "Роза", price: 25, chance: "17.5%" },
+  ...giftsCatalog.map((gift) => ({
+    icon: { src: gift.icon },
+    label: gift.label,
+    price: gift.price,
+    chance: chanceLabelByPrice[gift.price] ?? "—",
+  })),
 ];
 
 // Create extended array for smooth roulette spinning
@@ -262,10 +297,7 @@ export const GiftsPage: FC = () => {
               >
                 {/* Centered icon - takes most of the space */}
                 <div className="absolute inset-0 flex items-center justify-center pb-8">
-                  <picture>
-                    {gift.icon.webp && <source srcSet={gift.icon.webp} type="image/webp" />}
-                    <img src={gift.icon.src} alt={gift.label} className="gift-icon w-[100px] h-[100px] drop-shadow-lg" />
-                  </picture>
+                  <img src={gift.icon.src} alt={gift.label} className="gift-icon w-[100px] h-[100px] drop-shadow-lg" />
                 </div>
                 {/* Price badge centered at bottom */}
                 <div className="absolute bottom-3 left-1/2 -translate-x-1/2 star-badge star-badge--center star-badge--tight">
@@ -288,10 +320,7 @@ export const GiftsPage: FC = () => {
           >
             <div className="win-result-panel">
               <div className="win-result-content">
-                <picture>
-                  {wonPrize.icon.webp && <source srcSet={wonPrize.icon.webp} type="image/webp" />}
-                  <img src={wonPrize.icon.src} alt={wonPrize.label} className="gift-icon w-[120px] h-[120px] drop-shadow-xl" />
-                </picture>
+                <img src={wonPrize.icon.src} alt={wonPrize.label} className="gift-icon w-[120px] h-[120px] drop-shadow-xl" />
                 <p className="text-foreground font-semibold text-2xl">Вы выиграли подарок!</p>
                 <p className="text-muted-foreground text-base leading-relaxed">
                   {demoMode
@@ -367,16 +396,13 @@ export const GiftsPage: FC = () => {
             >
               {/* Centered icon */}
               <div className="absolute inset-0 flex items-center justify-center pb-14">
-                <picture>
-                  {prize.icon.webp && <source srcSet={prize.icon.webp} type="image/webp" />}
-                  <img src={prize.icon.src} alt={prize.label} className="gift-icon w-[86px] h-[86px] drop-shadow-lg" />
-                </picture>
+                <img src={prize.icon.src} alt={prize.label} className="gift-icon w-[86px] h-[86px] drop-shadow-lg" />
               </div>
               {/* Price badge centered */}
               <div className="absolute bottom-7 left-1/2 -translate-x-1/2 star-badge star-badge--center star-badge--bottom">
                 <span className="price-row">
                   <img src={StarSvg} alt="Stars" className="star-icon" />
-                  <span className="text-[16px] font-normal">{prize.price}</span>
+                  <span className="text-[15px] font-normal">{prize.price}</span>
                 </span>
               </div>
               {/* Chance at bottom center */}

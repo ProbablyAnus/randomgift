@@ -1023,8 +1023,8 @@ html, body, #root {
   height: 1.3em !important;
 }
 .star-badge--bottom {
-  padding: 5px 10px !important;
-  gap: 4px !important;
+  padding: 4px 8px !important;
+  gap: 3px !important;
 }
 
 .chance-text {
@@ -1038,7 +1038,7 @@ html, body, #root {
 
 /* === Latest requested adjustments === */
 .tg-tabs {
-  margin-bottom: 24px !important;
+  margin-bottom: 28px !important;
 }
 
 .tg-tab {

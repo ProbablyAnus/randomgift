@@ -1003,7 +1003,7 @@ html, body, #root {
   background: #473f32 !important;
   border: 1px solid #473f32 !important;
   color: #FFFFFF !important;
-  font-weight: 500 !important;
+  font-weight: 400 !important;
   line-height: 1 !important;
 }
 
@@ -1018,13 +1018,17 @@ html, body, #root {
   padding: 4px 9px !important;
   gap: 3px !important;
 }
+.star-badge--bottom {
+  padding: 7px 14px !important;
+  gap: 6px !important;
+}
 
 .chance-text {
   display: block;
   margin-top: 6px;
   font-size: 0.85em;
-  font-weight: 500;
-  color: color-mix(in srgb, var(--tg-text) 65%, transparent);
+  font-weight: 400;
+  color: color-mix(in srgb, var(--tg-text) 50%, transparent);
   letter-spacing: 0.01em;
 }
 
@@ -1057,6 +1061,11 @@ html, body, #root {
 .price-row .star-icon {
   width: 1.2em !important;
   height: 1.2em !important;
+}
+
+.win-prize-card .star-icon {
+  width: 1.7em !important;
+  height: 1.7em !important;
 }
 
 .primary-button {

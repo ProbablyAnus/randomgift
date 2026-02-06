@@ -107,6 +107,32 @@ async def handle_invoice(request: web.Request) -> web.Response:
     return web.json_response({"invoice_link": invoice_link})
 
 
+async def handle_create_invoice(request: web.Request) -> web.Response:
+    bot: Bot = request.app["bot"]
+    try:
+        data = await request.json()
+    except json.JSONDecodeError:
+        return web.json_response({"error": "invalid_json"}, status=400)
+
+    amount = data.get("amount")
+    if not isinstance(amount, int):
+        return web.json_response({"error": "invalid_amount"}, status=400)
+
+    if amount not in ALLOWED_PRICES:
+        return web.json_response({"error": "unsupported_amount"}, status=400)
+
+    invoice_link = await bot.create_invoice_link(
+        title="Random Gift",
+        description="Random gift",
+        payload=json.dumps({"amount": amount}),
+        provider_token="",
+        currency="XTR",
+        prices=[LabeledPrice(label="Random gift", amount=amount)],
+    )
+
+    return web.json_response({"invoiceLink": invoice_link})
+
+
 async def run_api_server(bot: Bot) -> None:
     @web.middleware
     async def cors_middleware(request: web.Request, handler):
@@ -115,7 +141,7 @@ async def run_api_server(bot: Bot) -> None:
         else:
             response = await handler(request)
         response.headers["Access-Control-Allow-Origin"] = "*"
-        response.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
         response.headers["Access-Control-Allow-Headers"] = "Content-Type, X-Telegram-Init-Data"
         return response
 
@@ -123,6 +149,8 @@ async def run_api_server(bot: Bot) -> None:
     app["bot"] = bot
     app.router.add_get("/api/invoice", handle_invoice)
     app.router.add_options("/api/invoice", handle_invoice)
+    app.router.add_post("/create-invoice", handle_create_invoice)
+    app.router.add_options("/create-invoice", handle_create_invoice)
 
     runner = web.AppRunner(app)
     await runner.setup()

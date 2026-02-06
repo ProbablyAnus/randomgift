@@ -252,7 +252,7 @@ export const GiftsPage: FC = () => {
             {extendedRoulette.map((gift, index) => (
               <div
                 key={index}
-                className="flex-shrink-0 rounded-[12px] px-[10px] relative touch-feedback"
+                className="flex-shrink-0 rounded-[12px] px-[10px] relative"
                 style={{ 
                   width: rouletteCardWidth, 
                   height: baseCardHeight,
@@ -264,7 +264,7 @@ export const GiftsPage: FC = () => {
                 <div className="absolute inset-0 flex items-center justify-center pb-8">
                   <picture>
                     {gift.icon.webp && <source srcSet={gift.icon.webp} type="image/webp" />}
-                    <img src={gift.icon.src} alt={gift.label} className="w-[84px] h-[84px] drop-shadow-lg" />
+                    <img src={gift.icon.src} alt={gift.label} className="gift-icon w-[92px] h-[92px] drop-shadow-lg" />
                   </picture>
                 </div>
                 {/* Price badge centered at bottom */}
@@ -290,7 +290,7 @@ export const GiftsPage: FC = () => {
               <div className="win-result-content">
                 <picture>
                   {wonPrize.icon.webp && <source srcSet={wonPrize.icon.webp} type="image/webp" />}
-                  <img src={wonPrize.icon.src} alt={wonPrize.label} className="w-[120px] h-[120px] drop-shadow-xl" />
+                  <img src={wonPrize.icon.src} alt={wonPrize.label} className="gift-icon w-[120px] h-[120px] drop-shadow-xl" />
                 </picture>
                 <p className="text-foreground font-semibold text-2xl">Вы выиграли подарок!</p>
                 <p className="text-muted-foreground text-base leading-relaxed">
@@ -300,14 +300,15 @@ export const GiftsPage: FC = () => {
                 </p>
               </div>
               <div className="win-result-actions">
-                <button
-                  type="button"
-                  className="win-result-primary-button touch-feedback"
-                  onClick={handleDisableDemo}
-                  disabled={!demoMode}
-                >
-                  Отключить демо-режим
-                </button>
+                {demoMode && (
+                  <button
+                    type="button"
+                    className="win-result-primary-button touch-feedback"
+                    onClick={handleDisableDemo}
+                  >
+                    Отключить демо-режим
+                  </button>
+                )}
                 <button
                   type="button"
                   className="win-result-secondary-button touch-feedback"
@@ -355,7 +356,7 @@ export const GiftsPage: FC = () => {
           {allWinPrizes.map((prize, index) => (
             <div
               key={index}
-              className="win-prize-card flex-shrink-0 rounded-[12px] relative touch-feedback"
+              className="win-prize-card flex-shrink-0 rounded-[12px] relative"
               style={{
                 scrollSnapAlign: "start",
                 width: baseCardWidth,
@@ -368,7 +369,7 @@ export const GiftsPage: FC = () => {
               <div className="absolute inset-0 flex items-center justify-center pb-14">
                 <picture>
                   {prize.icon.webp && <source srcSet={prize.icon.webp} type="image/webp" />}
-                  <img src={prize.icon.src} alt={prize.label} className="w-[78px] h-[78px] drop-shadow-lg" />
+                  <img src={prize.icon.src} alt={prize.label} className="gift-icon w-[86px] h-[86px] drop-shadow-lg" />
                 </picture>
               </div>
               {/* Price badge centered */}

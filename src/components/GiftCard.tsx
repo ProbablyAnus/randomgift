@@ -8,17 +8,15 @@ interface GiftCardProps {
   label?: string;
   price: number;
   isSelected?: boolean;
-  onClick?: () => void;
   chance?: string;
 }
 
-export const GiftCard: FC<GiftCardProps> = ({ iconPng, iconWebp, label, price, isSelected, onClick, chance }) => {
+export const GiftCard: FC<GiftCardProps> = ({ iconPng, iconWebp, label, price, isSelected, chance }) => {
   const { sizeX } = useAdaptivity();
   const cardSize = sizeX === "compact" ? CARD_DIMENSIONS.compact : CARD_DIMENSIONS.regular;
 
   return (
-    <button
-      onClick={onClick}
+    <div
       className={`gift-card ${isSelected ? "gift-card-selected" : ""}`}
       style={{ width: cardSize.width, height: cardSize.height }}
     >
@@ -31,7 +29,7 @@ export const GiftCard: FC<GiftCardProps> = ({ iconPng, iconWebp, label, price, i
           <img
             src={iconPng}
             alt={label || "Подарок"}
-            className="drop-shadow-lg"
+            className="gift-icon drop-shadow-lg"
             style={{ width: ICON_SIZES.card, height: ICON_SIZES.card }}
           />
         </picture>
@@ -45,6 +43,6 @@ export const GiftCard: FC<GiftCardProps> = ({ iconPng, iconWebp, label, price, i
       {chance && (
         <span className="chance-text">{chance}</span>
       )}
-    </button>
+    </div>
   );
 };

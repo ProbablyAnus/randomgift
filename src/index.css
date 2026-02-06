@@ -125,14 +125,6 @@
     margin-top: auto;
   }
 
-  .gift-card:hover {
-    transform: scale(1.02);
-  }
-
-  .gift-card:active {
-    transform: scale(0.98);
-  }
-
   .gift-card-selected {
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--tg-button) 85%, transparent);
   }
@@ -682,6 +674,14 @@ html, body, #root {
 /* Gift card icons a bit larger (closer to reference) */
 .gift-card img {
   image-rendering: auto;
+}
+
+.gift-icon,
+.button-price-icon,
+.star-icon {
+  -webkit-touch-callout: none;
+  user-select: none;
+  pointer-events: none;
 }
 
 /* =========================

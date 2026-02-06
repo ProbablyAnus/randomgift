@@ -97,11 +97,24 @@ export const useTelegramWebApp = () => {
     applyViewportVars(wa);
 
     const handleViewportChange = () => applyViewportVars(wa);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        applyViewportVars(wa);
+      }
+    };
 
     wa?.onEvent?.("viewportChanged", handleViewportChange);
+    window.addEventListener("resize", handleViewportChange);
+    window.addEventListener("focus", handleViewportChange);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.visualViewport?.addEventListener("resize", handleViewportChange);
 
     return () => {
       wa?.offEvent?.("viewportChanged", handleViewportChange);
+      window.removeEventListener("resize", handleViewportChange);
+      window.removeEventListener("focus", handleViewportChange);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.visualViewport?.removeEventListener("resize", handleViewportChange);
     };
   }, []);
 

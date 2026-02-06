@@ -1000,8 +1000,8 @@ html, body, #root {
   padding: 6px 12px !important;
   gap: 4px !important;
   border-radius: 999px !important;
-  background: #007AFF !important;
-  border: 1px solid #007AFF !important;
+  background: #473f32 !important;
+  border: 1px solid #473f32 !important;
   color: #FFFFFF !important;
   font-weight: 500 !important;
   line-height: 1 !important;
@@ -1149,7 +1149,7 @@ html, body, #root {
   align-items: center;
   width: fit-content !important;
   max-width: 100% !important;
-  gap: 6px !important;
+  gap: 10px !important;
   margin: 8px auto 18px !important;
   padding: 0 8px !important;
   overflow: visible !important;
@@ -1170,8 +1170,8 @@ html, body, #root {
 }
 
 .tg-tab__star {
-  width: clamp(26px, 6.4vw, 32px) !important;
-  height: clamp(26px, 6.4vw, 32px) !important;
+  width: clamp(28px, 7vw, 34px) !important;
+  height: clamp(28px, 7vw, 34px) !important;
   flex-shrink: 0;
 }
 
@@ -1183,7 +1183,7 @@ html, body, #root {
 @media (max-width: 360px) {
   .tg-tabs {
     padding: 0 8px !important;
-    gap: 2px !important;
+    gap: 6px !important;
   }
 
   .tg-tab,

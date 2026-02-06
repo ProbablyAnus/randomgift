@@ -1,10 +1,12 @@
-import { FC, useState, useRef } from "react";
+import { FC, useMemo, useRef, useState } from "react";
 import { PriceTabs } from "../PriceTabs";
 import StarSvg from "@/assets/gifts/star-badge.svg";
 import ButtonIcon from "@/assets/gifts/svg-image-1.svg";
 import { Switch } from "@/components/ui/switch";
 import { RefreshCw } from "lucide-react";
 import { useAdaptivity } from "@/hooks/useAdaptivity";
+import { useTelegramWebApp } from "@/hooks/useTelegramWebApp";
+import { toast } from "@/components/ui/sonner";
 import bouquetSvg from "@/assets/gifts/bouquet.svg";
 import cakeSvg from "@/assets/gifts/cake.svg";
 import champagneSvg from "@/assets/gifts/champagne.svg";
@@ -24,55 +26,85 @@ const prices = [25, 50, 100];
 type GiftIcon = { src: string };
 type RouletteGift = { icon: GiftIcon; label: string; price: number; chance: number };
 type WinPrize = { icon: GiftIcon; label: string; price: number; chance: string };
+type GiftId =
+  | "heart-box"
+  | "teddy-bear"
+  | "gift-box"
+  | "rose"
+  | "elka"
+  | "newteddy"
+  | "cake"
+  | "bouquet"
+  | "rocket"
+  | "champagne"
+  | "trophy"
+  | "ring"
+  | "diamond";
 
-const chanceWeightByPrice: Record<number, number> = {
-  15: 27,
-  25: 17.5,
-  50: 10,
-  100: 6,
+type ChanceConfig = { weight: number; label: string };
+
+const chanceBySelectedPrice: Record<number, Record<GiftId, ChanceConfig>> = {
+  25: {
+    "heart-box": { weight: 18, label: "18%" },
+    "teddy-bear": { weight: 18, label: "18%" },
+    "gift-box": { weight: 26, label: "26%" },
+    rose: { weight: 26, label: "26%" },
+    elka: { weight: 2, label: "2%" },
+    newteddy: { weight: 2, label: "2%" },
+    cake: { weight: 2, label: "2%" },
+    bouquet: { weight: 2, label: "2%" },
+    rocket: { weight: 2, label: "2%" },
+    champagne: { weight: 2, label: "2%" },
+    trophy: { weight: 0.33, label: "0.33%" },
+    ring: { weight: 0.33, label: "0.33%" },
+    diamond: { weight: 0.34, label: "0.34%" },
+  },
+  50: {
+    "heart-box": { weight: 7, label: "7%" },
+    "teddy-bear": { weight: 7, label: "7%" },
+    "gift-box": { weight: 24, label: "24%" },
+    rose: { weight: 24, label: "24%" },
+    elka: { weight: 5.5, label: "5.5%" },
+    newteddy: { weight: 5.5, label: "5.5%" },
+    cake: { weight: 5.5, label: "5.5%" },
+    bouquet: { weight: 5.5, label: "5.5%" },
+    rocket: { weight: 5.5, label: "5.5%" },
+    champagne: { weight: 5.5, label: "5.5%" },
+    trophy: { weight: 1.33, label: "1.33%" },
+    ring: { weight: 1.33, label: "1.33%" },
+    diamond: { weight: 1.34, label: "1.34%" },
+  },
+  100: {
+    "heart-box": { weight: 1, label: "1%" },
+    "teddy-bear": { weight: 1, label: "1%" },
+    "gift-box": { weight: 2, label: "2%" },
+    rose: { weight: 2, label: "2%" },
+    elka: { weight: 12, label: "12%" },
+    newteddy: { weight: 12, label: "12%" },
+    cake: { weight: 12, label: "12%" },
+    bouquet: { weight: 12, label: "12%" },
+    rocket: { weight: 12, label: "12%" },
+    champagne: { weight: 12, label: "12%" },
+    trophy: { weight: 6.67, label: "6.67%" },
+    ring: { weight: 6.67, label: "6.67%" },
+    diamond: { weight: 6.66, label: "6.66%" },
+  },
 };
 
-const chanceLabelByPrice: Record<number, string> = {
-  15: "27%",
-  25: "17.5%",
-  50: "6%",
-  100: "1%",
-};
-
-const giftsCatalog = [
-  { icon: heartBoxSvg, label: "Сердце", price: 15 },
-  { icon: teddyBearSvg, label: "Медвежонок", price: 15 },
-  { icon: giftBoxSvg, label: "Коробка", price: 25 },
-  { icon: roseSvg, label: "Роза", price: 25 },
-  { icon: elkaSvg, label: "Ёлка", price: 50 },
-  { icon: newTeddySvg, label: "Мишка", price: 50 },
-  { icon: cakeSvg, label: "Торт", price: 50 },
-  { icon: bouquetSvg, label: "Букет", price: 50 },
-  { icon: rocketSvg, label: "Ракета", price: 50 },
-  { icon: champagneSvg, label: "Шампанское", price: 50 },
-  { icon: trophySvg, label: "Кубок", price: 100 },
-  { icon: ringSvg, label: "Кольцо", price: 100 },
-  { icon: diamondSvg, label: "Алмаз", price: 100 },
-];
-
-// Roulette gifts for spinning
-const rouletteGifts: RouletteGift[] = [
-  ...giftsCatalog.map((gift) => ({
-    icon: { src: gift.icon },
-    label: gift.label,
-    price: gift.price,
-    chance: chanceWeightByPrice[gift.price] ?? 1,
-  })),
-];
-
-// Win prizes for bottom section
-const allWinPrizes: WinPrize[] = [
-  ...giftsCatalog.map((gift) => ({
-    icon: { src: gift.icon },
-    label: gift.label,
-    price: gift.price,
-    chance: chanceLabelByPrice[gift.price] ?? "—",
-  })),
+const giftsCatalog: { id: GiftId; icon: string; label: string; price: number }[] = [
+  { id: "heart-box", icon: heartBoxSvg, label: "Сердце", price: 15 },
+  { id: "teddy-bear", icon: teddyBearSvg, label: "Медвежонок", price: 15 },
+  { id: "gift-box", icon: giftBoxSvg, label: "Коробка", price: 25 },
+  { id: "rose", icon: roseSvg, label: "Роза", price: 25 },
+  { id: "elka", icon: elkaSvg, label: "Ёлка", price: 50 },
+  { id: "newteddy", icon: newTeddySvg, label: "Мишка", price: 50 },
+  { id: "cake", icon: cakeSvg, label: "Торт", price: 50 },
+  { id: "bouquet", icon: bouquetSvg, label: "Букет", price: 50 },
+  { id: "rocket", icon: rocketSvg, label: "Ракета", price: 50 },
+  { id: "champagne", icon: champagneSvg, label: "Шампанское", price: 50 },
+  { id: "trophy", icon: trophySvg, label: "Кубок", price: 100 },
+  { id: "ring", icon: ringSvg, label: "Кольцо", price: 100 },
+  { id: "diamond", icon: diamondSvg, label: "Алмаз", price: 100 },
 ];
 
 // Create extended array for smooth roulette spinning
@@ -84,16 +116,24 @@ const createExtendedRoulette = (gifts: RouletteGift[]) => {
   return extended;
 };
 
-const extendedRoulette = createExtendedRoulette(rouletteGifts);
+const shuffleGifts = (gifts: RouletteGift[]) => {
+  const copy = [...gifts];
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+};
 
 // Select winner based on chances
-const selectWinnerByChance = () => {
-  const totalChance = rouletteGifts.reduce((sum, g) => sum + g.chance, 0);
+const selectWinnerByChance = (gifts: RouletteGift[]) => {
+  const totalChance = gifts.reduce((sum, g) => sum + g.chance, 0);
+  if (totalChance <= 0) return 0;
   const random = Math.random() * totalChance;
   let cumulative = 0;
 
-  for (let i = 0; i < rouletteGifts.length; i++) {
-    cumulative += rouletteGifts[i].chance;
+  for (let i = 0; i < gifts.length; i++) {
+    cumulative += gifts[i].chance;
     if (random <= cumulative) {
       return i;
     }
@@ -103,6 +143,7 @@ const selectWinnerByChance = () => {
 
 export const GiftsPage: FC = () => {
   const { sizeX, platform } = useAdaptivity();
+  const { webApp } = useTelegramWebApp();
   const [selectedPrice, setSelectedPrice] = useState(25);
   const [demoMode, setDemoMode] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
@@ -112,12 +153,46 @@ export const GiftsPage: FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const chanceMap = chanceBySelectedPrice[selectedPrice];
+
+  const baseRouletteGifts = useMemo<RouletteGift[]>(
+    () =>
+      giftsCatalog.map((gift) => ({
+        icon: { src: gift.icon },
+        label: gift.label,
+        price: gift.price,
+        chance: chanceMap?.[gift.id]?.weight ?? 0,
+      })),
+    [chanceMap]
+  );
+
+  const rouletteGifts = useMemo<RouletteGift[]>(
+    () => shuffleGifts(baseRouletteGifts),
+    [baseRouletteGifts, selectedPrice]
+  );
+
+  const allWinPrizes = useMemo<WinPrize[]>(
+    () =>
+      giftsCatalog.map((gift) => ({
+        icon: { src: gift.icon },
+        label: gift.label,
+        price: gift.price,
+        chance: chanceMap?.[gift.id]?.label ?? "—",
+      })),
+    [chanceMap]
+  );
+
+  const extendedRoulette = useMemo(
+    () => createExtendedRoulette(rouletteGifts),
+    [rouletteGifts]
+  );
+
   const baseCardWidth = sizeX === "compact" ? 140 : 160;
   const baseCardHeight = sizeX === "compact" ? 162 : 184;
   const rouletteCardWidth = baseCardWidth;
   const cardGap = 12;
   
-  const handleGetGift = () => {
+  const startSpin = () => {
     if (isSpinning) return;
 
     if (closeTimeoutRef.current) {
@@ -130,7 +205,7 @@ export const GiftsPage: FC = () => {
     setShowResult(false);
     
     // Select winner based on chances
-    const winnerIndex = selectWinnerByChance();
+    const winnerIndex = selectWinnerByChance(rouletteGifts);
     const winner = rouletteGifts[winnerIndex];
     
     // Calculate spin position
@@ -174,6 +249,64 @@ export const GiftsPage: FC = () => {
         navigator.vibrate([50, 30, 100]);
       }
     }, 4000);
+  };
+
+  const requestInvoiceLink = async (amount: number) => {
+    try {
+      const response = await fetch("/create-invoice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount }),
+      });
+
+      if (!response.ok) {
+        toast("Не удалось создать счет на оплату.");
+        return null;
+      }
+
+      const data = (await response.json()) as { invoiceLink?: string };
+      if (!data.invoiceLink) {
+        toast("Счет на оплату недоступен.");
+        return null;
+      }
+
+      return data.invoiceLink;
+    } catch (error) {
+      toast("Ошибка соединения при оплате.");
+      return null;
+    }
+  };
+
+  const handleGetGift = async () => {
+    if (isSpinning) return;
+
+    if (demoMode) {
+      startSpin();
+      return;
+    }
+
+    const invoiceLink = await requestInvoiceLink(selectedPrice);
+    if (!invoiceLink) return;
+
+    if (!webApp?.openInvoice) {
+      toast("Оплата доступна только в Telegram.");
+      return;
+    }
+
+    webApp.openInvoice(invoiceLink, (status) => {
+      if (status === "paid") {
+        startSpin();
+        return;
+      }
+      if (status === "cancelled") {
+        toast("Оплата отменена.");
+        return;
+      }
+      if (status === "failed") {
+        toast("Оплата не прошла.");
+        return;
+      }
+    });
   };
 
   const closeResultPanel = () => {

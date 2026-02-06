@@ -19,7 +19,7 @@ import roseSvg from "@/assets/gifts/rose.svg";
 import teddyBearSvg from "@/assets/gifts/teddy-bear.svg";
 import trophySvg from "@/assets/gifts/trophy.svg";
 
-const prices = [15, 25, 50, 100];
+const prices = [25, 50, 100];
 
 type GiftIcon = { src: string };
 type RouletteGift = { icon: GiftIcon; label: string; price: number; chance: number };

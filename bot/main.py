@@ -6,7 +6,7 @@ import os
 from urllib.parse import parse_qsl
 
 from aiohttp import web
-from aiogram import Bot, Dispatcher, F, types
+from aiogram import Bot, Dispatcher, types
 from aiogram.filters import CommandStart
 from aiogram.types import LabeledPrice
 from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -204,10 +204,7 @@ async def main() -> None:
 
         await pre_checkout_query.answer(ok=True)
 
-    @dp.message(F.successful_payment)
-    async def handle_successful_payment(message: types.Message) -> None:
-        await message.answer("Оплата прошла успешно! 🎉")
-
+    # Intentionally no successful_payment handler to avoid sending payment notifications.
     await dp.start_polling(bot)
     api_task.cancel()
 

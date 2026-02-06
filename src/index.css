@@ -1018,9 +1018,13 @@ html, body, #root {
   padding: 4px 9px !important;
   gap: 3px !important;
 }
+.star-badge--tight .star-icon {
+  width: 1.1em !important;
+  height: 1.1em !important;
+}
 .star-badge--bottom {
-  padding: 7px 14px !important;
-  gap: 6px !important;
+  padding: 6px 12px !important;
+  gap: 5px !important;
 }
 
 .chance-text {
@@ -1167,20 +1171,20 @@ html, body, #root {
 .tg-tab,
 .tg-tab--active {
   width: auto !important;
-  min-width: 72px !important;
+  min-width: 78px !important;
   justify-self: center !important;
-  height: 36px !important;
-  padding: 0 6px !important;
+  height: 40px !important;
+  padding: 0 8px !important;
   border-radius: 999px !important;
   gap: 4px !important;
   justify-content: center !important;
-  font-size: clamp(14px, 4vw, 16px) !important;
+  font-size: clamp(15px, 4vw, 18px) !important;
   font-weight: 400 !important;
 }
 
 .tg-tab__star {
-  width: clamp(28px, 7vw, 34px) !important;
-  height: clamp(28px, 7vw, 34px) !important;
+  width: clamp(30px, 7vw, 36px) !important;
+  height: clamp(30px, 7vw, 36px) !important;
   flex-shrink: 0;
 }
 
@@ -1197,8 +1201,8 @@ html, body, #root {
 
   .tg-tab,
   .tg-tab--active {
-    min-width: 66px !important;
-    padding: 0 5px !important;
-    font-size: 15px !important;
+    min-width: 70px !important;
+    padding: 0 6px !important;
+    font-size: 16px !important;
   }
 }

@@ -264,7 +264,7 @@ export const GiftsPage: FC = () => {
                 <div className="absolute inset-0 flex items-center justify-center pb-8">
                   <picture>
                     {gift.icon.webp && <source srcSet={gift.icon.webp} type="image/webp" />}
-                    <img src={gift.icon.src} alt={gift.label} className="gift-icon w-[92px] h-[92px] drop-shadow-lg" />
+                    <img src={gift.icon.src} alt={gift.label} className="gift-icon w-[100px] h-[100px] drop-shadow-lg" />
                   </picture>
                 </div>
                 {/* Price badge centered at bottom */}

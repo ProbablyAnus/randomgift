@@ -769,7 +769,7 @@ html, body, #root {
   width: fit-content;
   padding: 6px 10px;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.25);
+  background: #473f32;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
@@ -926,7 +926,7 @@ html, body, #root {
   width: fit-content;
   padding:8px 14px;
   border-radius:999px;
-  background: rgba(0,0,0,0.28);
+  background: #473f32;
   border: 1px solid rgba(255,255,255,0.08);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -1144,14 +1144,14 @@ html, body, #root {
 }
 
 .tg-tabs {
-  display: grid !important;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: flex !important;
+  justify-content: center;
   align-items: center;
-  width: 100% !important;
+  width: fit-content !important;
   max-width: 100% !important;
-  gap: 4px !important;
-  margin: 8px 0 18px !important;
-  padding: 0 12px !important;
+  gap: 6px !important;
+  margin: 8px auto 18px !important;
+  padding: 0 8px !important;
   overflow: visible !important;
 }
 
@@ -1170,8 +1170,8 @@ html, body, #root {
 }
 
 .tg-tab__star {
-  width: clamp(20px, 5.4vw, 24px) !important;
-  height: clamp(20px, 5.4vw, 24px) !important;
+  width: clamp(26px, 6.4vw, 32px) !important;
+  height: clamp(26px, 6.4vw, 32px) !important;
   flex-shrink: 0;
 }
 

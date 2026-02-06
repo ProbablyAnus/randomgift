@@ -1019,12 +1019,12 @@ html, body, #root {
   gap: 3px !important;
 }
 .star-badge--tight .star-icon {
-  width: 1.1em !important;
-  height: 1.1em !important;
+  width: 1.3em !important;
+  height: 1.3em !important;
 }
 .star-badge--bottom {
-  padding: 6px 12px !important;
-  gap: 5px !important;
+  padding: 5px 10px !important;
+  gap: 4px !important;
 }
 
 .chance-text {

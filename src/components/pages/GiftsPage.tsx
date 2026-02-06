@@ -6,7 +6,6 @@ import { Switch } from "@/components/ui/switch";
 import { RefreshCw } from "lucide-react";
 import { useAdaptivity } from "@/hooks/useAdaptivity";
 import { useTelegramWebApp } from "@/hooks/useTelegramWebApp";
-import { toast } from "@/components/ui/sonner";
 import bouquetSvg from "@/assets/gifts/bouquet.svg";
 import cakeSvg from "@/assets/gifts/cake.svg";
 import champagneSvg from "@/assets/gifts/champagne.svg";
@@ -253,23 +252,29 @@ export const GiftsPage: FC = () => {
 
   const requestInvoiceLink = async (amount: number) => {
     try {
-      const response = await fetch("/create-invoice", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount }),
-      });
+      const initData = webApp?.initData;
+      const response = initData
+        ? await fetch(`/api/invoice?amount=${amount}`, {
+            method: "GET",
+            headers: { "X-Telegram-Init-Data": initData },
+          })
+        : await fetch("/create-invoice", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ amount }),
+          });
 
       if (!response.ok) {
-        toast("Не удалось создать счет на оплату.");
         return null;
       }
 
-      const data = (await response.json()) as { invoiceLink?: string };
-      if (!data.invoiceLink) {
+      const data = (await response.json()) as { invoiceLink?: string; invoice_link?: string };
+      const invoiceLink = data.invoiceLink ?? data.invoice_link;
+      if (!invoiceLink) {
         return null;
       }
 
-      return data.invoiceLink;
+      return invoiceLink;
     } catch (error) {
       return null;
     }

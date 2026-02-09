@@ -380,6 +380,17 @@
   --tg-text: #000000;
 }
 
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 :root[data-theme="dark"] {
   --app-bg: rgba(28, 28, 30, 1);
   --app-card: rgba(44, 44, 46, 1);

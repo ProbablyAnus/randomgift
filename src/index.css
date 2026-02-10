@@ -1219,3 +1219,57 @@ html, body, #root {
     font-size: 16px !important;
   }
 }
+
+/* === Section swipe transition + stable gifts screen === */
+.tab-page {
+  width: 100%;
+}
+
+.tab-page--static {
+  animation: none;
+}
+
+.tab-page--swipe-left {
+  animation: tab-swipe-left 260ms ease;
+}
+
+.tab-page--swipe-right {
+  animation: tab-swipe-right 260ms ease;
+}
+
+@keyframes tab-swipe-left {
+  from {
+    opacity: 0.75;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes tab-swipe-right {
+  from {
+    opacity: 0.75;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Remove mount jerks on Gifts tab elements */
+.tg-tab--active .tg-tab__text,
+.tg-tab--active .tg-tab__star,
+.button-content {
+  animation: none !important;
+}
+
+.button-content {
+  flex-wrap: nowrap;
+}
+
+.button-price {
+  gap: 3px;
+}

@@ -15,15 +15,14 @@ interface LeaderboardUser {
   games?: number;
   plays?: number;
   giftsReceived?: number;
+  spentStars?: number;
+  starsSpent?: number;
+  totalSpentStars?: number;
+  xp?: number;
+  score?: number;
 }
 
-const formatGames = (count: number) => {
-  const mod10 = count % 10;
-  const mod100 = count % 100;
-  if (mod10 === 1 && mod100 !== 11) return `${count} игра`;
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return `${count} игры`;
-  return `${count} игр`;
-};
+const formatXp = (count: number) => `${count} XP`;
 
 const getDisplayName = (user: LeaderboardUser) => {
   if (user.userName) return user.userName;
@@ -34,8 +33,17 @@ const getDisplayName = (user: LeaderboardUser) => {
 
 const getPhotoUrl = (user: LeaderboardUser) => user.photoUrl ?? user.photo_url ?? "";
 
-const getGamesCount = (user: LeaderboardUser) =>
-  user.gamesPlayed ?? user.games ?? user.plays ?? user.giftsReceived ?? 0;
+const getXpCount = (user: LeaderboardUser) =>
+  user.spentStars ??
+  user.starsSpent ??
+  user.totalSpentStars ??
+  user.xp ??
+  user.score ??
+  user.gamesPlayed ??
+  user.games ??
+  user.plays ??
+  user.giftsReceived ??
+  0;
 
 export const LeaderboardPage: FC = () => {
   const { webApp } = useTelegramWebApp();
@@ -85,9 +93,7 @@ export const LeaderboardPage: FC = () => {
   }, [apiBaseUrl]);
 
   const rankedUsers = useMemo(() => {
-    return leaderboard
-      .filter((user) => getGamesCount(user) > 0)
-      .sort((a, b) => getGamesCount(b) - getGamesCount(a));
+    return [...leaderboard].sort((a, b) => getXpCount(b) - getXpCount(a));
   }, [leaderboard]);
 
   const filteredUsers = useMemo(() => {
@@ -122,9 +128,9 @@ export const LeaderboardPage: FC = () => {
 
   if (!rankedUsers.length) {
     return (
-      <div className={styles.emptyState}>
-        <div className={styles.emptyTitle}>Рейтинг пуст</div>
-        <div className={styles.emptySubtitle}>Сыграйте хотя бы один раз, чтобы появиться здесь.</div>
+        <div className={styles.emptyState}>
+          <div className={styles.emptyTitle}>Рейтинг пуст</div>
+          <div className={styles.emptySubtitle}>Пока нет пользователей для отображения.</div>
         {hasError && <div className={styles.emptyHint}>Не удалось загрузить данные. Попробуйте позже.</div>}
       </div>
     );
@@ -155,7 +161,7 @@ export const LeaderboardPage: FC = () => {
             const photoUrl = getPhotoUrl(leader);
             const isMe =
               currentUserId !== undefined && currentUserId !== null && String(leader.userId) === String(currentUserId);
-            const gamesCount = getGamesCount(leader);
+            const xpCount = getXpCount(leader);
             const initial = name.charAt(0).toUpperCase();
 
             return (
@@ -174,9 +180,9 @@ export const LeaderboardPage: FC = () => {
                     {name}
                     {isMe && <span>YOU</span>}
                   </div>
-                  <div className={styles.count}>{formatGames(gamesCount)}</div>
+                  <div className={styles.count}>{formatXp(xpCount)}</div>
                 </div>
-                <div className={styles.number} data-index={index + 1} />
+                <div className={styles.number}>#{index + 1}</div>
               </button>
             );
           })}

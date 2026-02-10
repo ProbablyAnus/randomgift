@@ -1,43 +1,33 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { BottomNav, type TabType } from "@/components/BottomNav";
 import { GiftsPage } from "@/components/pages/GiftsPage";
 import { LeaderboardPage } from "@/components/pages/LeaderboardPage";
 import { ProfilePage } from "@/components/pages/ProfilePage";
 import { AdaptivityProvider } from "@/hooks/useAdaptivity";
 
-const tabOrder: TabType[] = ["gifts", "leaderboard", "profile"];
-const SWIPE_DURATION_MS = 360;
+const PAGE_TRANSITION_MS = 300;
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<TabType>("gifts");
   const [displayedTab, setDisplayedTab] = useState<TabType>("gifts");
-  const [swipeDirection, setSwipeDirection] = useState<"left" | "right">("left");
+  const [leavingTab, setLeavingTab] = useState<TabType | null>(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
-    if (activeTab === displayedTab) {
-      return;
-    }
+    if (activeTab === displayedTab) return;
 
-    const fromIndex = tabOrder.indexOf(displayedTab);
-    const toIndex = tabOrder.indexOf(activeTab);
-    setSwipeDirection(toIndex > fromIndex ? "left" : "right");
+    const previousTab = displayedTab;
+    setLeavingTab(previousTab);
+    setDisplayedTab(activeTab);
+    setIsTransitioning(true);
 
     const timer = window.setTimeout(() => {
-      setDisplayedTab(activeTab);
-    }, SWIPE_DURATION_MS);
+      setLeavingTab(null);
+      setIsTransitioning(false);
+    }, PAGE_TRANSITION_MS);
 
     return () => window.clearTimeout(timer);
   }, [activeTab, displayedTab]);
-
-  const animationClass = useMemo(() => {
-    if (activeTab === displayedTab) {
-      return "tab-page tab-page--static";
-    }
-
-    return swipeDirection === "left"
-      ? "tab-page tab-page--swipe-left"
-      : "tab-page tab-page--swipe-right";
-  }, [activeTab, displayedTab, swipeDirection]);
 
   const renderPage = (tab: TabType) => {
     switch (tab) {
@@ -56,7 +46,10 @@ const Index = () => {
     <AdaptivityProvider>
       <div className="app-container">
         <div className="content-area scrollbar-hide">
-          <div className={animationClass}>{renderPage(activeTab)}</div>
+          <div className="tab-page-layer tab-page-layer--enter">{renderPage(displayedTab)}</div>
+          {isTransitioning && leavingTab && (
+            <div className="tab-page-layer tab-page-layer--leave">{renderPage(leavingTab)}</div>
+          )}
         </div>
         <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
       </div>

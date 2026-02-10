@@ -42,6 +42,14 @@ const Index = () => {
     }
   };
 
+  const handleTabChange = (nextTab: TabType) => {
+    const activeElement = document.activeElement;
+    if (activeElement instanceof HTMLElement) {
+      activeElement.blur();
+    }
+    setActiveTab(nextTab);
+  };
+
   return (
     <AdaptivityProvider>
       <div className="app-container">
@@ -51,7 +59,7 @@ const Index = () => {
             <div className="tab-page-layer tab-page-layer--leave">{renderPage(leavingTab)}</div>
           )}
         </div>
-        <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+        <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
       </div>
     </AdaptivityProvider>
   );

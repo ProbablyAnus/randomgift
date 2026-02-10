@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Lottie, { type LottieRefCurrentProps } from "lottie-react";
-import GiftAnimation from "@/assets/tabbar/tab-gifts.json";
-import LeaderboardAnimation from "@/assets/tabbar/tab-leaderboard.json";
-import ProfileAnimation from "@/assets/tabbar/tab-profile.json";
+import GiftAnimation from "@/assets/lottie/tab-gifts.json";
+import LeaderboardAnimation from "@/assets/lottie/tab-leaderboard.json";
+import ProfileAnimation from "@/assets/lottie/tab-profile.json";
 
 export type TabType = "gifts" | "leaderboard" | "profile";
 
@@ -29,12 +29,22 @@ const hexToLottieColor = (hex: string) => {
 const recolorLottie = (data: object, hex: string) => {
   const cloned = JSON.parse(JSON.stringify(data));
   const target = hexToLottieColor(hex);
-  const recolorNode = (node: any) => {
+  const recolorNode = (node: unknown) => {
     if (!node || typeof node !== "object") return;
-    if ((node.ty === "fl" || node.ty === "st") && node.c?.k && Array.isArray(node.c.k)) {
-      node.c.k = target;
+
+    const shapeNode = node as {
+      ty?: string;
+      c?: {
+        k?: number[] | unknown;
+      };
+      [key: string]: unknown;
+    };
+
+    if ((shapeNode.ty === "fl" || shapeNode.ty === "st") && Array.isArray(shapeNode.c?.k)) {
+      shapeNode.c.k = target;
     }
-    Object.values(node).forEach((value) => {
+
+    Object.values(shapeNode).forEach((value) => {
       if (Array.isArray(value)) {
         value.forEach(recolorNode);
       } else if (typeof value === "object") {
@@ -57,7 +67,7 @@ export const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
   );
 
   const [current, setCurrent] = useState<TabType>(activeTab);
-  const [activeColor, setActiveColor] = useState("#0080FA");
+  const [activeColor, setActiveColor] = useState("#007AFF");
   const [inactiveColor, setInactiveColor] = useState("#959595");
   const lottieRefs = useRef<Array<LottieRefCurrentProps | null>>([]);
 
@@ -65,7 +75,7 @@ export const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
 
   useEffect(() => {
     const styles = getComputedStyle(document.documentElement);
-    const nextActive = styles.getPropertyValue("--tg-button").trim();
+    const nextActive = styles.getPropertyValue("--tg-link").trim() || styles.getPropertyValue("--tg-button").trim();
     const nextInactive = styles.getPropertyValue("--tg-hint").trim();
     if (nextActive) setActiveColor(nextActive);
     if (nextInactive) setInactiveColor(nextInactive);

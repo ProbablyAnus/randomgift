@@ -6,7 +6,7 @@ import { ProfilePage } from "@/components/pages/ProfilePage";
 import { AdaptivityProvider } from "@/hooks/useAdaptivity";
 
 const tabOrder: TabType[] = ["gifts", "leaderboard", "profile"];
-const SWIPE_DURATION_MS = 260;
+const SWIPE_DURATION_MS = 360;
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<TabType>("gifts");

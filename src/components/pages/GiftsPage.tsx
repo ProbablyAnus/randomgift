@@ -352,7 +352,7 @@ export const GiftsPage: FC = () => {
 
   return (
     <div className="flex-1 pb-6">
-      <div className="pt-3 mb-6">
+      <div className="pt-3 mb-8">
         <PriceTabs
           prices={prices}
           selectedPrice={selectedPrice}

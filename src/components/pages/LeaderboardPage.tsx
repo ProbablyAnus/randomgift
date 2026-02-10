@@ -5,11 +5,13 @@ import styles from "./LeaderboardPage.module.scss";
 
 interface LeaderboardUser {
   id?: number | string;
+  _id?: number | string;
   userId?: number | string;
   user_id?: number | string;
   username?: string;
   userName?: string;
   user_name?: string;
+  name?: string;
   firstName?: string;
   first_name?: string;
   lastName?: string;
@@ -17,12 +19,14 @@ interface LeaderboardUser {
   photoUrl?: string;
   photo_url?: string;
   avatar?: string;
+  profilePicture?: string;
   gamesPlayed?: number;
   games_played?: number;
   games?: number;
   plays?: number;
   giftsReceived?: number;
   gifts_received?: number;
+  receivedGiftsCount?: number;
   spentStars?: number;
   spent_stars?: number;
   starsSpent?: number;
@@ -53,13 +57,14 @@ const getDisplayName = (user: LeaderboardUser) => {
   if (user.userName) return user.userName;
   if (user.username) return user.username;
   if (user.user_name) return user.user_name;
+  if (user.name) return user.name;
   const fullName = [user.firstName ?? user.first_name, user.lastName ?? user.last_name].filter(Boolean).join(" ");
   return fullName || "Без имени";
 };
 
-const getPhotoUrl = (user: LeaderboardUser) => user.photoUrl ?? user.photo_url ?? user.avatar ?? "";
+const getPhotoUrl = (user: LeaderboardUser) => user.photoUrl ?? user.photo_url ?? user.avatar ?? user.profilePicture ?? "";
 
-const getUserId = (user: LeaderboardUser) => user.userId ?? user.user_id ?? user.id;
+const getUserId = (user: LeaderboardUser) => user.userId ?? user.user_id ?? user.id ?? user._id;
 
 const getXpCount = (user: LeaderboardUser) =>
   user.spentStars ??
@@ -67,17 +72,16 @@ const getXpCount = (user: LeaderboardUser) =>
   user.starsSpent ??
   user.totalSpentStars ??
   user.total_spent_stars ??
+  user.receivedGiftsCount ??
+  user.giftsReceived ??
+  user.gifts_received ??
   user.xp ??
   user.score ??
   user.gamesPlayed ??
   user.games_played ??
   user.games ??
   user.plays ??
-  user.giftsReceived ??
-  user.gifts_received ??
   0;
-
-
 
 const getPositionLabel = (position: number) => {
   if (position === 1) return "🥇";
@@ -125,18 +129,36 @@ export const LeaderboardPage: FC = () => {
       setHasError(false);
       try {
         const initData = webApp?.initData;
-        const response = await fetch(`${apiBaseUrl}/api/leaderboard`, {
-          signal: controller.signal,
-          headers: initData ? { "X-Telegram-Init-Data": initData } : undefined,
-        });
-        if (!response.ok) {
-          throw new Error("Не удалось загрузить рейтинг.");
+        const encodedInitData = initData ? encodeURIComponent(initData) : "";
+        const endpoints = [
+          `${apiBaseUrl}/api/leaderboard`,
+          `${apiBaseUrl}/api/users${encodedInitData ? `?initData=${encodedInitData}` : ""}`,
+        ];
+
+        let list: LeaderboardUser[] = [];
+
+        for (const endpoint of endpoints) {
+          const response = await fetch(endpoint, {
+            signal: controller.signal,
+            headers: initData ? { "X-Telegram-Init-Data": initData } : undefined,
+          });
+
+          if (!response.ok) {
+            continue;
+          }
+
+          const data = (await response.json()) as LeaderboardResponse;
+          list = toLeaderboardArray(data);
+
+          if (list.length) {
+            break;
+          }
         }
-        const data = (await response.json()) as LeaderboardResponse;
+
         if (!isMounted) return;
-        const list = toLeaderboardArray(data);
         setLeaderboard(list);
-      } catch (error) {
+        setHasError(!list.length);
+      } catch {
         if (!isMounted) return;
         setHasError(true);
         setLeaderboard([]);
@@ -168,11 +190,7 @@ export const LeaderboardPage: FC = () => {
   const handleUserClick = (user: LeaderboardUser) => {
     const username = user.username ?? user.userName ?? user.user_name;
     const userId = getUserId(user);
-    const telegramLink = username
-      ? `https://t.me/${username}`
-      : userId
-        ? `tg://user?id=${userId}`
-        : "";
+    const telegramLink = username ? `https://t.me/${username}` : userId ? `tg://user?id=${userId}` : "";
 
     if (!telegramLink) return;
 
@@ -191,9 +209,9 @@ export const LeaderboardPage: FC = () => {
 
   if (!rankedUsers.length) {
     return (
-        <div className={styles.emptyState}>
-          <div className={styles.emptyTitle}>Рейтинг пуст</div>
-          <div className={styles.emptySubtitle}>Пока нет пользователей для отображения.</div>
+      <div className={styles.emptyState}>
+        <div className={styles.emptyTitle}>Рейтинг пуст</div>
+        <div className={styles.emptySubtitle}>Пока нет пользователей для отображения.</div>
         {hasError && <div className={styles.emptyHint}>Не удалось загрузить данные. Попробуйте позже.</div>}
       </div>
     );

@@ -4,6 +4,7 @@ import { useTelegramWebApp } from "@/hooks/useTelegramWebApp";
 import styles from "./LeaderboardPage.module.scss";
 
 interface LeaderboardUser {
+  id?: number | string;
   userId?: number | string;
   username?: string;
   userName?: string;
@@ -22,6 +23,15 @@ interface LeaderboardUser {
   score?: number;
 }
 
+type LeaderboardResponse =
+  | LeaderboardUser[]
+  | {
+      users?: LeaderboardUser[];
+      leaderboard?: LeaderboardUser[];
+      data?: LeaderboardUser[] | { users?: LeaderboardUser[]; leaderboard?: LeaderboardUser[] };
+      result?: LeaderboardUser[] | { users?: LeaderboardUser[]; leaderboard?: LeaderboardUser[] };
+    };
+
 const formatXp = (count: number) => `${count} XP`;
 
 const getDisplayName = (user: LeaderboardUser) => {
@@ -32,6 +42,8 @@ const getDisplayName = (user: LeaderboardUser) => {
 };
 
 const getPhotoUrl = (user: LeaderboardUser) => user.photoUrl ?? user.photo_url ?? "";
+
+const getUserId = (user: LeaderboardUser) => user.userId ?? user.id;
 
 const getXpCount = (user: LeaderboardUser) =>
   user.spentStars ??
@@ -44,6 +56,22 @@ const getXpCount = (user: LeaderboardUser) =>
   user.plays ??
   user.giftsReceived ??
   0;
+
+const toLeaderboardArray = (data: LeaderboardResponse): LeaderboardUser[] => {
+  if (Array.isArray(data)) return data;
+
+  const nestedData = data.data;
+  if (Array.isArray(nestedData)) return nestedData;
+  if (nestedData?.users) return nestedData.users;
+  if (nestedData?.leaderboard) return nestedData.leaderboard;
+
+  const nestedResult = data.result;
+  if (Array.isArray(nestedResult)) return nestedResult;
+  if (nestedResult?.users) return nestedResult.users;
+  if (nestedResult?.leaderboard) return nestedResult.leaderboard;
+
+  return data.users ?? data.leaderboard ?? [];
+};
 
 export const LeaderboardPage: FC = () => {
   const { webApp } = useTelegramWebApp();
@@ -63,15 +91,17 @@ export const LeaderboardPage: FC = () => {
       setIsLoading(true);
       setHasError(false);
       try {
+        const initData = webApp?.initData;
         const response = await fetch(`${apiBaseUrl}/api/leaderboard`, {
           signal: controller.signal,
+          headers: initData ? { "X-Telegram-Init-Data": initData } : undefined,
         });
         if (!response.ok) {
           throw new Error("Не удалось загрузить рейтинг.");
         }
-        const data = (await response.json()) as LeaderboardUser[] | { users?: LeaderboardUser[] };
+        const data = (await response.json()) as LeaderboardResponse;
         if (!isMounted) return;
-        const list = Array.isArray(data) ? data : data.users ?? [];
+        const list = toLeaderboardArray(data);
         setLeaderboard(list);
       } catch (error) {
         if (!isMounted) return;
@@ -90,7 +120,7 @@ export const LeaderboardPage: FC = () => {
       isMounted = false;
       controller.abort();
     };
-  }, [apiBaseUrl]);
+  }, [apiBaseUrl, webApp?.initData]);
 
   const rankedUsers = useMemo(() => {
     return [...leaderboard].sort((a, b) => getXpCount(b) - getXpCount(a));
@@ -104,7 +134,7 @@ export const LeaderboardPage: FC = () => {
 
   const handleUserClick = (user: LeaderboardUser) => {
     const username = user.username ?? user.userName;
-    const userId = user.userId;
+    const userId = getUserId(user);
     const telegramLink = username
       ? `https://t.me/${username}`
       : userId
@@ -160,14 +190,14 @@ export const LeaderboardPage: FC = () => {
             const name = getDisplayName(leader);
             const photoUrl = getPhotoUrl(leader);
             const isMe =
-              currentUserId !== undefined && currentUserId !== null && String(leader.userId) === String(currentUserId);
+              currentUserId !== undefined && currentUserId !== null && String(getUserId(leader)) === String(currentUserId);
             const xpCount = getXpCount(leader);
             const initial = name.charAt(0).toUpperCase();
 
             return (
               <button
                 className={styles.row}
-                key={`${leader.userId ?? name}-${index}`}
+                key={`${getUserId(leader) ?? name}-${index}`}
                 type="button"
                 onClick={() => handleUserClick(leader)}
               >

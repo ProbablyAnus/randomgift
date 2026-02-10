@@ -3,6 +3,8 @@ import hashlib
 import hmac
 import json
 import os
+import sqlite3
+from pathlib import Path
 from urllib.parse import parse_qsl
 
 from aiohttp import web
@@ -23,6 +25,7 @@ MINI_APP_BUTTON = os.getenv("MINI_APP_BUTTON", "Открыть мини-прил
 API_HOST = os.getenv("API_HOST", "0.0.0.0")
 API_PORT = int(os.getenv("API_PORT", "8080"))
 ALLOWED_PRICES = {25, 50, 100}
+DB_PATH = Path(os.getenv("DB_PATH", Path(__file__).with_name("app.db")))
 
 if not BOT_TOKEN:
     raise RuntimeError("BOT_TOKEN is not set. Add it to .env or the environment before starting the bot.")
@@ -31,6 +34,115 @@ if not MINI_APP_URL:
     raise RuntimeError(
         "WEB_APP_URL is not set. Add WEB_APP_URL or MINI_APP_URL to .env so the bot can open your domain."
     )
+
+
+class Database:
+    def __init__(self, path: Path) -> None:
+        self.path = path
+        self._lock = asyncio.Lock()
+
+    def _connect(self) -> sqlite3.Connection:
+        conn = sqlite3.connect(self.path)
+        conn.row_factory = sqlite3.Row
+        return conn
+
+    async def init(self) -> None:
+        await asyncio.to_thread(self._init_sync)
+
+    def _init_sync(self) -> None:
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        with self._connect() as conn:
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS users (
+                    user_id INTEGER PRIMARY KEY,
+                    username TEXT,
+                    first_name TEXT,
+                    last_name TEXT,
+                    photo_url TEXT,
+                    spent_stars INTEGER NOT NULL DEFAULT 0,
+                    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                )
+                """
+            )
+            conn.commit()
+
+    async def upsert_user(self, user: dict) -> None:
+        if not isinstance(user.get("id"), int):
+            return
+
+        async with self._lock:
+            await asyncio.to_thread(self._upsert_user_sync, user)
+
+    def _upsert_user_sync(self, user: dict) -> None:
+        with self._connect() as conn:
+            conn.execute(
+                """
+                INSERT INTO users (user_id, username, first_name, last_name, photo_url)
+                VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT(user_id) DO UPDATE SET
+                    username = COALESCE(excluded.username, users.username),
+                    first_name = COALESCE(excluded.first_name, users.first_name),
+                    last_name = COALESCE(excluded.last_name, users.last_name),
+                    photo_url = COALESCE(excluded.photo_url, users.photo_url),
+                    updated_at = CURRENT_TIMESTAMP
+                """,
+                (
+                    user["id"],
+                    user.get("username"),
+                    user.get("first_name"),
+                    user.get("last_name"),
+                    user.get("photo_url"),
+                ),
+            )
+            conn.commit()
+
+    async def add_spent_stars(self, user_id: int, amount: int) -> None:
+        if amount <= 0:
+            return
+
+        async with self._lock:
+            await asyncio.to_thread(self._add_spent_stars_sync, user_id, amount)
+
+    def _add_spent_stars_sync(self, user_id: int, amount: int) -> None:
+        with self._connect() as conn:
+            conn.execute(
+                """
+                INSERT INTO users (user_id, spent_stars)
+                VALUES (?, ?)
+                ON CONFLICT(user_id) DO UPDATE SET
+                    spent_stars = users.spent_stars + excluded.spent_stars,
+                    updated_at = CURRENT_TIMESTAMP
+                """,
+                (user_id, amount),
+            )
+            conn.commit()
+
+    async def get_leaderboard(self) -> list[dict]:
+        return await asyncio.to_thread(self._get_leaderboard_sync)
+
+    def _get_leaderboard_sync(self) -> list[dict]:
+        with self._connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT user_id, username, first_name, last_name, photo_url, spent_stars
+                FROM users
+                ORDER BY spent_stars DESC, user_id ASC
+                """
+            ).fetchall()
+
+        return [
+            {
+                "userId": row["user_id"],
+                "username": row["username"],
+                "firstName": row["first_name"],
+                "lastName": row["last_name"],
+                "photoUrl": row["photo_url"],
+                "spentStars": row["spent_stars"],
+            }
+            for row in rows
+        ]
+
 
 def verify_telegram_init_data(init_data: str, bot_token: str) -> dict | None:
     data = dict(parse_qsl(init_data, keep_blank_values=True))
@@ -45,6 +157,22 @@ def verify_telegram_init_data(init_data: str, bot_token: str) -> dict | None:
         return None
 
     return data
+
+
+def extract_user_from_init_data(parsed_init_data: dict) -> dict | None:
+    user_raw = parsed_init_data.get("user")
+    if not user_raw:
+        return None
+
+    try:
+        user = json.loads(user_raw)
+    except json.JSONDecodeError:
+        return None
+
+    if not isinstance(user, dict) or not isinstance(user.get("id"), int):
+        return None
+
+    return user
 
 
 def build_invoice_payload(amount: int, user_id: int) -> str:
@@ -70,10 +198,17 @@ def parse_invoice_payload(payload: str) -> dict | None:
 
 async def handle_invoice(request: web.Request) -> web.Response:
     bot: Bot = request.app["bot"]
+    db: Database = request.app["db"]
     init_data = request.headers.get("X-Telegram-Init-Data", "")
     parsed = verify_telegram_init_data(init_data, BOT_TOKEN)
     if not parsed:
         return web.json_response({"error": "invalid_init_data"}, status=401)
+
+    user = extract_user_from_init_data(parsed)
+    if not user:
+        return web.json_response({"error": "invalid_user"}, status=400)
+
+    await db.upsert_user(user)
 
     amount_raw = request.query.get("amount", "0")
     try:
@@ -84,17 +219,7 @@ async def handle_invoice(request: web.Request) -> web.Response:
     if amount not in ALLOWED_PRICES:
         return web.json_response({"error": "unsupported_amount"}, status=400)
 
-    user_id: int | None = None
-    if "user" in parsed:
-        try:
-            user_id = json.loads(parsed["user"]).get("id")
-        except json.JSONDecodeError:
-            user_id = None
-
-    if not isinstance(user_id, int):
-        return web.json_response({"error": "invalid_user"}, status=400)
-
-    payload = build_invoice_payload(amount, user_id)
+    payload = build_invoice_payload(amount, user["id"])
     invoice_link = await bot.create_invoice_link(
         title="Random Gift",
         description=f"Покупка подарка за {amount} звезд.",
@@ -133,7 +258,22 @@ async def handle_create_invoice(request: web.Request) -> web.Response:
     return web.json_response({"invoiceLink": invoice_link})
 
 
-async def run_api_server(bot: Bot) -> None:
+async def handle_leaderboard(request: web.Request) -> web.Response:
+    db: Database = request.app["db"]
+
+    init_data = request.headers.get("X-Telegram-Init-Data", "")
+    if init_data:
+        parsed = verify_telegram_init_data(init_data, BOT_TOKEN)
+        if parsed:
+            user = extract_user_from_init_data(parsed)
+            if user:
+                await db.upsert_user(user)
+
+    leaderboard = await db.get_leaderboard()
+    return web.json_response(leaderboard)
+
+
+async def run_api_server(bot: Bot, db: Database) -> None:
     @web.middleware
     async def cors_middleware(request: web.Request, handler):
         if request.method == "OPTIONS":
@@ -147,10 +287,13 @@ async def run_api_server(bot: Bot) -> None:
 
     app = web.Application(middlewares=[cors_middleware])
     app["bot"] = bot
+    app["db"] = db
     app.router.add_get("/api/invoice", handle_invoice)
     app.router.add_options("/api/invoice", handle_invoice)
     app.router.add_post("/create-invoice", handle_create_invoice)
     app.router.add_options("/create-invoice", handle_create_invoice)
+    app.router.add_get("/api/leaderboard", handle_leaderboard)
+    app.router.add_options("/api/leaderboard", handle_leaderboard)
 
     runner = web.AppRunner(app)
     await runner.setup()
@@ -168,11 +311,22 @@ def build_start_keyboard() -> types.InlineKeyboardMarkup:
 async def main() -> None:
     bot = Bot(BOT_TOKEN)
     dp = Dispatcher()
+    db = Database(DB_PATH)
+    await db.init()
 
-    api_task = asyncio.create_task(run_api_server(bot))
+    api_task = asyncio.create_task(run_api_server(bot, db))
 
     @dp.message(CommandStart())
     async def handle_start(message: types.Message) -> None:
+        await db.upsert_user(
+            {
+                "id": message.from_user.id,
+                "username": message.from_user.username,
+                "first_name": message.from_user.first_name,
+                "last_name": message.from_user.last_name,
+                "photo_url": None,
+            }
+        )
         text = (
             "Привет! 🎁\n"
             "Жми на кнопку ниже, чтобы открыть мини-приложение и забрать подарки."
@@ -204,7 +358,27 @@ async def main() -> None:
 
         await pre_checkout_query.answer(ok=True)
 
-    # Intentionally no successful_payment handler to avoid sending payment notifications.
+    @dp.message(lambda message: message.successful_payment is not None)
+    async def handle_successful_payment(message: types.Message) -> None:
+        successful_payment = message.successful_payment
+        if not successful_payment:
+            return
+
+        payload = parse_invoice_payload(successful_payment.invoice_payload)
+        if not payload:
+            return
+
+        await db.upsert_user(
+            {
+                "id": message.from_user.id,
+                "username": message.from_user.username,
+                "first_name": message.from_user.first_name,
+                "last_name": message.from_user.last_name,
+                "photo_url": None,
+            }
+        )
+        await db.add_spent_stars(payload["user_id"], payload["amount"])
+
     await dp.start_polling(bot)
     api_task.cancel()
 

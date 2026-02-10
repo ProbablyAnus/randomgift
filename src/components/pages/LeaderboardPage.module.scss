@@ -126,22 +126,9 @@
 
 .scrollbox .count {
   color: #007aff;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 16px;
   letter-spacing: -0.1px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.scrollbox .count::before {
-  content: "";
-  width: 12px;
-  height: 12px;
-  background-image: url("./gift.svg");
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: contain;
 }
 
 .scrollbox .number {
@@ -153,28 +140,6 @@
   font-weight: 510;
   font-size: 15px;
   letter-spacing: -0.43px;
-}
-
-.scrollbox .number::before {
-  content: "#" attr(data-index);
-}
-
-.scrollbox .number[data-index="1"]::before,
-.scrollbox .number[data-index="2"]::before,
-.scrollbox .number[data-index="3"]::before {
-  font-size: 22px;
-}
-
-.scrollbox .number[data-index="1"]::before {
-  content: "🥇";
-}
-
-.scrollbox .number[data-index="2"]::before {
-  content: "🥈";
-}
-
-.scrollbox .number[data-index="3"]::before {
-  content: "🥉";
 }
 
 .noItems {

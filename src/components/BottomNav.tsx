@@ -31,10 +31,8 @@ const recolorLottie = (data: object, hex: string) => {
   const target = hexToLottieColor(hex);
   const recolorNode = (node: any) => {
     if (!node || typeof node !== "object") return;
-    if (node.ty === "fl" || node.ty === "st") {
-      if (node.c?.k && Array.isArray(node.c.k)) {
-        node.c.k = target;
-      }
+    if ((node.ty === "fl" || node.ty === "st") && node.c?.k && Array.isArray(node.c.k)) {
+      node.c.k = target;
     }
     Object.values(node).forEach((value) => {
       if (Array.isArray(value)) {
@@ -59,9 +57,20 @@ export const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
   );
 
   const [current, setCurrent] = useState<TabType>(activeTab);
+  const [activeColor, setActiveColor] = useState("#0080FA");
+  const [inactiveColor, setInactiveColor] = useState("#959595");
   const lottieRefs = useRef<Array<LottieRefCurrentProps | null>>([]);
 
   useEffect(() => setCurrent(activeTab), [activeTab]);
+
+  useEffect(() => {
+    const styles = getComputedStyle(document.documentElement);
+    const nextActive = styles.getPropertyValue("--tg-button").trim();
+    const nextInactive = styles.getPropertyValue("--tg-hint").trim();
+    if (nextActive) setActiveColor(nextActive);
+    if (nextInactive) setInactiveColor(nextInactive);
+  }, []);
+
   useEffect(() => {
     const activeIndex = tabs.findIndex((tab) => tab.id === current);
     const target = lottieRefs.current[activeIndex];
@@ -70,18 +79,19 @@ export const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
 
   return (
     <div className="cbc-tabbar" role="navigation" aria-label="Bottom navigation">
-      {tabs.map((t, index) => {
-        const isActive = current === t.id;
-        const animationData = recolorLottie(t.animationData, isActive ? "#0080FA" : "#959595");
+      {tabs.map((tab, index) => {
+        const isActive = current === tab.id;
+        const animationData = recolorLottie(tab.animationData, isActive ? activeColor : inactiveColor);
+
         return (
           <button
-            key={t.id}
+            key={tab.id}
             type="button"
             className="cbc-tabbar__item"
             data-active={isActive ? "" : undefined}
             onClick={() => {
-              setCurrent(t.id);
-              onTabChange(t.id);
+              setCurrent(tab.id);
+              onTabChange(tab.id);
             }}
           >
             <span className="cbc-tabbar__iconWrap" aria-hidden="true">
@@ -95,7 +105,7 @@ export const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
                 className="cbc-tabbar__lottie"
               />
             </span>
-            <span className="cbc-tabbar__label">{t.label}</span>
+            <span className="cbc-tabbar__label">{tab.label}</span>
           </button>
         );
       })}

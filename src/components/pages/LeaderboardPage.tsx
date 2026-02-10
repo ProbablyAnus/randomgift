@@ -47,7 +47,7 @@ type LeaderboardPayload = LeaderboardUser[] | LeaderboardPayloadObject;
 
 type LeaderboardResponse = LeaderboardPayload | null | undefined;
 
-const formatXp = (count: number) => `${count} XP`;
+const formatXp = (count: number) => `${count} xp`;
 
 const getDisplayName = (user: LeaderboardUser) => {
   if (user.userName) return user.userName;
@@ -76,6 +76,15 @@ const getXpCount = (user: LeaderboardUser) =>
   user.giftsReceived ??
   user.gifts_received ??
   0;
+
+
+
+const getPositionLabel = (position: number) => {
+  if (position === 1) return "🥇";
+  if (position === 2) return "🥈";
+  if (position === 3) return "🥉";
+  return `#${position}`;
+};
 
 const toLeaderboardArray = (data: LeaderboardResponse): LeaderboardUser[] => {
   if (!data) return [];
@@ -152,7 +161,7 @@ export const LeaderboardPage: FC = () => {
 
   const filteredUsers = useMemo(() => {
     const trimmed = searchValue.trim().toLowerCase();
-    if (trimmed.length < 3) return rankedUsers;
+    if (!trimmed) return rankedUsers;
     return rankedUsers.filter((leader) => getDisplayName(leader).toLowerCase().includes(trimmed));
   }, [rankedUsers, searchValue]);
 
@@ -204,7 +213,7 @@ export const LeaderboardPage: FC = () => {
         </div>
       </div>
 
-      {searchValue.trim().length > 2 && !filteredUsers.length ? (
+      {searchValue.trim().length > 0 && !filteredUsers.length ? (
         <div className={styles.noItems}>
           <div className={styles.noItemsTitle}>Совпадений не найдено</div>
         </div>
@@ -236,7 +245,7 @@ export const LeaderboardPage: FC = () => {
                   </div>
                   <div className={styles.count}>{formatXp(xpCount)}</div>
                 </div>
-                <div className={styles.number}>#{index + 1}</div>
+                <div className={styles.number}>{getPositionLabel(index + 1)}</div>
               </button>
             );
           })}

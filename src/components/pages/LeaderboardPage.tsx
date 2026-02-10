@@ -6,71 +6,95 @@ import styles from "./LeaderboardPage.module.scss";
 interface LeaderboardUser {
   id?: number | string;
   userId?: number | string;
+  user_id?: number | string;
   username?: string;
   userName?: string;
+  user_name?: string;
   firstName?: string;
+  first_name?: string;
   lastName?: string;
+  last_name?: string;
   photoUrl?: string;
   photo_url?: string;
+  avatar?: string;
   gamesPlayed?: number;
+  games_played?: number;
   games?: number;
   plays?: number;
   giftsReceived?: number;
+  gifts_received?: number;
   spentStars?: number;
+  spent_stars?: number;
   starsSpent?: number;
   totalSpentStars?: number;
+  total_spent_stars?: number;
   xp?: number;
   score?: number;
 }
 
-type LeaderboardResponse =
-  | LeaderboardUser[]
-  | {
-      users?: LeaderboardUser[];
-      leaderboard?: LeaderboardUser[];
-      data?: LeaderboardUser[] | { users?: LeaderboardUser[]; leaderboard?: LeaderboardUser[] };
-      result?: LeaderboardUser[] | { users?: LeaderboardUser[]; leaderboard?: LeaderboardUser[] };
-    };
+type LeaderboardPayloadObject = {
+  users?: LeaderboardUser[];
+  leaderboard?: LeaderboardUser[];
+  items?: LeaderboardUser[];
+  rows?: LeaderboardUser[];
+  list?: LeaderboardUser[];
+  data?: LeaderboardPayload;
+  result?: LeaderboardPayload;
+  payload?: LeaderboardPayload;
+};
+
+type LeaderboardPayload = LeaderboardUser[] | LeaderboardPayloadObject;
+
+type LeaderboardResponse = LeaderboardPayload | null | undefined;
 
 const formatXp = (count: number) => `${count} XP`;
 
 const getDisplayName = (user: LeaderboardUser) => {
   if (user.userName) return user.userName;
   if (user.username) return user.username;
-  const fullName = [user.firstName, user.lastName].filter(Boolean).join(" ");
+  if (user.user_name) return user.user_name;
+  const fullName = [user.firstName ?? user.first_name, user.lastName ?? user.last_name].filter(Boolean).join(" ");
   return fullName || "Без имени";
 };
 
-const getPhotoUrl = (user: LeaderboardUser) => user.photoUrl ?? user.photo_url ?? "";
+const getPhotoUrl = (user: LeaderboardUser) => user.photoUrl ?? user.photo_url ?? user.avatar ?? "";
 
-const getUserId = (user: LeaderboardUser) => user.userId ?? user.id;
+const getUserId = (user: LeaderboardUser) => user.userId ?? user.user_id ?? user.id;
 
 const getXpCount = (user: LeaderboardUser) =>
   user.spentStars ??
+  user.spent_stars ??
   user.starsSpent ??
   user.totalSpentStars ??
+  user.total_spent_stars ??
   user.xp ??
   user.score ??
   user.gamesPlayed ??
+  user.games_played ??
   user.games ??
   user.plays ??
   user.giftsReceived ??
+  user.gifts_received ??
   0;
 
 const toLeaderboardArray = (data: LeaderboardResponse): LeaderboardUser[] => {
+  if (!data) return [];
   if (Array.isArray(data)) return data;
 
-  const nestedData = data.data;
-  if (Array.isArray(nestedData)) return nestedData;
-  if (nestedData?.users) return nestedData.users;
-  if (nestedData?.leaderboard) return nestedData.leaderboard;
+  const arrayFields: (keyof LeaderboardPayloadObject)[] = ["users", "leaderboard", "items", "rows", "list"];
+  for (const field of arrayFields) {
+    const value = data[field];
+    if (Array.isArray(value)) return value;
+  }
 
-  const nestedResult = data.result;
-  if (Array.isArray(nestedResult)) return nestedResult;
-  if (nestedResult?.users) return nestedResult.users;
-  if (nestedResult?.leaderboard) return nestedResult.leaderboard;
+  const nestedFields: (keyof LeaderboardPayloadObject)[] = ["data", "result", "payload"];
+  for (const field of nestedFields) {
+    const nested = data[field];
+    const list = toLeaderboardArray(nested);
+    if (list.length) return list;
+  }
 
-  return data.users ?? data.leaderboard ?? [];
+  return [];
 };
 
 export const LeaderboardPage: FC = () => {
@@ -133,7 +157,7 @@ export const LeaderboardPage: FC = () => {
   }, [rankedUsers, searchValue]);
 
   const handleUserClick = (user: LeaderboardUser) => {
-    const username = user.username ?? user.userName;
+    const username = user.username ?? user.userName ?? user.user_name;
     const userId = getUserId(user);
     const telegramLink = username
       ? `https://t.me/${username}`

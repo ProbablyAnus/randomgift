@@ -341,7 +341,7 @@ export const GiftsPage: FC = () => {
 
     return (
       <span key={contentKey} className="button-content">
-        <span className="text-lg">Получить подарок</span>
+        <span className="text-lg">Купить подарок за</span>
         <span className="button-price">
           <img src={ButtonIcon} alt="" className="button-price-icon" />
           <span className="text-lg font-semibold price-value">{selectedPrice}</span>

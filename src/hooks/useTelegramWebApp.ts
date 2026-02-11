@@ -39,6 +39,14 @@ export type TelegramWebApp = {
   openTelegramLink?: (url: string) => void;
   openLink?: (url: string) => void;
   openInvoice?: (url: string, cb?: (status: "paid" | "cancelled" | "failed" | "pending") => void) => void;
+  showPopup?: (
+    params: {
+      title?: string;
+      message: string;
+      buttons?: Array<{ id?: string; type?: "default" | "ok" | "close" | "cancel" | "destructive"; text?: string }>;
+    },
+    callback?: (buttonId: string) => void
+  ) => void;
   expand?: () => void;
   ready?: () => void;
 };

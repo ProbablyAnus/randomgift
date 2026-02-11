@@ -153,7 +153,6 @@ export const GiftsPage: FC = () => {
   const [wonPrize, setWonPrize] = useState<{ icon: GiftIcon; label: string; price: number } | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [isCreatingInvoice, setIsCreatingInvoice] = useState(false);
-  const [invoiceErrorMessage, setInvoiceErrorMessage] = useState<string | null>(null);
   const rouletteRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -196,6 +195,19 @@ export const GiftsPage: FC = () => {
   const baseCardHeight = sizeX === "compact" ? 162 : 184;
   const rouletteCardWidth = baseCardWidth;
   const cardGap = 12;
+
+  const showTelegramErrorPopup = (message: string) => {
+    if (webApp?.showPopup) {
+      webApp.showPopup({
+        title: "Ошибка",
+        message,
+        buttons: [{ type: "ok" }],
+      });
+      return;
+    }
+
+    window.alert(message);
+  };
   
   const startSpin = () => {
     if (isSpinning) return;
@@ -314,23 +326,16 @@ export const GiftsPage: FC = () => {
     }
 
     setIsCreatingInvoice(true);
-    setInvoiceErrorMessage(null);
-
     try {
       const { invoiceLink, errorMessage } = await requestInvoiceLink(selectedPrice);
       if (!invoiceLink || !webApp?.openInvoice) {
-        setInvoiceErrorMessage(errorMessage ?? "Не удалось создать счёт, попробуйте позже");
+        showTelegramErrorPopup(errorMessage ?? "Не удалось создать счёт, попробуйте позже");
         return;
       }
 
       webApp.openInvoice(invoiceLink, (status) => {
         if (status === "paid") {
           startSpin();
-          return;
-        }
-
-        if (status === "cancelled" || status === "failed") {
-          console.warn(`Invoice was not paid: ${status}`);
         }
       });
     } finally {
@@ -528,11 +533,6 @@ export const GiftsPage: FC = () => {
         >
           {getButtonContent()}
         </button>
-        {invoiceErrorMessage && (
-          <p className="mt-3 text-sm text-destructive" role="alert">
-            {invoiceErrorMessage}
-          </p>
-        )}
       </div>
 
       {/* Win Prizes Section - Horizontal Scroll */}

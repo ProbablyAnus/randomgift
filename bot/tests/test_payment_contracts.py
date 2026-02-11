@@ -4,7 +4,7 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 
 from bot.api import handle_invoice
-from bot.bot_handlers import process_pre_checkout_query
+from bot.bot_handlers import process_pre_checkout_query, process_successful_payment
 from bot.payments import build_invoice_payload
 
 
@@ -57,6 +57,56 @@ class PaymentContractsTest(unittest.IsolatedAsyncioTestCase):
         await process_pre_checkout_query(query)
 
         query.answer.assert_awaited_once_with(ok=False, error_message="Платеж от другого пользователя.")
+
+    async def test_successful_payment_updates_spent_stars_for_payload_user(self):
+        db = AsyncMock()
+        message = SimpleNamespace(
+            message_id=123,
+            from_user=SimpleNamespace(
+                id=777,
+                username="tester",
+                first_name="Test",
+                last_name="User",
+            ),
+            successful_payment=SimpleNamespace(
+                invoice_payload=build_invoice_payload(50, 777),
+                telegram_payment_charge_id="charge-1",
+            ),
+        )
+
+        await process_successful_payment(message, db)
+
+        db.upsert_user.assert_awaited_once_with(
+            {
+                "id": 777,
+                "username": "tester",
+                "first_name": "Test",
+                "last_name": "User",
+                "photo_url": None,
+            }
+        )
+        db.add_spent_stars.assert_awaited_once_with(777, 50)
+
+    async def test_successful_payment_ignores_invalid_payload(self):
+        db = AsyncMock()
+        message = SimpleNamespace(
+            message_id=123,
+            from_user=SimpleNamespace(
+                id=777,
+                username="tester",
+                first_name="Test",
+                last_name="User",
+            ),
+            successful_payment=SimpleNamespace(
+                invoice_payload="not-json",
+                telegram_payment_charge_id="charge-1",
+            ),
+        )
+
+        await process_successful_payment(message, db)
+
+        db.upsert_user.assert_not_awaited()
+        db.add_spent_stars.assert_not_awaited()
 
 
 if __name__ == "__main__":

@@ -81,9 +81,9 @@ python bot/main.py
 
 ## API endpoints
 
-- Актуальный endpoint для создания инвойса: `GET /api/invoice?amount=<value>`.
-- Legacy endpoint `POST /create-invoice` оставлен только на переходный период и возвращает `410 Gone` с инструкцией использовать `/api/invoice`.
-- Все новые интеграции должны использовать только `/api/invoice`.
+- Единственный поддерживаемый endpoint для создания инвойса: `GET /api/invoice?amount=<value>`.
+- Все интеграции по Stars-оплате должны использовать только `/api/invoice`.
+- Последовательность flow и контракт payload описаны в `docs/payment-sequence-flow.md`.
 
 ## Стек
 

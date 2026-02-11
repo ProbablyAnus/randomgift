@@ -1,4 +1,11 @@
 import json
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class PaymentValidationResult:
+    ok: bool
+    error_message: str | None = None
 
 
 def build_invoice_payload(amount: int, user_id: int) -> str:
@@ -33,3 +40,27 @@ def parse_invoice_payload(payload: str) -> dict | None:
         "id": str(payload_id) if payload_id is not None else None,
         "correlation_id": correlation_id,
     }
+
+
+def validate_payment_request(
+    payload: dict,
+    *,
+    allowed_amounts: set[int],
+    currency: str,
+    expected_currency: str,
+    total_amount: int,
+    from_user_id: int,
+) -> PaymentValidationResult:
+    if currency != expected_currency:
+        return PaymentValidationResult(ok=False, error_message="Неверная валюта.")
+
+    if payload["amount"] not in allowed_amounts:
+        return PaymentValidationResult(ok=False, error_message="Некорректная сумма.")
+
+    if total_amount != payload["amount"]:
+        return PaymentValidationResult(ok=False, error_message="Несовпадение суммы.")
+
+    if from_user_id != payload["user_id"]:
+        return PaymentValidationResult(ok=False, error_message="Платеж от другого пользователя.")
+
+    return PaymentValidationResult(ok=True)

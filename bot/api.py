@@ -1,3 +1,5 @@
+import logging
+from datetime import datetime, timezone
 from urllib.parse import urlparse
 
 from aiohttp import web
@@ -8,6 +10,9 @@ from config import ALLOWED_PRICES, BOT_TOKEN, CORS_ALLOW_ORIGIN, INIT_DATA_MAX_A
 from database import Database
 from payments import build_invoice_payload
 from security import extract_user_from_init_data, verify_telegram_init_data
+
+
+logger = logging.getLogger(__name__)
 
 
 async def handle_invoice(request: web.Request) -> web.Response:
@@ -64,6 +69,22 @@ async def handle_leaderboard(request: web.Request) -> web.Response:
     return web.json_response(leaderboard)
 
 
+async def handle_create_invoice_legacy(request: web.Request) -> web.Response:
+    logger.warning(
+        "Deprecated endpoint hit: route=%s user_agent=%s timestamp=%s",
+        request.path,
+        request.headers.get("User-Agent", ""),
+        datetime.now(timezone.utc).isoformat(),
+    )
+    return web.json_response(
+        {
+            "error": "deprecated_endpoint",
+            "message": "Endpoint /create-invoice is deprecated. Use /api/invoice instead.",
+        },
+        status=410,
+    )
+
+
 def _resolve_allowed_origin() -> str | None:
     if CORS_ALLOW_ORIGIN:
         return CORS_ALLOW_ORIGIN
@@ -99,6 +120,7 @@ async def run_api_server(bot: Bot, db: Database, api_host: str, api_port: int) -
     app["db"] = db
     app.router.add_get("/api/invoice", handle_invoice)
     app.router.add_options("/api/invoice", handle_invoice)
+    app.router.add_post("/create-invoice", handle_create_invoice_legacy)
     app.router.add_get("/api/leaderboard", handle_leaderboard)
     app.router.add_options("/api/leaderboard", handle_leaderboard)
 

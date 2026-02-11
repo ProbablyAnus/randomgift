@@ -90,24 +90,69 @@ const getPositionLabel = (position: number) => {
   return `#${position}`;
 };
 
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+};
+
+const isLeaderboardUserLike = (value: unknown): value is LeaderboardUser => {
+  if (!isRecord(value)) return false;
+
+  return (
+    "id" in value ||
+    "_id" in value ||
+    "userId" in value ||
+    "user_id" in value ||
+    "username" in value ||
+    "userName" in value ||
+    "user_name" in value ||
+    "name" in value ||
+    "spentStars" in value ||
+    "spent_stars" in value ||
+    "xp" in value ||
+    "score" in value ||
+    "gamesPlayed" in value ||
+    "games_played" in value ||
+    "giftsReceived" in value ||
+    "gifts_received" in value
+  );
+};
+
+const collectLeaderboardUsers = (value: unknown, seen: WeakSet<object>): LeaderboardUser[] => {
+  if (!value) return [];
+
+  if (Array.isArray(value)) {
+    return value.flatMap((item) => collectLeaderboardUsers(item, seen));
+  }
+
+  if (!isRecord(value)) return [];
+  if (seen.has(value)) return [];
+  seen.add(value);
+
+  if (isLeaderboardUserLike(value)) {
+    return [value];
+  }
+
+  return Object.values(value).flatMap((item) => collectLeaderboardUsers(item, seen));
+};
+
+const dedupeUsers = (users: LeaderboardUser[]) => {
+  const byKey = new Map<string, LeaderboardUser>();
+
+  users.forEach((user, index) => {
+    const key = String(getUserId(user) ?? user.username ?? user.userName ?? user.user_name ?? `row-${index}`);
+    if (!byKey.has(key)) {
+      byKey.set(key, user);
+    }
+  });
+
+  return [...byKey.values()];
+};
+
 const toLeaderboardArray = (data: LeaderboardResponse): LeaderboardUser[] => {
   if (!data) return [];
-  if (Array.isArray(data)) return data;
 
-  const arrayFields: (keyof LeaderboardPayloadObject)[] = ["users", "leaderboard", "items", "rows", "list"];
-  for (const field of arrayFields) {
-    const value = data[field];
-    if (Array.isArray(value)) return value;
-  }
-
-  const nestedFields: (keyof LeaderboardPayloadObject)[] = ["data", "result", "payload"];
-  for (const field of nestedFields) {
-    const nested = data[field];
-    const list = toLeaderboardArray(nested);
-    if (list.length) return list;
-  }
-
-  return [];
+  const list = collectLeaderboardUsers(data, new WeakSet<object>());
+  return dedupeUsers(list);
 };
 
 export const LeaderboardPage: FC = () => {

@@ -19,4 +19,17 @@ def parse_invoice_payload(payload: str) -> dict | None:
     if not isinstance(amount, int) or not isinstance(user_id, int):
         return None
 
-    return {"amount": amount, "user_id": user_id}
+    payload_id = data.get("id")
+    if payload_id is not None and not isinstance(payload_id, (str, int)):
+        return None
+
+    correlation_id = data.get("correlation_id")
+    if correlation_id is not None and not isinstance(correlation_id, str):
+        return None
+
+    return {
+        "amount": amount,
+        "user_id": user_id,
+        "id": str(payload_id) if payload_id is not None else None,
+        "correlation_id": correlation_id,
+    }

@@ -1,3 +1,5 @@
+import logging
+
 from aiogram import Dispatcher, types
 from aiogram.filters import CommandStart
 from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -5,6 +7,9 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from config import ALLOWED_PRICES, MINI_APP_BUTTON, MINI_APP_URL
 from database import Database
 from payments import parse_invoice_payload
+
+
+logger = logging.getLogger(__name__)
 
 
 def build_start_keyboard() -> types.InlineKeyboardMarkup:
@@ -34,24 +39,79 @@ def register_bot_handlers(dp: Dispatcher, db: Database) -> None:
 
     @dp.pre_checkout_query()
     async def handle_pre_checkout(pre_checkout_query: types.PreCheckoutQuery) -> None:
+        logger.info(
+            "pre_checkout_query_received",
+            extra={
+                "query_id": pre_checkout_query.id,
+                "user_id": pre_checkout_query.from_user.id,
+                "currency": pre_checkout_query.currency,
+                "total_amount": pre_checkout_query.total_amount,
+            },
+        )
         payload = parse_invoice_payload(pre_checkout_query.invoice_payload)
+        logger.info(
+            "pre_checkout_query_payload_parsed",
+            extra={
+                "query_id": pre_checkout_query.id,
+                "payload_is_valid": bool(payload),
+                "payload": payload,
+            },
+        )
         if not payload:
+            logger.warning(
+                "pre_checkout_query_rejected",
+                extra={"query_id": pre_checkout_query.id, "reason": "invalid_payload"},
+            )
             await pre_checkout_query.answer(ok=False, error_message="Некорректные данные платежа.")
             return
 
         if pre_checkout_query.currency != "XTR":
+            logger.warning(
+                "pre_checkout_query_rejected",
+                extra={
+                    "query_id": pre_checkout_query.id,
+                    "reason": "invalid_currency",
+                    "currency": pre_checkout_query.currency,
+                },
+            )
             await pre_checkout_query.answer(ok=False, error_message="Неверная валюта.")
             return
 
         if payload["amount"] not in ALLOWED_PRICES:
+            logger.warning(
+                "pre_checkout_query_rejected",
+                extra={
+                    "query_id": pre_checkout_query.id,
+                    "reason": "unsupported_amount",
+                    "amount": payload["amount"],
+                },
+            )
             await pre_checkout_query.answer(ok=False, error_message="Некорректная сумма.")
             return
 
         if pre_checkout_query.total_amount != payload["amount"]:
+            logger.warning(
+                "pre_checkout_query_rejected",
+                extra={
+                    "query_id": pre_checkout_query.id,
+                    "reason": "amount_mismatch",
+                    "payload_amount": payload["amount"],
+                    "total_amount": pre_checkout_query.total_amount,
+                },
+            )
             await pre_checkout_query.answer(ok=False, error_message="Несовпадение суммы.")
             return
 
         if pre_checkout_query.from_user.id != payload["user_id"]:
+            logger.warning(
+                "pre_checkout_query_rejected",
+                extra={
+                    "query_id": pre_checkout_query.id,
+                    "reason": "user_id_mismatch",
+                    "from_user_id": pre_checkout_query.from_user.id,
+                    "payload_user_id": payload["user_id"],
+                },
+            )
             await pre_checkout_query.answer(ok=False, error_message="Платеж от другого пользователя.")
             return
 
@@ -65,7 +125,26 @@ def register_bot_handlers(dp: Dispatcher, db: Database) -> None:
 
         payload = parse_invoice_payload(successful_payment.invoice_payload)
         if not payload:
+            logger.warning(
+                "successful_payment_payload_invalid",
+                extra={
+                    "message_id": message.message_id,
+                    "user_id": message.from_user.id,
+                },
+            )
             return
+
+        logger.info(
+            "successful_payment_received",
+            extra={
+                "message_id": message.message_id,
+                "user_id": payload["user_id"],
+                "amount": payload["amount"],
+                "payload_id": payload.get("id"),
+                "correlation_id": payload.get("correlation_id")
+                or successful_payment.telegram_payment_charge_id,
+            },
+        )
 
         await db.upsert_user(
             {

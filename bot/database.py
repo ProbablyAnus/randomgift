@@ -1,6 +1,10 @@
 import asyncio
+import logging
 import sqlite3
 from pathlib import Path
+
+
+logger = logging.getLogger(__name__)
 
 
 class Database:
@@ -66,24 +70,40 @@ class Database:
 
     async def add_spent_stars(self, user_id: int, amount: int) -> None:
         if amount <= 0:
+            logger.warning("add_spent_stars_skipped", extra={"user_id": user_id, "amount": amount, "reason": "non_positive_amount"})
             return
 
-        async with self._lock:
-            await asyncio.to_thread(self._add_spent_stars_sync, user_id, amount)
+        try:
+            async with self._lock:
+                await asyncio.to_thread(self._add_spent_stars_sync, user_id, amount)
+        except Exception:
+            logger.exception("add_spent_stars_failed", extra={"user_id": user_id, "amount": amount})
+            raise
 
     def _add_spent_stars_sync(self, user_id: int, amount: int) -> None:
         with self._connect() as conn:
-            conn.execute(
+            cursor = conn.execute(
                 """
                 INSERT INTO users (user_id, spent_stars)
                 VALUES (?, ?)
                 ON CONFLICT(user_id) DO UPDATE SET
                     spent_stars = users.spent_stars + excluded.spent_stars,
                     updated_at = CURRENT_TIMESTAMP
+                RETURNING spent_stars
                 """,
                 (user_id, amount),
             )
+            row = cursor.fetchone()
             conn.commit()
+
+        logger.info(
+            "add_spent_stars_succeeded",
+            extra={
+                "user_id": user_id,
+                "amount_added": amount,
+                "current_spent_stars": row["spent_stars"] if row else None,
+            },
+        )
 
     async def get_leaderboard(self) -> list[dict]:
         return await asyncio.to_thread(self._get_leaderboard_sync)
@@ -97,6 +117,8 @@ class Database:
                 ORDER BY spent_stars DESC, user_id ASC
                 """
             ).fetchall()
+
+        logger.info("get_leaderboard_result", extra={"records_count": len(rows)})
 
         return [
             {

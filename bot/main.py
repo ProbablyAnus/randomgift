@@ -1,4 +1,5 @@
 import asyncio
+import logging
 
 from aiogram import Bot, Dispatcher
 from dotenv import load_dotenv
@@ -10,6 +11,8 @@ from database import Database
 
 load_dotenv()
 validate_config()
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 
 
 async def main() -> None:

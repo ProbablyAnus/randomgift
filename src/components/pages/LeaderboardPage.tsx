@@ -52,6 +52,8 @@ type LeaderboardPayload = LeaderboardUser[] | LeaderboardPayloadObject;
 
 type LeaderboardResponse = LeaderboardPayload | null | undefined;
 
+type LeaderboardEmptyReason = "empty_leaderboard" | "load_error" | null;
+
 const formatXp = (count: number) => `${count} xp`;
 
 const getDisplayName = (user: LeaderboardUser) => {
@@ -162,6 +164,7 @@ export const LeaderboardPage: FC = () => {
   const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [emptyReason, setEmptyReason] = useState<LeaderboardEmptyReason>(null);
   const currentUserId = webApp?.initDataUnsafe?.user?.id;
 
   useEffect(() => {
@@ -171,6 +174,7 @@ export const LeaderboardPage: FC = () => {
     const fetchLeaderboard = async () => {
       setIsLoading(true);
       setHasError(false);
+      setEmptyReason(null);
       try {
         const initData = webApp?.initData;
         if (!initData) {
@@ -191,10 +195,12 @@ export const LeaderboardPage: FC = () => {
         if (!isMounted) return;
         setLeaderboard(list);
         setHasError(false);
+        setEmptyReason(list.length === 0 ? "empty_leaderboard" : null);
       } catch {
         if (!isMounted) return;
         setHasError(true);
         setLeaderboard([]);
+        setEmptyReason("load_error");
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -220,6 +226,21 @@ export const LeaderboardPage: FC = () => {
     return rankedUsers.filter((leader) => getDisplayName(leader).toLowerCase().includes(trimmed));
   }, [rankedUsers, searchValue]);
 
+
+  useEffect(() => {
+    if (!emptyReason) return;
+
+    const detail = {
+      event: "leaderboard_empty_state",
+      reason: emptyReason,
+      hasError,
+      timestamp: Date.now(),
+    };
+
+    window.dispatchEvent(new CustomEvent("app:telemetry", { detail }));
+    console.info("leaderboard_empty_state", detail);
+  }, [emptyReason, hasError]);
+
   const handleUserClick = (user: LeaderboardUser) => {
     const username = user.username ?? user.userName ?? user.user_name;
     const userId = getUserId(user);
@@ -242,7 +263,7 @@ export const LeaderboardPage: FC = () => {
 
   if (!rankedUsers.length) {
     return (
-      <div className={styles.emptyState}>
+      <div className={styles.emptyState} data-empty-reason={emptyReason ?? undefined}>
         <div className={styles.emptyTitle}>Рейтинг пуст</div>
         <div className={styles.emptySubtitle}>Пока нет пользователей для отображения.</div>
         {hasError && <div className={styles.emptyHint}>Не удалось загрузить данные. Попробуйте позже.</div>}

@@ -2,6 +2,7 @@ import { FC, useEffect, useMemo, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useTelegramWebApp } from "@/hooks/useTelegramWebApp";
 import styles from "./LeaderboardPage.module.scss";
+import { buildApiUrl } from "@/lib/api";
 
 interface LeaderboardUser {
   id?: number | string;
@@ -161,8 +162,6 @@ export const LeaderboardPage: FC = () => {
   const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
-
   const currentUserId = webApp?.initDataUnsafe?.user?.id;
 
   useEffect(() => {
@@ -174,35 +173,24 @@ export const LeaderboardPage: FC = () => {
       setHasError(false);
       try {
         const initData = webApp?.initData;
-        const encodedInitData = initData ? encodeURIComponent(initData) : "";
-        const endpoints = [
-          `${apiBaseUrl}/api/leaderboard`,
-          `${apiBaseUrl}/api/users${encodedInitData ? `?initData=${encodedInitData}` : ""}`,
-        ];
-
-        let list: LeaderboardUser[] = [];
-
-        for (const endpoint of endpoints) {
-          const response = await fetch(endpoint, {
-            signal: controller.signal,
-            headers: initData ? { "X-Telegram-Init-Data": initData } : undefined,
-          });
-
-          if (!response.ok) {
-            continue;
-          }
-
-          const data = (await response.json()) as LeaderboardResponse;
-          list = toLeaderboardArray(data);
-
-          if (list.length) {
-            break;
-          }
+        if (!initData) {
+          console.warn("initData missing — leaderboard user won't be registered");
         }
+        const response = await fetch(buildApiUrl("/api/leaderboard"), {
+          signal: controller.signal,
+          headers: initData ? { "X-Telegram-Init-Data": initData } : undefined,
+        });
+
+        if (!response.ok) {
+          throw new Error("failed_to_load_leaderboard");
+        }
+
+        const data = (await response.json()) as LeaderboardResponse;
+        const list = toLeaderboardArray(data);
 
         if (!isMounted) return;
         setLeaderboard(list);
-        setHasError(!list.length);
+        setHasError(false);
       } catch {
         if (!isMounted) return;
         setHasError(true);
@@ -220,7 +208,7 @@ export const LeaderboardPage: FC = () => {
       isMounted = false;
       controller.abort();
     };
-  }, [apiBaseUrl, webApp?.initData]);
+  }, [webApp?.initData]);
 
   const rankedUsers = useMemo(() => {
     return [...leaderboard].sort((a, b) => getXpCount(b) - getXpCount(a));

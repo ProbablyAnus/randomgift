@@ -22,6 +22,7 @@
 3. Заполните `.env.local` (frontend, Vite):
    - `VITE_NEWS_URL` — ссылка на канал/новости.
    - `VITE_SUPPORT_URL` — ссылка на поддержку.
+   - `VITE_API_BASE_URL` — базовый URL API (например, `http://localhost:8080` для локальной разработки без reverse proxy).
 
 ## Полный запуск проекта (пошагово)
 

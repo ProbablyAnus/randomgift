@@ -6,6 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { RefreshCw } from "lucide-react";
 import { useAdaptivity } from "@/hooks/useAdaptivity";
 import { useTelegramWebApp } from "@/hooks/useTelegramWebApp";
+import { buildApiUrl } from "@/lib/api";
 import bouquetSvg from "@/assets/gifts/bouquet.svg";
 import cakeSvg from "@/assets/gifts/cake.svg";
 import champagneSvg from "@/assets/gifts/champagne.svg";
@@ -148,6 +149,7 @@ export const GiftsPage: FC = () => {
   const [isSpinning, setIsSpinning] = useState(false);
   const [wonPrize, setWonPrize] = useState<{ icon: GiftIcon; label: string; price: number } | null>(null);
   const [showResult, setShowResult] = useState(false);
+  const [isCreatingInvoice, setIsCreatingInvoice] = useState(false);
   const rouletteRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -251,18 +253,17 @@ export const GiftsPage: FC = () => {
   };
 
   const requestInvoiceLink = async (amount: number) => {
+    const initData = webApp?.initData;
+    if (!initData) {
+      console.warn("initData missing: invoice cannot be created outside Telegram WebApp context");
+      return null;
+    }
+
     try {
-      const initData = webApp?.initData;
-      const response = initData
-        ? await fetch(`/api/invoice?amount=${amount}`, {
-            method: "GET",
-            headers: { "X-Telegram-Init-Data": initData },
-          })
-        : await fetch("/create-invoice", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ amount }),
-          });
+      const response = await fetch(buildApiUrl(`/api/invoice?amount=${amount}`), {
+        method: "GET",
+        headers: { "X-Telegram-Init-Data": initData },
+      });
 
       if (!response.ok) {
         return null;
@@ -281,26 +282,32 @@ export const GiftsPage: FC = () => {
   };
 
   const handleGetGift = async () => {
-    if (isSpinning) return;
+    if (isSpinning || isCreatingInvoice) return;
 
     if (demoMode) {
       startSpin();
       return;
     }
 
-    const invoiceLink = await requestInvoiceLink(selectedPrice);
-    if (!invoiceLink) return;
+    setIsCreatingInvoice(true);
 
-    if (!webApp?.openInvoice) {
-      return;
+    try {
+      const invoiceLink = await requestInvoiceLink(selectedPrice);
+      if (!invoiceLink || !webApp?.openInvoice) return;
+
+      webApp.openInvoice(invoiceLink, (status) => {
+        if (status === "paid") {
+          startSpin();
+          return;
+        }
+
+        if (status === "cancelled" || status === "failed") {
+          console.warn(`Invoice was not paid: ${status}`);
+        }
+      });
+    } finally {
+      setIsCreatingInvoice(false);
     }
-
-    webApp.openInvoice(invoiceLink, (status) => {
-      if (status === "paid") {
-        startSpin();
-        return;
-      }
-    });
   };
 
   const closeResultPanel = () => {
@@ -320,9 +327,9 @@ export const GiftsPage: FC = () => {
 
   // Button text based on state
   const getButtonContent = () => {
-    const contentKey = isSpinning ? "spinning" : demoMode ? "demo" : "gift";
+    const contentKey = isSpinning || isCreatingInvoice ? "spinning" : demoMode ? "demo" : "gift";
 
-    if (isSpinning) {
+    if (isSpinning || isCreatingInvoice) {
       return (
         <span key={contentKey} className="button-content">
           <RefreshCw size={26} className="animate-spin text-primary-foreground" />
@@ -488,7 +495,7 @@ export const GiftsPage: FC = () => {
       <div className="px-4 pb-3 mt-2">
         <button
           onClick={handleGetGift}
-          disabled={isSpinning}
+          disabled={isSpinning || isCreatingInvoice}
           className="primary-button touch-feedback"
         >
           {getButtonContent()}

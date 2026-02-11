@@ -21,13 +21,6 @@ interface LeaderboardUser {
   photo_url?: string;
   avatar?: string;
   profilePicture?: string;
-  gamesPlayed?: number;
-  games_played?: number;
-  games?: number;
-  plays?: number;
-  giftsReceived?: number;
-  gifts_received?: number;
-  receivedGiftsCount?: number;
   spentStars?: number;
   spent_stars?: number;
   starsSpent?: number;
@@ -75,15 +68,8 @@ const getXpCount = (user: LeaderboardUser) =>
   user.starsSpent ??
   user.totalSpentStars ??
   user.total_spent_stars ??
-  user.receivedGiftsCount ??
-  user.giftsReceived ??
-  user.gifts_received ??
   user.xp ??
   user.score ??
-  user.gamesPlayed ??
-  user.games_played ??
-  user.games ??
-  user.plays ??
   0;
 
 const getPositionLabel = (position: number) => {
@@ -113,10 +99,8 @@ const isLeaderboardUserLike = (value: unknown): value is LeaderboardUser => {
     "spent_stars" in value ||
     "xp" in value ||
     "score" in value ||
-    "gamesPlayed" in value ||
-    "games_played" in value ||
-    "giftsReceived" in value ||
-    "gifts_received" in value
+    "totalSpentStars" in value ||
+    "total_spent_stars" in value
   );
 };
 

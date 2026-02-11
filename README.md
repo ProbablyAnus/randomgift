@@ -79,6 +79,12 @@ python bot/main.py
 - `.env` — чувствительные данные бота (токен, домен мини-приложения).
 - `.env.local` — переменные фронтенда, которые будут доступны в Vite (`VITE_...`).
 
+## API endpoints
+
+- Актуальный endpoint для создания инвойса: `GET /api/invoice?amount=<value>`.
+- Legacy endpoint `POST /create-invoice` оставлен только на переходный период и возвращает `410 Gone` с инструкцией использовать `/api/invoice`.
+- Все новые интеграции должны использовать только `/api/invoice`.
+
 ## Стек
 
 - Vite

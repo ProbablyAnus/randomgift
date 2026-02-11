@@ -266,10 +266,20 @@ export const GiftsPage: FC = () => {
       };
     }
 
+    const userId = webApp?.initDataUnsafe?.user?.id;
+    if (typeof userId !== "number") {
+      console.warn("user id missing in initDataUnsafe: invoice payload cannot be built");
+      return null;
+    }
+
     try {
-      const response = await fetch(buildApiUrl(`/api/invoice?amount=${amount}`), {
-        method: "GET",
-        headers: { "X-Telegram-Init-Data": initData },
+      const response = await fetch(buildApiUrl("/api/invoice"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Telegram-Init-Data": initData,
+        },
+        body: JSON.stringify({ amount, user_id: userId }),
       });
 
       if (!response.ok) {

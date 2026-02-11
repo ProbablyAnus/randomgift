@@ -87,3 +87,7 @@ python bot/main.py
 - shadcn-ui
 - Tailwind CSS
 - aiogram (бот)
+
+## Платежный контракт и flow
+
+- Подробный sequence flow и контракт payload: `docs/payment-sequence.md`.

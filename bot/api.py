@@ -6,7 +6,7 @@ from aiogram.types import LabeledPrice
 
 from config import ALLOWED_PRICES, BOT_TOKEN, CORS_ALLOW_ORIGIN, INIT_DATA_MAX_AGE_SECONDS, MINI_APP_URL
 from database import Database
-from payments import build_invoice_payload
+from payments import INVOICE_API_ROUTE, build_invoice_payload, parse_invoice_request_payload
 from security import extract_user_from_init_data, verify_telegram_init_data
 
 
@@ -25,23 +25,29 @@ async def handle_invoice(request: web.Request) -> web.Response:
 
     await db.upsert_user(user)
 
-    amount_raw = request.query.get("amount", "0")
     try:
-        amount = int(amount_raw)
-    except ValueError:
-        return web.json_response({"error": "invalid_amount"}, status=400)
+        body = await request.json()
+    except Exception:
+        return web.json_response({"error": "invalid_payload"}, status=400)
 
-    if amount not in ALLOWED_PRICES:
+    payload = parse_invoice_request_payload(body)
+    if not payload:
+        return web.json_response({"error": "invalid_payload"}, status=400)
+
+    if payload["amount"] not in ALLOWED_PRICES:
         return web.json_response({"error": "unsupported_amount"}, status=400)
 
-    payload = build_invoice_payload(amount, user["id"])
+    if payload["user_id"] != user["id"]:
+        return web.json_response({"error": "user_id_mismatch"}, status=403)
+
+    invoice_payload = build_invoice_payload(payload["amount"], payload["user_id"])
     invoice_link = await bot.create_invoice_link(
         title="Random Gift",
-        description=f"Покупка подарка за {amount} звезд.",
-        payload=payload,
+        description=f"Покупка подарка за {payload['amount']} звезд.",
+        payload=invoice_payload,
         provider_token="",
         currency="XTR",
-        prices=[LabeledPrice(label=f"{amount} Stars", amount=amount)],
+        prices=[LabeledPrice(label=f"{payload['amount']} Stars", amount=payload['amount'])],
     )
 
     return web.json_response({"invoice_link": invoice_link})
@@ -97,8 +103,8 @@ async def run_api_server(bot: Bot, db: Database, api_host: str, api_port: int) -
     app = web.Application(middlewares=[cors_middleware])
     app["bot"] = bot
     app["db"] = db
-    app.router.add_get("/api/invoice", handle_invoice)
-    app.router.add_options("/api/invoice", handle_invoice)
+    app.router.add_post(INVOICE_API_ROUTE, handle_invoice)
+    app.router.add_options(INVOICE_API_ROUTE, handle_invoice)
     app.router.add_get("/api/leaderboard", handle_leaderboard)
     app.router.add_options("/api/leaderboard", handle_leaderboard)
 

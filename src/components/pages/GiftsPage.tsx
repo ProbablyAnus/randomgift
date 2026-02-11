@@ -26,6 +26,9 @@ const prices = [25, 50, 100];
 type GiftIcon = { src: string };
 type RouletteGift = { icon: GiftIcon; label: string; price: number; chance: number };
 type WinPrize = { icon: GiftIcon; label: string; price: number; chance: string };
+type InvoiceRequestResult =
+  | { invoiceLink: string; errorMessage: null }
+  | { invoiceLink: null; errorMessage: string };
 type GiftId =
   | "heart-box"
   | "teddy-bear"
@@ -150,6 +153,7 @@ export const GiftsPage: FC = () => {
   const [wonPrize, setWonPrize] = useState<{ icon: GiftIcon; label: string; price: number } | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [isCreatingInvoice, setIsCreatingInvoice] = useState(false);
+  const [invoiceErrorMessage, setInvoiceErrorMessage] = useState<string | null>(null);
   const rouletteRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -252,11 +256,14 @@ export const GiftsPage: FC = () => {
     }, 4000);
   };
 
-  const requestInvoiceLink = async (amount: number) => {
+  const requestInvoiceLink = async (amount: number): Promise<InvoiceRequestResult> => {
     const initData = webApp?.initData;
     if (!initData) {
       console.warn("initData missing: invoice cannot be created outside Telegram WebApp context");
-      return null;
+      return {
+        invoiceLink: null,
+        errorMessage: "Не удалось создать счёт, попробуйте позже",
+      };
     }
 
     try {
@@ -266,18 +273,35 @@ export const GiftsPage: FC = () => {
       });
 
       if (!response.ok) {
-        return null;
+        const isServerOrClientError = response.status >= 400 && response.status <= 599;
+        if (isServerOrClientError) {
+          return {
+            invoiceLink: null,
+            errorMessage: "Не удалось создать счёт, попробуйте позже",
+          };
+        }
+
+        return {
+          invoiceLink: null,
+          errorMessage: "Не удалось создать счёт, попробуйте позже",
+        };
       }
 
-      const data = (await response.json()) as { invoiceLink?: string; invoice_link?: string };
-      const invoiceLink = data.invoiceLink ?? data.invoice_link;
+      const data = (await response.json()) as { invoice_link?: string };
+      const invoiceLink = data.invoice_link;
       if (!invoiceLink) {
-        return null;
+        return {
+          invoiceLink: null,
+          errorMessage: "Не удалось создать счёт, попробуйте позже",
+        };
       }
 
-      return invoiceLink;
-    } catch (error) {
-      return null;
+      return { invoiceLink, errorMessage: null };
+    } catch {
+      return {
+        invoiceLink: null,
+        errorMessage: "Не удалось создать счёт, попробуйте позже",
+      };
     }
   };
 
@@ -290,10 +314,14 @@ export const GiftsPage: FC = () => {
     }
 
     setIsCreatingInvoice(true);
+    setInvoiceErrorMessage(null);
 
     try {
-      const invoiceLink = await requestInvoiceLink(selectedPrice);
-      if (!invoiceLink || !webApp?.openInvoice) return;
+      const { invoiceLink, errorMessage } = await requestInvoiceLink(selectedPrice);
+      if (!invoiceLink || !webApp?.openInvoice) {
+        setInvoiceErrorMessage(errorMessage ?? "Не удалось создать счёт, попробуйте позже");
+        return;
+      }
 
       webApp.openInvoice(invoiceLink, (status) => {
         if (status === "paid") {
@@ -500,6 +528,11 @@ export const GiftsPage: FC = () => {
         >
           {getButtonContent()}
         </button>
+        {invoiceErrorMessage && (
+          <p className="mt-3 text-sm text-destructive" role="alert">
+            {invoiceErrorMessage}
+          </p>
+        )}
       </div>
 
       {/* Win Prizes Section - Horizontal Scroll */}

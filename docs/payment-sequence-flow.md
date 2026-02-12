@@ -4,8 +4,9 @@ This document fixes the contract for Stars payments and should be used as the si
 
 ## Supported invoice route
 
-- **Only supported route:** `GET /api/invoice?amount=<value>`
-- Request must include `X-Telegram-Init-Data` header.
+- **Only supported route:** `GET /api/invoice?amount=<value>&init_data=<telegram_init_data>`
+- `init_data` query param is the primary transport for Telegram Mini App auth data (avoids CORS preflight issues with custom headers).
+- Backend also accepts `X-Telegram-Init-Data` header for backwards compatibility.
 
 ## Unified invoice payload schema
 
@@ -24,7 +25,7 @@ Rules:
 
 ## End-to-end sequence
 
-1. **Frontend** sends `GET /api/invoice?amount=<value>` with `X-Telegram-Init-Data`.
+1. **Frontend** sends `GET /api/invoice?amount=<value>&init_data=<telegram_init_data>`.
 2. **Invoice API** validates `initData`, extracts user, validates amount, builds payload via `build_invoice_payload(amount, user_id)`, and calls `create_invoice_link`.
 3. **Telegram pre_checkout** event arrives to bot.
 4. **pre_checkout handler** parses invoice payload and validates request with the same contract (`amount`, `user_id`, currency, and total amount).

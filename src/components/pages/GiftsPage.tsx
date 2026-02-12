@@ -208,6 +208,10 @@ export const GiftsPage: FC = () => {
 
     window.alert(message);
   };
+
+  const getActiveWebApp = () => {
+    return webApp ?? ((window as typeof window & { Telegram?: { WebApp?: typeof webApp } }).Telegram?.WebApp ?? null);
+  };
   
   const startSpin = () => {
     if (isSpinning) return;
@@ -269,7 +273,8 @@ export const GiftsPage: FC = () => {
   };
 
   const requestInvoiceLink = async (amount: number): Promise<InvoiceRequestResult> => {
-    const initData = webApp?.initData;
+    const activeWebApp = getActiveWebApp();
+    const initData = activeWebApp?.initData;
 
     if (!initData) {
       console.warn(
@@ -337,12 +342,14 @@ export const GiftsPage: FC = () => {
     setIsCreatingInvoice(true);
     try {
       const { invoiceLink, errorMessage } = await requestInvoiceLink(selectedPrice);
-      if (!invoiceLink || !webApp?.openInvoice) {
+      const activeWebApp = getActiveWebApp();
+
+      if (!invoiceLink || !activeWebApp?.openInvoice) {
         showTelegramErrorPopup(errorMessage ?? "Не удалось создать счёт, попробуйте позже");
         return;
       }
 
-      webApp.openInvoice(invoiceLink, (status) => {
+      activeWebApp.openInvoice(invoiceLink, (status) => {
         if (status === "paid") {
           startSpin();
         }

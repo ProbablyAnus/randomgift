@@ -270,37 +270,44 @@ export const GiftsPage: FC = () => {
 
   const requestInvoiceLink = async (amount: number): Promise<InvoiceRequestResult> => {
     const initData = webApp?.initData;
+
     if (!initData) {
-      console.warn("initData missing: invoice cannot be created outside Telegram WebApp context");
+      console.warn(
+        "initData missing: invoice cannot be created outside Telegram WebApp context"
+      );
+
       return {
         invoiceLink: null,
-        errorMessage: "Не удалось создать счёт, попробуйте позже",
+        errorMessage: "Откройте приложение внутри Telegram",
       };
     }
 
     try {
       const response = await fetch(buildApiUrl(`/api/invoice?amount=${amount}`), {
         method: "GET",
-        headers: { "X-Telegram-Init-Data": initData },
+        headers: {
+          "X-Telegram-Init-Data": initData,
+        },
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const isServerOrClientError = response.status >= 400 && response.status <= 599;
-        if (isServerOrClientError) {
-          return {
-            invoiceLink: null,
-            errorMessage: "Не удалось создать счёт, попробуйте позже",
-          };
+        let message = "Не удалось создать счёт, попробуйте позже";
+
+        if (data?.error === "invalid_init_data") {
+          message = "Откройте приложение внутри Telegram";
         }
 
         return {
           invoiceLink: null,
-          errorMessage: "Не удалось создать счёт, попробуйте позже",
+          errorMessage: message,
         };
       }
 
-      const data = (await response.json()) as { invoice_link?: string };
-      const invoiceLink = data.invoice_link;
+      // Поддерживаем оба варианта ответа backend
+      const invoiceLink = data.invoice_link || data.invoiceLink;
+
       if (!invoiceLink) {
         return {
           invoiceLink: null,
@@ -309,7 +316,9 @@ export const GiftsPage: FC = () => {
       }
 
       return { invoiceLink, errorMessage: null };
-    } catch {
+    } catch (error) {
+      console.error("Invoice fetch error:", error);
+
       return {
         invoiceLink: null,
         errorMessage: "Не удалось создать счёт, попробуйте позже",

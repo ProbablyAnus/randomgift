@@ -1,68 +1,129 @@
+import logging
 
-from fastapi import FastAPI, Request
 from aiogram import Bot
 from aiogram.types import LabeledPrice
-import os
-from dotenv import load_dotenv
-load_dotenv()
+from fastapi import FastAPI, Header, Query
+from fastapi.responses import JSONResponse
+import uvicorn
 
+from config import ALLOWED_PRICES, BOT_TOKEN, INIT_DATA_MAX_AGE_SECONDS
+from payments import build_invoice_payload
+from security import extract_user_from_init_data, verify_telegram_init_data
+
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
-bot = None
 
 
 async def create_stars_invoice(bot: Bot, amount: int, user_id: int) -> str:
-    payload = f"{user_id}:{amount}"
-
     prices = [
         LabeledPrice(
             label=f"{amount} ⭐",
-            amount=amount
+            amount=amount,
         )
     ]
 
-    invoice_link = await bot.create_invoice_link(
+    return await bot.create_invoice_link(
         title="Random Gift",
         description=f"Покупка подарка за {amount} звезд.",
-        payload=payload,
+        payload=build_invoice_payload(amount, user_id),
         currency="XTR",
         prices=prices,
     )
 
-    return invoice_link
+
+@app.get("/api/invoice")
+async def handle_invoice(
+    amount: int = Query(...),
+    x_telegram_init_data: str | None = Header(default=None),
+):
+    if amount not in ALLOWED_PRICES:
+        return JSONResponse(status_code=400, content={"error": "invalid_amount"})
+
+    if not x_telegram_init_data:
+        return JSONResponse(status_code=401, content={"error": "invalid_init_data"})
+
+    parsed_init_data = verify_telegram_init_data(
+        x_telegram_init_data,
+        BOT_TOKEN,
+        INIT_DATA_MAX_AGE_SECONDS,
+    )
+    if not parsed_init_data:
+        return JSONResponse(status_code=401, content={"error": "invalid_init_data"})
+
+    user = extract_user_from_init_data(parsed_init_data)
+    if not user:
+        return JSONResponse(status_code=401, content={"error": "invalid_init_data"})
+
+    db = app.state.db
+    bot = app.state.bot
+
+    await db.upsert_user(user)
+
+    try:
+        invoice_link = await create_stars_invoice(bot, amount, int(user["id"]))
+    except Exception:
+        logger.exception("invoice_creation_failed", extra={"user_id": user.get("id"), "amount": amount})
+        return JSONResponse(status_code=500, content={"error": "invoice_creation_failed"})
+
+    return {"invoice_link": invoice_link}
 
 
 @app.post("/api/create-invoice")
-async def create_invoice(request: Request):
-    data = await request.json()
+@app.post("/create-invoice")
+async def create_invoice_legacy(payload: dict):
+    amount = payload.get("amount")
+    user_id = payload.get("user_id")
 
-    amount = int(data["amount"])
-    user_id = int(data["user_id"])
+    if not isinstance(amount, int) or amount not in ALLOWED_PRICES:
+        return JSONResponse(status_code=400, content={"error": "invalid_amount"})
+
+    if not isinstance(user_id, int):
+        return JSONResponse(status_code=400, content={"error": "invalid_user_id"})
 
     try:
-        link = await create_stars_invoice(bot, amount, user_id)
-    except Exception as e:
-        print("INVOICE ERROR:", repr(e))
-        return {"error": str(e)}
+        invoice_link = await create_stars_invoice(app.state.bot, amount, user_id)
+    except Exception:
+        logger.exception("invoice_creation_failed", extra={"user_id": user_id, "amount": amount})
+        return JSONResponse(status_code=500, content={"error": "invoice_creation_failed"})
 
-    return {"invoiceLink": link}
+    return {"invoiceLink": invoice_link}
 
-import uvicorn
+
+@app.get("/api/leaderboard")
+async def handle_leaderboard(x_telegram_init_data: str | None = Header(default=None)):
+    if not x_telegram_init_data:
+        return JSONResponse(status_code=401, content={"error": "invalid_init_data"})
+
+    parsed_init_data = verify_telegram_init_data(
+        x_telegram_init_data,
+        BOT_TOKEN,
+        INIT_DATA_MAX_AGE_SECONDS,
+    )
+    if not parsed_init_data:
+        return JSONResponse(status_code=401, content={"error": "invalid_init_data"})
+
+    user = extract_user_from_init_data(parsed_init_data)
+    if not user:
+        return JSONResponse(status_code=401, content={"error": "invalid_init_data"})
+
+    await app.state.db.upsert_user(user)
+    leaderboard = await app.state.db.get_leaderboard()
+    return {"leaderboard": leaderboard}
+
 
 async def run_api_server(bot_instance, db_instance, host, port):
-    global bot
-    bot = bot_instance
+    app.state.bot = bot_instance
+    app.state.db = db_instance
 
     config = uvicorn.Config(
         app,
         host=host,
         port=port,
         loop="asyncio",
-        lifespan="off"
+        lifespan="off",
     )
 
     server = uvicorn.Server(config)
     await server.serve()
-
-
-

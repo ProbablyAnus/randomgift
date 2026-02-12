@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 // Minimal Telegram WebApp integration (safe fallback for non-Telegram browsers).
 // Theme + language are handled by SettingsProvider.
@@ -95,9 +95,40 @@ export const initTelegramWebApp = () => {
 };
 
 export const useTelegramWebApp = () => {
-  const webApp = useMemo<TelegramWebApp | null>(() => {
+  const [webApp, setWebApp] = useState<TelegramWebApp | null>(() => {
     return ((window as any)?.Telegram?.WebApp as TelegramWebApp) ?? null;
-  }, []);
+  });
+
+  useEffect(() => {
+    if (webApp) return;
+
+    const maxAttempts = 20;
+    let attempts = 0;
+
+    const attachWebApp = () => {
+      const wa = ((window as any)?.Telegram?.WebApp as TelegramWebApp) ?? null;
+      attempts += 1;
+
+      if (wa || attempts >= maxAttempts) {
+        setWebApp(wa);
+        return true;
+      }
+
+      return false;
+    };
+
+    if (attachWebApp()) return;
+
+    const intervalId = window.setInterval(() => {
+      if (attachWebApp()) {
+        window.clearInterval(intervalId);
+      }
+    }, 100);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [webApp]);
 
   useEffect(() => {
     const wa = webApp;
@@ -124,7 +155,7 @@ export const useTelegramWebApp = () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.visualViewport?.removeEventListener("resize", handleViewportChange);
     };
-  }, []);
+  }, [webApp]);
 
   return useMemo(() => {
     return {

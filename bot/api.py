@@ -3,10 +3,11 @@ import logging
 from aiogram import Bot
 from aiogram.types import LabeledPrice
 from fastapi import FastAPI, Header, Query
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import uvicorn
 
-from config import ALLOWED_PRICES, BOT_TOKEN, INIT_DATA_MAX_AGE_SECONDS
+from config import ALLOWED_PRICES, BOT_TOKEN, CORS_ALLOW_ORIGIN, INIT_DATA_MAX_AGE_SECONDS
 from payments import build_invoice_payload
 from security import extract_user_from_init_data, verify_telegram_init_data
 
@@ -14,6 +15,17 @@ from security import extract_user_from_init_data, verify_telegram_init_data
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
+
+if CORS_ALLOW_ORIGIN:
+    allow_origins = [origin.strip() for origin in CORS_ALLOW_ORIGIN.split(",") if origin.strip()]
+    if allow_origins:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=allow_origins,
+            allow_methods=["GET", "POST", "OPTIONS"],
+            allow_headers=["*"],
+        )
+        logger.info("cors_enabled", extra={"allow_origins": allow_origins})
 
 
 async def create_stars_invoice(bot: Bot, amount: int, user_id: int) -> str:
@@ -36,24 +48,40 @@ async def create_stars_invoice(bot: Bot, amount: int, user_id: int) -> str:
 @app.get("/api/invoice")
 async def handle_invoice(
     amount: int = Query(...),
+    init_data: str | None = Query(default=None),
     x_telegram_init_data: str | None = Header(default=None),
 ):
+    effective_init_data = x_telegram_init_data or init_data
+
+    logger.info(
+        "invoice_request_received",
+        extra={
+            "amount": amount,
+            "has_init_data": bool(effective_init_data),
+            "init_data_source": "header" if x_telegram_init_data else ("query" if init_data else "missing"),
+        },
+    )
+
     if amount not in ALLOWED_PRICES:
+        logger.warning("invoice_request_invalid_amount", extra={"amount": amount})
         return JSONResponse(status_code=400, content={"error": "invalid_amount"})
 
-    if not x_telegram_init_data:
+    if not effective_init_data:
+        logger.warning("invoice_request_missing_init_data")
         return JSONResponse(status_code=401, content={"error": "invalid_init_data"})
 
     parsed_init_data = verify_telegram_init_data(
-        x_telegram_init_data,
+        effective_init_data,
         BOT_TOKEN,
         INIT_DATA_MAX_AGE_SECONDS,
     )
     if not parsed_init_data:
+        logger.warning("invoice_request_invalid_init_data")
         return JSONResponse(status_code=401, content={"error": "invalid_init_data"})
 
     user = extract_user_from_init_data(parsed_init_data)
     if not user:
+        logger.warning("invoice_request_user_missing_in_init_data")
         return JSONResponse(status_code=401, content={"error": "invalid_init_data"})
 
     db = app.state.db

@@ -288,16 +288,32 @@ export const GiftsPage: FC = () => {
     }
 
     try {
-      const response = await fetch(buildApiUrl(`/api/invoice?amount=${amount}`), {
-        method: "GET",
-        headers: {
-          "X-Telegram-Init-Data": initData,
-        },
+      const query = new URLSearchParams({
+        amount: String(amount),
+        init_data: initData,
       });
 
-      const data = await response.json();
+      const response = await fetch(buildApiUrl(`/api/invoice?${query.toString()}`), {
+        method: "GET",
+      });
+
+      const rawResponse = await response.text();
+      let data: any = null;
+
+      try {
+        data = rawResponse ? JSON.parse(rawResponse) : null;
+      } catch (parseError) {
+        console.error("Invoice response JSON parse error:", parseError, rawResponse);
+      }
 
       if (!response.ok) {
+        console.error("Invoice request failed:", {
+          status: response.status,
+          statusText: response.statusText,
+          data,
+          url: response.url,
+        });
+
         let message = "Не удалось создать счёт, попробуйте позже";
 
         if (data?.error === "invalid_init_data") {

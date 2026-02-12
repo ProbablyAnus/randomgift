@@ -162,25 +162,31 @@ export const LeaderboardPage: FC = () => {
       try {
         const initData = webApp?.initData;
         if (!initData) {
-          console.warn("initData missing — leaderboard user won't be registered");
+          console.warn("initData missing: leaderboard request is outside Telegram WebApp context");
         }
+
         const response = await fetch(buildApiUrl("/api/leaderboard"), {
           signal: controller.signal,
           headers: initData ? { "X-Telegram-Init-Data": initData } : undefined,
         });
 
+        const data = (await response.json()) as LeaderboardResponse & { error?: string };
+
         if (!response.ok) {
+          if (data?.error === "invalid_init_data") {
+            console.warn("invalid_init_data: leaderboard request must be made inside Telegram");
+          }
           throw new Error("failed_to_load_leaderboard");
         }
 
-        const data = (await response.json()) as LeaderboardResponse;
         const list = toLeaderboardArray(data);
 
         if (!isMounted) return;
         setLeaderboard(list);
         setHasError(false);
         setEmptyReason(list.length === 0 ? "empty_leaderboard" : null);
-      } catch {
+      } catch (error) {
+        console.error("Leaderboard fetch error:", error);
         if (!isMounted) return;
         setHasError(true);
         setLeaderboard([]);

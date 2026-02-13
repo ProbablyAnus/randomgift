@@ -288,13 +288,13 @@ export const GiftsPage: FC = () => {
     }
 
     try {
-      const query = new URLSearchParams({
-        amount: String(amount),
-        init_data: initData,
-      });
-
-      const response = await fetch(buildApiUrl(`/api/invoice?${query.toString()}`), {
-        method: "GET",
+      const response = await fetch(buildApiUrl("/api/payments/invoice"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Telegram-Init-Data": initData,
+        },
+        body: JSON.stringify({ amount }),
       });
 
       const rawResponse = await response.text();

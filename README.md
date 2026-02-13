@@ -81,8 +81,8 @@ python bot/main.py
 
 ## API endpoints
 
-- Единственный поддерживаемый endpoint для создания инвойса: `GET /api/invoice?amount=<value>`.
-- Все интеграции по Stars-оплате должны использовать только `/api/invoice`.
+- Основной endpoint для создания инвойса: `POST /api/payments/invoice`.
+- Совместимые fallback routes: `POST /api/invoice` и `GET /api/invoice?amount=<value>&init_data=<telegram_init_data>`.
 - Последовательность flow и контракт payload описаны в `docs/payment-sequence-flow.md`.
 
 ## Стек

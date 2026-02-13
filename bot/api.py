@@ -45,20 +45,31 @@ async def create_stars_invoice(bot: Bot, amount: int, user_id: int) -> str:
     )
 
 
-@app.get("/api/invoice")
-async def handle_invoice(
-    amount: int = Query(...),
-    init_data: str | None = Query(default=None),
-    x_telegram_init_data: str | None = Header(default=None),
+def _resolve_init_data(
+    init_data: str | None,
+    x_telegram_init_data: str | None,
+) -> tuple[str | None, str]:
+    if x_telegram_init_data:
+        return x_telegram_init_data, "header"
+    if init_data:
+        return init_data, "query_or_body"
+    return None, "missing"
+
+
+async def _create_invoice_response(
+    *,
+    amount: int,
+    init_data: str | None,
+    x_telegram_init_data: str | None,
 ):
-    effective_init_data = x_telegram_init_data or init_data
+    effective_init_data, init_data_source = _resolve_init_data(init_data, x_telegram_init_data)
 
     logger.info(
         "invoice_request_received",
         extra={
             "amount": amount,
             "has_init_data": bool(effective_init_data),
-            "init_data_source": "header" if x_telegram_init_data else ("query" if init_data else "missing"),
+            "init_data_source": init_data_source,
         },
     )
 
@@ -95,7 +106,45 @@ async def handle_invoice(
         logger.exception("invoice_creation_failed", extra={"user_id": user.get("id"), "amount": amount})
         return JSONResponse(status_code=500, content={"error": "invoice_creation_failed"})
 
-    return {"invoice_link": invoice_link}
+    return {
+        "invoice_link": invoice_link,
+        "invoiceLink": invoice_link,
+    }
+
+
+@app.get("/api/invoice")
+async def handle_invoice_get(
+    amount: int = Query(...),
+    init_data: str | None = Query(default=None),
+    x_telegram_init_data: str | None = Header(default=None),
+):
+    return await _create_invoice_response(
+        amount=amount,
+        init_data=init_data,
+        x_telegram_init_data=x_telegram_init_data,
+    )
+
+
+@app.post("/api/invoice")
+@app.post("/api/payments/invoice")
+async def handle_invoice_post(
+    payload: dict,
+    x_telegram_init_data: str | None = Header(default=None),
+):
+    amount = payload.get("amount")
+    init_data = payload.get("init_data")
+
+    if not isinstance(amount, int):
+        return JSONResponse(status_code=400, content={"error": "invalid_amount"})
+
+    if init_data is not None and not isinstance(init_data, str):
+        return JSONResponse(status_code=400, content={"error": "invalid_init_data"})
+
+    return await _create_invoice_response(
+        amount=amount,
+        init_data=init_data,
+        x_telegram_init_data=x_telegram_init_data,
+    )
 
 
 @app.post("/api/create-invoice")

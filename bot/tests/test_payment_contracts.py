@@ -3,16 +3,9 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 
-from bot.api import handle_invoice
+from bot.api import _create_invoice_response, app, handle_invoice_post
 from bot.bot_handlers import process_pre_checkout_query, process_successful_payment
 from bot.payments import build_invoice_payload
-
-
-class _FakeRequest:
-    def __init__(self, amount: int, bot: AsyncMock, db: AsyncMock):
-        self.headers = {"X-Telegram-Init-Data": "valid_init_data"}
-        self.query = {"amount": str(amount)}
-        self.app = {"bot": bot, "db": db}
 
 
 class _FakePreCheckoutQuery:
@@ -26,23 +19,31 @@ class _FakePreCheckoutQuery:
 
 
 class PaymentContractsTest(unittest.IsolatedAsyncioTestCase):
-    async def test_invoice_endpoint_returns_invoice_link_for_valid_init_data_and_amount(self):
-        bot = AsyncMock()
-        bot.create_invoice_link = AsyncMock(return_value="https://t.me/invoice/test-link")
-        db = AsyncMock()
-        request = _FakeRequest(amount=50, bot=bot, db=db)
+    async def asyncSetUp(self):
+        app.state.bot = AsyncMock()
+        app.state.bot.create_invoice_link = AsyncMock(return_value="https://t.me/invoice/test-link")
+        app.state.db = AsyncMock()
 
+    async def test_invoice_endpoint_returns_invoice_link_for_valid_init_data_and_amount(self):
         with (
             patch("bot.api.verify_telegram_init_data", return_value={"user": '{"id": 777}'}),
             patch("bot.api.extract_user_from_init_data", return_value={"id": 777}),
         ):
-            response = await handle_invoice(request)
+            response = await _create_invoice_response(
+                amount=50,
+                init_data="valid_init_data",
+                x_telegram_init_data=None,
+            )
 
-        self.assertEqual(response.status, 200)
-        body = json.loads(response.text)
-        self.assertEqual(body["invoice_link"], "https://t.me/invoice/test-link")
-        bot.create_invoice_link.assert_awaited_once()
-        db.upsert_user.assert_awaited_once_with({"id": 777})
+        self.assertEqual(response["invoice_link"], "https://t.me/invoice/test-link")
+        app.state.bot.create_invoice_link.assert_awaited_once()
+        app.state.db.upsert_user.assert_awaited_once_with({"id": 777})
+
+    async def test_invoice_post_endpoint_rejects_invalid_amount_type(self):
+        response = await handle_invoice_post(payload={"amount": "50"}, x_telegram_init_data="valid")
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(json.loads(response.body), {"error": "invalid_amount"})
 
     async def test_pre_checkout_accepts_matching_user_id(self):
         query = _FakePreCheckoutQuery(user_id=777, payload_user_id=777, amount=50)

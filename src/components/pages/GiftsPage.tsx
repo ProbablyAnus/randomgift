@@ -6,6 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { RefreshCw } from "lucide-react";
 import { useAdaptivity } from "@/hooks/useAdaptivity";
 import { useTelegramWebApp } from "@/hooks/useTelegramWebApp";
+import { buildApiUrl } from "@/lib/api";
 import bouquetSvg from "@/assets/gifts/bouquet.svg";
 import cakeSvg from "@/assets/gifts/cake.svg";
 import champagneSvg from "@/assets/gifts/champagne.svg";
@@ -192,7 +193,6 @@ export const GiftsPage: FC = () => {
   const rouletteCardWidth = baseCardWidth;
   const cardGap = 12;
 
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
   const isBusy = isSpinning || isProcessingPayment;
 
   const startSpin = () => {
@@ -263,7 +263,7 @@ export const GiftsPage: FC = () => {
 
     try {
       setIsProcessingPayment(true);
-      const response = await fetch(`${apiBaseUrl}/api/invoice?amount=${selectedPrice}`, {
+      const response = await fetch(buildApiUrl(`/api/invoice?amount=${selectedPrice}`), {
         headers: {
           "X-Telegram-Init-Data": webApp.initData,
         },

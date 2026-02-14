@@ -1,9 +1,5 @@
 import asyncio
-import hashlib
-import hmac
-import json
-import os
-from urllib.parse import parse_qsl
+import logging
 
 from aiohttp import web
 from aiogram import Bot, Dispatcher, F, types
@@ -12,68 +8,42 @@ from aiogram.types import LabeledPrice
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from dotenv import load_dotenv
 
+from config import (
+    ALLOWED_PRICES,
+    API_HOST,
+    API_PORT,
+    BOT_TOKEN,
+    DB_PATH,
+    INIT_DATA_MAX_AGE_SECONDS,
+    MINI_APP_BUTTON,
+    MINI_APP_URL,
+    validate_config,
+)
+from database import Database
+from payments import build_invoice_payload, parse_invoice_payload
+from security import extract_user_from_init_data, verify_telegram_init_data
+
 load_dotenv()
+validate_config()
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-WEB_APP_URL = os.getenv("WEB_APP_URL") or os.getenv("APP_PUBLIC_URL")
-
-# MINI_APP_URL можно задать напрямую или оставить пустым, чтобы использовать WEB_APP_URL
-MINI_APP_URL = os.getenv("MINI_APP_URL") or WEB_APP_URL
-MINI_APP_BUTTON = os.getenv("MINI_APP_BUTTON", "Открыть мини-приложение")
-API_HOST = os.getenv("API_HOST", "0.0.0.0")
-API_PORT = int(os.getenv("API_PORT", "8080"))
-ALLOWED_PRICES = {25, 50, 100}
-
-if not BOT_TOKEN:
-    raise RuntimeError("BOT_TOKEN is not set. Add it to .env or the environment before starting the bot.")
-
-if not MINI_APP_URL:
-    raise RuntimeError(
-        "WEB_APP_URL is not set. Add WEB_APP_URL or MINI_APP_URL to .env so the bot can open your domain."
-    )
+logger = logging.getLogger(__name__)
 
 
-def verify_telegram_init_data(init_data: str, bot_token: str) -> dict | None:
-    data = dict(parse_qsl(init_data, keep_blank_values=True))
-    received_hash = data.pop("hash", None)
-    if not received_hash:
+def _parse_user_from_init_data(init_data: str) -> dict | None:
+    parsed = verify_telegram_init_data(init_data, BOT_TOKEN, INIT_DATA_MAX_AGE_SECONDS)
+    if not parsed:
         return None
 
-    data_check_string = "\n".join(f"{key}={value}" for key, value in sorted(data.items()))
-    secret_key = hashlib.sha256(bot_token.encode()).digest()
-    calculated_hash = hmac.new(secret_key, data_check_string.encode(), hashlib.sha256).hexdigest()
-    if calculated_hash != received_hash:
-        return None
-
-    return data
-
-
-def build_invoice_payload(amount: int, user_id: int) -> str:
-    return json.dumps({"amount": amount, "user_id": user_id})
-
-
-def parse_invoice_payload(payload: str) -> dict | None:
-    try:
-        data = json.loads(payload)
-    except json.JSONDecodeError:
-        return None
-
-    if not isinstance(data, dict):
-        return None
-
-    amount = data.get("amount")
-    user_id = data.get("user_id")
-    if not isinstance(amount, int) or not isinstance(user_id, int):
-        return None
-
-    return {"amount": amount, "user_id": user_id}
+    return extract_user_from_init_data(parsed)
 
 
 async def handle_invoice(request: web.Request) -> web.Response:
     bot: Bot = request.app["bot"]
+    db: Database = request.app["db"]
+
     init_data = request.headers.get("X-Telegram-Init-Data", "")
-    parsed = verify_telegram_init_data(init_data, BOT_TOKEN)
-    if not parsed:
+    user = _parse_user_from_init_data(init_data)
+    if not user:
         return web.json_response({"error": "invalid_init_data"}, status=401)
 
     amount_raw = request.query.get("amount", "0")
@@ -85,17 +55,9 @@ async def handle_invoice(request: web.Request) -> web.Response:
     if amount not in ALLOWED_PRICES:
         return web.json_response({"error": "unsupported_amount"}, status=400)
 
-    user_id: int | None = None
-    if "user" in parsed:
-        try:
-            user_id = json.loads(parsed["user"]).get("id")
-        except json.JSONDecodeError:
-            user_id = None
+    await db.upsert_user(user)
 
-    if not isinstance(user_id, int):
-        return web.json_response({"error": "invalid_user"}, status=400)
-
-    payload = build_invoice_payload(amount, user_id)
+    payload = build_invoice_payload(amount, int(user["id"]))
     invoice_link = await bot.create_invoice_link(
         title="Random Gift",
         description=f"Покупка подарка за {amount} звезд.",
@@ -108,7 +70,20 @@ async def handle_invoice(request: web.Request) -> web.Response:
     return web.json_response({"invoice_link": invoice_link})
 
 
-async def run_api_server(bot: Bot) -> None:
+async def handle_leaderboard(request: web.Request) -> web.Response:
+    db: Database = request.app["db"]
+
+    init_data = request.headers.get("X-Telegram-Init-Data", "")
+    user = _parse_user_from_init_data(init_data)
+    if not user:
+        return web.json_response({"error": "invalid_init_data"}, status=401)
+
+    await db.upsert_user(user)
+    leaderboard = await db.get_leaderboard()
+    return web.json_response({"leaderboard": leaderboard})
+
+
+async def run_api_server(bot: Bot, db: Database) -> None:
     @web.middleware
     async def cors_middleware(request: web.Request, handler):
         if request.method == "OPTIONS":
@@ -122,8 +97,11 @@ async def run_api_server(bot: Bot) -> None:
 
     app = web.Application(middlewares=[cors_middleware])
     app["bot"] = bot
+    app["db"] = db
     app.router.add_get("/api/invoice", handle_invoice)
     app.router.add_options("/api/invoice", handle_invoice)
+    app.router.add_get("/api/leaderboard", handle_leaderboard)
+    app.router.add_options("/api/leaderboard", handle_leaderboard)
 
     runner = web.AppRunner(app)
     await runner.setup()
@@ -141,8 +119,10 @@ def build_start_keyboard() -> types.InlineKeyboardMarkup:
 async def main() -> None:
     bot = Bot(BOT_TOKEN)
     dp = Dispatcher()
+    db = Database(DB_PATH)
+    await db.init()
 
-    api_task = asyncio.create_task(run_api_server(bot))
+    api_task = asyncio.create_task(run_api_server(bot, db))
 
     @dp.message(CommandStart())
     async def handle_start(message: types.Message) -> None:
@@ -179,6 +159,14 @@ async def main() -> None:
 
     @dp.message(F.successful_payment)
     async def handle_successful_payment(message: types.Message) -> None:
+        payload = parse_invoice_payload(message.successful_payment.invoice_payload)
+        if payload:
+            await db.add_spent_stars(payload["user_id"], payload["amount"])
+            logger.info(
+                "payment_recorded",
+                extra={"user_id": payload["user_id"], "amount": payload["amount"]},
+            )
+
         await message.answer("Оплата прошла успешно! 🎉")
 
     await dp.start_polling(bot)

@@ -6,7 +6,6 @@ import { Switch } from "@/components/ui/switch";
 import { RefreshCw } from "lucide-react";
 import { useAdaptivity } from "@/hooks/useAdaptivity";
 import { useTelegramWebApp } from "@/hooks/useTelegramWebApp";
-import { buildApiUrl } from "@/lib/api";
 import bouquetSvg from "@/assets/gifts/bouquet.svg";
 import cakeSvg from "@/assets/gifts/cake.svg";
 import champagneSvg from "@/assets/gifts/champagne.svg";
@@ -26,9 +25,6 @@ const prices = [25, 50, 100];
 type GiftIcon = { src: string };
 type RouletteGift = { icon: GiftIcon; label: string; price: number; chance: number };
 type WinPrize = { icon: GiftIcon; label: string; price: number; chance: string };
-type InvoiceRequestResult =
-  | { invoiceLink: string; errorMessage: null }
-  | { invoiceLink: null; errorMessage: string };
 type GiftId =
   | "heart-box"
   | "teddy-bear"
@@ -152,7 +148,7 @@ export const GiftsPage: FC = () => {
   const [isSpinning, setIsSpinning] = useState(false);
   const [wonPrize, setWonPrize] = useState<{ icon: GiftIcon; label: string; price: number } | null>(null);
   const [showResult, setShowResult] = useState(false);
-  const [isCreatingInvoice, setIsCreatingInvoice] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const rouletteRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -196,23 +192,9 @@ export const GiftsPage: FC = () => {
   const rouletteCardWidth = baseCardWidth;
   const cardGap = 12;
 
-  const showTelegramErrorPopup = (message: string) => {
-    if (webApp?.showPopup) {
-      webApp.showPopup({
-        title: "Ошибка",
-        message,
-        buttons: [{ type: "ok" }],
-      });
-      return;
-    }
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
+  const isBusy = isSpinning || isProcessingPayment;
 
-    window.alert(message);
-  };
-
-  const getActiveWebApp = () => {
-    return webApp ?? ((window as typeof window & { Telegram?: { WebApp?: typeof webApp } }).Telegram?.WebApp ?? null);
-  };
-  
   const startSpin = () => {
     if (isSpinning) return;
 
@@ -272,106 +254,43 @@ export const GiftsPage: FC = () => {
     }, 4000);
   };
 
-  const requestInvoiceLink = async (amount: number): Promise<InvoiceRequestResult> => {
-    const activeWebApp = getActiveWebApp();
-    const initData = activeWebApp?.initData;
-
-    if (!initData) {
-      console.warn(
-        "initData missing: invoice cannot be created outside Telegram WebApp context"
-      );
-
-      return {
-        invoiceLink: null,
-        errorMessage: "Откройте приложение внутри Telegram",
-      };
-    }
-
-    try {
-      const response = await fetch(buildApiUrl("/api/payments/invoice"), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Telegram-Init-Data": initData,
-        },
-        body: JSON.stringify({ amount }),
-      });
-
-      const rawResponse = await response.text();
-      let data: any = null;
-
-      try {
-        data = rawResponse ? JSON.parse(rawResponse) : null;
-      } catch (parseError) {
-        console.error("Invoice response JSON parse error:", parseError, rawResponse);
-      }
-
-      if (!response.ok) {
-        console.error("Invoice request failed:", {
-          status: response.status,
-          statusText: response.statusText,
-          data,
-          url: response.url,
-        });
-
-        let message = "Не удалось создать счёт, попробуйте позже";
-
-        if (data?.error === "invalid_init_data") {
-          message = "Откройте приложение внутри Telegram";
-        }
-
-        return {
-          invoiceLink: null,
-          errorMessage: message,
-        };
-      }
-
-      // Поддерживаем оба варианта ответа backend
-      const invoiceLink = data.invoice_link || data.invoiceLink;
-
-      if (!invoiceLink) {
-        return {
-          invoiceLink: null,
-          errorMessage: "Не удалось создать счёт, попробуйте позже",
-        };
-      }
-
-      return { invoiceLink, errorMessage: null };
-    } catch (error) {
-      console.error("Invoice fetch error:", error);
-
-      return {
-        invoiceLink: null,
-        errorMessage: "Не удалось создать счёт, попробуйте позже",
-      };
-    }
-  };
-
-  const handleGetGift = async () => {
-    if (isSpinning || isCreatingInvoice) return;
-
-    if (demoMode) {
-      startSpin();
+  const handlePayment = async () => {
+    if (isBusy) return;
+    if (!webApp?.openInvoice || !webApp?.initData) {
+      window.alert("Оплата доступна только внутри Telegram.");
       return;
     }
 
-    setIsCreatingInvoice(true);
     try {
-      const { invoiceLink, errorMessage } = await requestInvoiceLink(selectedPrice);
-      const activeWebApp = getActiveWebApp();
+      setIsProcessingPayment(true);
+      const response = await fetch(`${apiBaseUrl}/api/invoice?amount=${selectedPrice}`, {
+        headers: {
+          "X-Telegram-Init-Data": webApp.initData,
+        },
+      });
 
-      if (!invoiceLink || !activeWebApp?.openInvoice) {
-        showTelegramErrorPopup(errorMessage ?? "Не удалось создать счёт, попробуйте позже");
-        return;
+      if (!response.ok) {
+        throw new Error("Не удалось создать счет на оплату.");
       }
 
-      activeWebApp.openInvoice(invoiceLink, (status) => {
+      const data = (await response.json()) as { invoice_link?: string };
+      if (!data.invoice_link) {
+        throw new Error("Ссылка на оплату не получена.");
+      }
+
+      webApp.openInvoice(data.invoice_link, (status) => {
+        setIsProcessingPayment(false);
+
         if (status === "paid") {
           startSpin();
+        } else if (status === "failed") {
+          window.alert("Платеж не прошел. Попробуйте снова.");
         }
       });
-    } finally {
-      setIsCreatingInvoice(false);
+    } catch (error) {
+      setIsProcessingPayment(false);
+      const message = error instanceof Error ? error.message : "Ошибка оплаты.";
+      window.alert(message);
     }
   };
 
@@ -392,9 +311,9 @@ export const GiftsPage: FC = () => {
 
   // Button text based on state
   const getButtonContent = () => {
-    const contentKey = isSpinning || isCreatingInvoice ? "spinning" : demoMode ? "demo" : "gift";
+    const contentKey = isBusy ? "spinning" : demoMode ? "demo" : "gift";
 
-    if (isSpinning || isCreatingInvoice) {
+    if (isBusy) {
       return (
         <span key={contentKey} className="button-content">
           <RefreshCw size={26} className="animate-spin text-primary-foreground" />
@@ -559,8 +478,8 @@ export const GiftsPage: FC = () => {
       {/* Get Gift Button */}
       <div className="px-4 pb-3 mt-2">
         <button
-          onClick={handleGetGift}
-          disabled={isSpinning || isCreatingInvoice}
+          onClick={demoMode ? startSpin : handlePayment}
+          disabled={isBusy}
           className="primary-button touch-feedback"
         >
           {getButtonContent()}

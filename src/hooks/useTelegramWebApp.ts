@@ -158,8 +158,12 @@ export const useTelegramWebApp = () => {
   }, [webApp]);
 
   return useMemo(() => {
+    const initData = webApp?.initData?.trim();
+    const hasValidInitData = Boolean(initData && new URLSearchParams(initData).get("hash"));
+
     return {
       webApp,
+      isTelegramContext: Boolean(webApp && hasValidInitData),
       colorScheme: (webApp?.colorScheme as "light" | "dark" | undefined) ?? "dark",
       isExpanded: Boolean(webApp?.isExpanded),
       themeParams: webApp?.themeParams ?? {},

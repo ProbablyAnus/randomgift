@@ -1,10 +1,10 @@
 import { FC } from "react";
 import { ChevronRight, LifeBuoy, Newspaper } from "lucide-react";
-import { useTelegramWebApp } from "@/hooks/useTelegramWebApp";
+import { useTelegramWebAppContext } from "@/contexts/TelegramWebAppContext";
 import styles from "./ProfilePage.module.scss";
 
 export const ProfilePage: FC = () => {
-  const { webApp } = useTelegramWebApp();
+  const { webApp } = useTelegramWebAppContext();
   const newsUrl = import.meta.env.VITE_NEWS_URL ?? "";
   const supportUrl = import.meta.env.VITE_SUPPORT_URL ?? "";
 

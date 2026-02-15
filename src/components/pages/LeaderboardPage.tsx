@@ -1,6 +1,6 @@
 import { FC, useEffect, useMemo, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useTelegramWebApp } from "@/hooks/useTelegramWebApp";
+import { useTelegramWebAppContext } from "@/contexts/TelegramWebAppContext";
 import styles from "./LeaderboardPage.module.scss";
 import { buildApiUrl } from "@/lib/api";
 
@@ -143,7 +143,7 @@ const toLeaderboardArray = (data: LeaderboardResponse): LeaderboardUser[] => {
 };
 
 export const LeaderboardPage: FC = () => {
-  const { webApp } = useTelegramWebApp();
+  const { webApp } = useTelegramWebAppContext();
   const [searchValue, setSearchValue] = useState("");
   const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);

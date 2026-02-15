@@ -5,7 +5,7 @@ import ButtonIcon from "@/assets/gifts/svg-image-1.svg";
 import { Switch } from "@/components/ui/switch";
 import { RefreshCw } from "lucide-react";
 import { useAdaptivity } from "@/hooks/useAdaptivity";
-import { useTelegramWebApp } from "@/hooks/useTelegramWebApp";
+import { useTelegramWebAppContext } from "@/contexts/TelegramWebAppContext";
 import { buildApiUrl } from "@/lib/api";
 import bouquetSvg from "@/assets/gifts/bouquet.svg";
 import cakeSvg from "@/assets/gifts/cake.svg";
@@ -143,7 +143,7 @@ const selectWinnerByChance = (gifts: RouletteGift[]) => {
 
 export const GiftsPage: FC = () => {
   const { sizeX, platform } = useAdaptivity();
-  const { webApp } = useTelegramWebApp();
+  const { webApp } = useTelegramWebAppContext();
   const [selectedPrice, setSelectedPrice] = useState(25);
   const [demoMode, setDemoMode] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);

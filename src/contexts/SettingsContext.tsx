@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, ReactNode } from "react";
-import { initTelegramWebApp } from "@/hooks/useTelegramWebApp";
+import { useTelegramWebAppContext } from "@/contexts/TelegramWebAppContext";
 
 export type ThemeMode = "auto" | "light" | "dark";
 
@@ -13,11 +13,9 @@ const SettingsContext = createContext<SettingsContextValue | null>(null);
 
 const THEME_KEY = "theme_mode";
 
-function resolveTheme(mode: ThemeMode): "light" | "dark" {
+function resolveTheme(mode: ThemeMode, telegramColorScheme: "light" | "dark"): "light" | "dark" {
   if (mode !== "auto") return mode;
-  const tg = window.Telegram?.WebApp;
-  const scheme = tg?.colorScheme;
-  return scheme === "light" ? "light" : "dark";
+  return telegramColorScheme;
 }
 
 const DEFAULT_THEME = {
@@ -73,12 +71,13 @@ const toRgba = (color: string, alpha: number) => {
 };
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
+  const { webApp, colorScheme } = useTelegramWebAppContext();
   const [theme, setThemeState] = useState<ThemeMode>(() => {
     const saved = localStorage.getItem(THEME_KEY) as ThemeMode | null;
     return saved === "light" || saved === "dark" || saved === "auto" ? saved : "auto";
   });
 
-  const resolvedTheme = useMemo(() => resolveTheme(theme), [theme]);
+  const resolvedTheme = useMemo(() => resolveTheme(theme, colorScheme), [theme, colorScheme]);
 
   const setTheme = (t: ThemeMode) => {
     setThemeState(t);
@@ -87,11 +86,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   // Apply document theme + Telegram chrome (like crypto-bot-contest)
   useEffect(() => {
-    initTelegramWebApp();
-    const tg = window.Telegram?.WebApp;
+    const tg = webApp;
 
     const apply = () => {
-      const resolved = resolveTheme(theme);
+      const resolved = resolveTheme(theme, colorScheme);
       const root = document.documentElement;
       const defaults = DEFAULT_THEME[resolved];
       const bgColor = defaults.bg;
@@ -167,7 +165,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     const themeEvents = ["themeChanged", "theme_changed"];
     themeEvents.forEach((event) => tg?.onEvent?.(event, onThemeChanged));
     return () => themeEvents.forEach((event) => tg?.offEvent?.(event, onThemeChanged));
-  }, [theme]);
+  }, [theme, colorScheme, webApp]);
 
   const value: SettingsContextValue = { theme, setTheme, resolvedTheme };
 

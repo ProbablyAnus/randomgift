@@ -1,20 +1,20 @@
 import { FC } from "react";
 import { ChevronRight, LifeBuoy, Newspaper } from "lucide-react";
-import { useTelegramWebAppContext } from "@/contexts/TelegramWebAppContext";
+import { useRequiredTelegramWebApp } from "@/contexts/TelegramWebAppContext";
 import styles from "./ProfilePage.module.scss";
 
 export const ProfilePage: FC = () => {
-  const { webApp } = useTelegramWebAppContext();
+  const webApp = useRequiredTelegramWebApp();
   const newsUrl = import.meta.env.NEWS_URL ?? "";
   const supportUrl = import.meta.env.SUPPORT_URL ?? "";
 
   const openLink = (url: string) => {
     if (!url) return;
-    if (webApp?.openTelegramLink) {
+    if (webApp.openTelegramLink) {
       webApp.openTelegramLink(url);
       return;
     }
-    if (webApp?.openLink) {
+    if (webApp.openLink) {
       webApp.openLink(url);
       return;
     }

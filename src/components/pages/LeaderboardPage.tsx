@@ -1,8 +1,9 @@
 import { FC, useEffect, useMemo, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useTelegramWebAppContext } from "@/contexts/TelegramWebAppContext";
+import { useRequiredTelegramWebApp } from "@/contexts/TelegramWebAppContext";
 import styles from "./LeaderboardPage.module.scss";
 import { buildApiUrl } from "@/lib/api";
+import { getTelegramUser } from "@/hooks/useTelegramWebApp";
 
 interface LeaderboardUser {
   id?: number | string;
@@ -194,13 +195,14 @@ export const preloadLeaderboard = (initData?: string) => {
 };
 
 export const LeaderboardPage: FC = () => {
-  const { webApp } = useTelegramWebAppContext();
+  const webApp = useRequiredTelegramWebApp();
   const [searchValue, setSearchValue] = useState("");
   const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [emptyReason, setEmptyReason] = useState<LeaderboardEmptyReason>(null);
-  const currentUserId = webApp?.initDataUnsafe?.user?.id;
+  const telegramUser = getTelegramUser(webApp);
+  const currentUserId = telegramUser?.id;
 
   useEffect(() => {
     let isMounted = true;
@@ -210,11 +212,7 @@ export const LeaderboardPage: FC = () => {
       setHasError(false);
       setEmptyReason(null);
       try {
-        const initData = webApp?.initData;
-        if (!initData) {
-          console.warn("initData missing: leaderboard request is outside Telegram WebApp context");
-        }
-        const list = await preloadLeaderboard(initData);
+        const list = await preloadLeaderboard(webApp.initData);
 
         if (!isMounted) return;
         setLeaderboard(list);
@@ -238,7 +236,7 @@ export const LeaderboardPage: FC = () => {
     return () => {
       isMounted = false;
     };
-  }, [webApp?.initData]);
+  }, [webApp.initData]);
 
   const rankedUsers = useMemo(() => {
     return [...leaderboard].sort((a, b) => getXpCount(b) - getXpCount(a));
@@ -272,9 +270,9 @@ export const LeaderboardPage: FC = () => {
 
     if (!telegramLink) return;
 
-    if (webApp?.openTelegramLink) {
+    if (webApp.openTelegramLink) {
       webApp.openTelegramLink(telegramLink);
-    } else if (webApp?.openLink) {
+    } else if (webApp.openLink) {
       webApp.openLink(telegramLink);
     } else {
       window.open(telegramLink, "_blank", "noopener,noreferrer");

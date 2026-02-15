@@ -12,7 +12,8 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "typecheck:telegram": "tsc -p tsconfig.telegram.json"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

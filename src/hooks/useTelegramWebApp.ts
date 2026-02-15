@@ -51,6 +51,10 @@ export type TelegramWebApp = {
   ready?: () => void;
 };
 
+const hasValidInitData = (webApp: TelegramWebApp | null | undefined) => {
+  return typeof webApp?.initData === "string" && webApp.initData.trim().length > 0;
+};
+
 const setRootPxVar = (name: string, value: number | undefined) => {
   if (typeof value !== "number" || Number.isNaN(value)) return;
   document.documentElement.style.setProperty(name, `${value}px`);
@@ -169,8 +173,11 @@ export const useTelegramWebApp = () => {
   }, []);
 
   return useMemo(() => {
+    const hasTelegramWebApp = Boolean((window as any)?.Telegram?.WebApp);
+
     return {
       webApp,
+      isTelegramContext: hasTelegramWebApp && hasValidInitData(webApp),
       colorScheme: (webApp?.colorScheme as "light" | "dark" | undefined) ?? "dark",
       isExpanded: Boolean(webApp?.isExpanded),
       themeParams: webApp?.themeParams ?? {},

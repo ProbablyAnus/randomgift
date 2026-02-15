@@ -10,15 +10,15 @@ type TelegramWebAppContextValue = {
 const TelegramWebAppContext = createContext<TelegramWebAppContextValue | null>(null);
 
 export const TelegramWebAppProvider = ({ children }: { children: ReactNode }) => {
-  const { webApp, colorScheme } = useTelegramWebApp();
+  const { webApp, colorScheme, isTelegramContext } = useTelegramWebApp();
 
   const value = useMemo<TelegramWebAppContextValue>(() => {
     return {
       webApp,
       colorScheme,
-      isTelegramContext: Boolean(webApp),
+      isTelegramContext,
     };
-  }, [webApp, colorScheme]);
+  }, [webApp, colorScheme, isTelegramContext]);
 
   // useTelegramWebApp must stay at the app root: duplicating it in child screens
   // re-subscribes Telegram/window listeners and can cause duplicate side effects.

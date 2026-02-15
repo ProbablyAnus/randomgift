@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { BottomNav, type TabType } from "@/components/BottomNav";
 import { GiftsPage } from "@/components/pages/GiftsPage";
 import { LeaderboardPage, preloadLeaderboard } from "@/components/pages/LeaderboardPage";
+import { OpenInTelegramPage } from "@/components/pages/OpenInTelegramPage";
 import { ProfilePage } from "@/components/pages/ProfilePage";
+import { useTelegramWebAppContext } from "@/contexts/TelegramWebAppContext";
 import { AdaptivityProvider } from "@/hooks/useAdaptivity";
-import { useTelegramWebApp } from "@/hooks/useTelegramWebApp";
 import bouquetSvg from "@/assets/gifts/bouquet.svg";
 import cakeSvg from "@/assets/gifts/cake.svg";
 import champagneSvg from "@/assets/gifts/champagne.svg";
@@ -29,9 +30,11 @@ const preloadImages = (images: string[]) => {
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<TabType>("gifts");
-  const { webApp } = useTelegramWebApp();
+  const { webApp, isTelegramContext } = useTelegramWebAppContext();
 
   useEffect(() => {
+    if (!isTelegramContext) return;
+
     preloadLeaderboard(webApp?.initData).catch((error) => {
       console.warn("leaderboard prefetch failed", error);
     });
@@ -51,7 +54,11 @@ const Index = () => {
       ringSvg,
       diamondSvg,
     ]);
-  }, [webApp?.initData]);
+  }, [isTelegramContext, webApp?.initData]);
+
+  if (!isTelegramContext) {
+    return <OpenInTelegramPage />;
+  }
 
   const renderPage = () => {
     switch (activeTab) {
@@ -69,9 +76,7 @@ const Index = () => {
   return (
     <AdaptivityProvider>
       <div className="app-container">
-        <div className="content-area scroll-smooth scrollbar-hide">
-          {renderPage()}
-        </div>
+        <div className="content-area scroll-smooth scrollbar-hide">{renderPage()}</div>
         <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
     </AdaptivityProvider>

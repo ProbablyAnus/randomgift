@@ -1,15 +1,16 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly VITE_PUBLIC_URL?: string;
-  readonly VITE_APP_PUBLIC_URL?: string;
   readonly APP_PUBLIC_URL?: string;
+  readonly TELEGRAM_APP_URL?: string;
+  readonly NEWS_URL?: string;
+  readonly SUPPORT_URL?: string;
+  readonly API_BASE_URL?: string;
 }
 
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
-
 
 declare module "*.svg" {
   const value: string;

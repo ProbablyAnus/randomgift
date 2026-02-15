@@ -7,9 +7,11 @@ Create `.env` in repo root:
 BOT_TOKEN=123456:AAAA...
 WEB_APP_URL=https://your-domain.com
 
-# Frontend (Vite)
-VITE_NEWS_URL="https://t.me/your_news_channel"
-VITE_SUPPORT_URL="https://t.me/your_support_account"
+# Frontend
+TELEGRAM_APP_URL="https://t.me/your_bot/your_startapp"
+NEWS_URL="https://t.me/your_news_channel"
+SUPPORT_URL="https://t.me/your_support_account"
+API_BASE_URL="https://your-domain.com"
 ```
 
 ## 2) Caddy

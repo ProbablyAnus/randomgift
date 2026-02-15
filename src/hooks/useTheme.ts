@@ -16,11 +16,11 @@ const apply = (theme: Theme) => {
   // For CSS selectors (crypto-bot-contest uses dataset.light/dark)
   if (theme === "dark") {
     root.dataset.dark = "1";
-    delete (root.dataset as any).light;
+    delete root.dataset.light;
     root.dataset.theme = "dark";
   } else {
     root.dataset.light = "1";
-    delete (root.dataset as any).dark;
+    delete root.dataset.dark;
     root.dataset.theme = "light";
   }
 

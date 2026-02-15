@@ -256,7 +256,10 @@ export const GiftsPage: FC = () => {
 
   const handlePayment = async () => {
     if (isBusy) return;
-    if (!webApp?.openInvoice || !webApp?.initData) {
+
+    const openInvoice = webApp?.openInvoice;
+    const initData = webApp?.initData;
+    if (!openInvoice || !initData) {
       window.alert("Оплата доступна только внутри Telegram.");
       return;
     }
@@ -265,7 +268,7 @@ export const GiftsPage: FC = () => {
       setIsProcessingPayment(true);
       const response = await fetch(buildApiUrl(`/api/invoice?amount=${selectedPrice}`), {
         headers: {
-          "X-Telegram-Init-Data": webApp.initData,
+          "X-Telegram-Init-Data": initData,
         },
       });
 
@@ -278,7 +281,7 @@ export const GiftsPage: FC = () => {
         throw new Error("Ссылка на оплату не получена.");
       }
 
-      webApp.openInvoice(data.invoice_link, (status) => {
+      openInvoice(data.invoice_link, (status) => {
         setIsProcessingPayment(false);
 
         if (status === "paid") {

@@ -1,6 +1,7 @@
 import { FC, useEffect, useMemo, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useTelegramWebApp } from "@/hooks/useTelegramWebApp";
+import { getTelegramUser } from "@/lib/telegram";
 import styles from "./LeaderboardPage.module.scss";
 import { buildApiUrl } from "@/lib/api";
 
@@ -149,7 +150,7 @@ export const LeaderboardPage: FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [emptyReason, setEmptyReason] = useState<LeaderboardEmptyReason>(null);
-  const currentUserId = webApp?.initDataUnsafe?.user?.id;
+  const currentUserId = getTelegramUser(webApp)?.id;
 
   useEffect(() => {
     let isMounted = true;

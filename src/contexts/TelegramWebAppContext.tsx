@@ -1,5 +1,6 @@
 import { createContext, ReactNode, useContext, useMemo } from "react";
-import { TelegramWebApp, useTelegramWebApp } from "@/hooks/useTelegramWebApp";
+import { useTelegramWebApp } from "@/hooks/useTelegramWebApp";
+import type { TelegramWebApp } from "@/types/telegram";
 
 type TelegramWebAppContextValue = {
   webApp: TelegramWebApp | null;
@@ -29,4 +30,13 @@ export const useTelegramWebAppContext = () => {
   const ctx = useContext(TelegramWebAppContext);
   if (!ctx) throw new Error("useTelegramWebAppContext must be used within TelegramWebAppProvider");
   return ctx;
+};
+
+export const useRequiredTelegramWebApp = () => {
+  const ctx = useTelegramWebAppContext();
+  if (!ctx.isTelegramContext || !ctx.webApp || !ctx.webApp.initData) {
+    throw new Error("useRequiredTelegramWebApp must be used inside Telegram WebApp context");
+  }
+
+  return ctx.webApp;
 };

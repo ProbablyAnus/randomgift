@@ -5,7 +5,7 @@ import ButtonIcon from "@/assets/gifts/svg-image-1.svg";
 import { Switch } from "@/components/ui/switch";
 import { RefreshCw } from "lucide-react";
 import { useAdaptivity } from "@/hooks/useAdaptivity";
-import { useTelegramWebAppContext } from "@/contexts/TelegramWebAppContext";
+import { useRequiredTelegramWebApp } from "@/contexts/TelegramWebAppContext";
 import { buildApiUrl } from "@/lib/api";
 import bouquetSvg from "@/assets/gifts/bouquet.svg";
 import cakeSvg from "@/assets/gifts/cake.svg";
@@ -143,7 +143,7 @@ const selectWinnerByChance = (gifts: RouletteGift[]) => {
 
 export const GiftsPage: FC = () => {
   const { sizeX, platform } = useAdaptivity();
-  const { webApp } = useTelegramWebAppContext();
+  const webApp = useRequiredTelegramWebApp();
   const [selectedPrice, setSelectedPrice] = useState(25);
   const [demoMode, setDemoMode] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
@@ -282,8 +282,8 @@ export const GiftsPage: FC = () => {
 
   const handlePayment = async () => {
     if (isBusy) return;
-    if (!webApp?.openInvoice || !webApp?.initData) {
-      window.alert("Оплата доступна только внутри Telegram.");
+    if (!webApp.openInvoice) {
+      window.alert("Оплата недоступна в вашей версии Telegram.");
       return;
     }
 

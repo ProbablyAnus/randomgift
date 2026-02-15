@@ -7,40 +7,13 @@ import { RefreshCw } from "lucide-react";
 import { useAdaptivity } from "@/hooks/useAdaptivity";
 import { useRequiredTelegramWebApp } from "@/contexts/TelegramWebAppContext";
 import { buildApiUrl } from "@/lib/api";
-import bouquetSvg from "@/assets/gifts/bouquet.svg";
-import cakeSvg from "@/assets/gifts/cake.svg";
-import champagneSvg from "@/assets/gifts/champagne.svg";
-import diamondSvg from "@/assets/gifts/diamond.svg";
-import elkaSvg from "@/assets/gifts/elka.svg";
-import giftBoxSvg from "@/assets/gifts/gift-box.svg";
-import heartBoxSvg from "@/assets/gifts/heart-box.svg";
-import newTeddySvg from "@/assets/gifts/newteddy.svg";
-import ringSvg from "@/assets/gifts/ring.svg";
-import rocketSvg from "@/assets/gifts/rocket.svg";
-import roseSvg from "@/assets/gifts/rose.svg";
-import teddyBearSvg from "@/assets/gifts/teddy-bear.svg";
-import trophySvg from "@/assets/gifts/trophy.svg";
+import { GIFTS_CATALOG, type GiftId } from "@/components/gifts/constants";
 
 const prices = [25, 50, 100];
 
 type GiftIcon = { src: string };
 type RouletteGift = { icon: GiftIcon; label: string; price: number; chance: number };
 type WinPrize = { icon: GiftIcon; label: string; price: number; chance: string };
-type GiftId =
-  | "heart-box"
-  | "teddy-bear"
-  | "gift-box"
-  | "rose"
-  | "elka"
-  | "newteddy"
-  | "cake"
-  | "bouquet"
-  | "rocket"
-  | "champagne"
-  | "trophy"
-  | "ring"
-  | "diamond";
-
 type ChanceConfig = { weight: number; label: string };
 
 const chanceBySelectedPrice: Record<number, Record<GiftId, ChanceConfig>> = {
@@ -91,21 +64,7 @@ const chanceBySelectedPrice: Record<number, Record<GiftId, ChanceConfig>> = {
   },
 };
 
-const giftsCatalog: { id: GiftId; icon: string; label: string; price: number }[] = [
-  { id: "heart-box", icon: heartBoxSvg, label: "Сердце", price: 15 },
-  { id: "teddy-bear", icon: teddyBearSvg, label: "Медвежонок", price: 15 },
-  { id: "gift-box", icon: giftBoxSvg, label: "Коробка", price: 25 },
-  { id: "rose", icon: roseSvg, label: "Роза", price: 25 },
-  { id: "elka", icon: elkaSvg, label: "Ёлка", price: 50 },
-  { id: "newteddy", icon: newTeddySvg, label: "Мишка", price: 50 },
-  { id: "cake", icon: cakeSvg, label: "Торт", price: 50 },
-  { id: "bouquet", icon: bouquetSvg, label: "Букет", price: 50 },
-  { id: "rocket", icon: rocketSvg, label: "Ракета", price: 50 },
-  { id: "champagne", icon: champagneSvg, label: "Шампанское", price: 50 },
-  { id: "trophy", icon: trophySvg, label: "Кубок", price: 100 },
-  { id: "ring", icon: ringSvg, label: "Кольцо", price: 100 },
-  { id: "diamond", icon: diamondSvg, label: "Алмаз", price: 100 },
-];
+const giftsCatalog = GIFTS_CATALOG;
 
 // Create extended array for smooth roulette spinning
 const createExtendedRoulette = (gifts: RouletteGift[]) => {
@@ -170,7 +129,7 @@ export const GiftsPage: FC = () => {
 
   const rouletteGifts = useMemo<RouletteGift[]>(
     () => shuffleGifts(baseRouletteGifts),
-    [baseRouletteGifts, selectedPrice]
+    [baseRouletteGifts]
   );
 
   const allWinPrizes = useMemo<WinPrize[]>(

@@ -5,8 +5,8 @@ import styles from "./ProfilePage.module.scss";
 
 export const ProfilePage: FC = () => {
   const { webApp } = useTelegramWebAppContext();
-  const newsUrl = import.meta.env.VITE_NEWS_URL ?? "";
-  const supportUrl = import.meta.env.VITE_SUPPORT_URL ?? "";
+  const newsUrl = import.meta.env.NEWS_URL ?? "";
+  const supportUrl = import.meta.env.SUPPORT_URL ?? "";
 
   const openLink = (url: string) => {
     if (!url) return;

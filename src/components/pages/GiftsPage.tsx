@@ -1,4 +1,4 @@
-import { FC, useMemo, useRef, useState } from "react";
+import { FC, useEffect, useMemo, useRef, useState } from "react";
 import { PriceTabs } from "../PriceTabs";
 import StarSvg from "@/assets/gifts/star-badge.svg";
 import ButtonIcon from "@/assets/gifts/svg-image-1.svg";
@@ -153,6 +153,7 @@ export const GiftsPage: FC = () => {
   const rouletteRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const spinTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const chanceMap = chanceBySelectedPrice[selectedPrice];
 
@@ -195,13 +196,37 @@ export const GiftsPage: FC = () => {
 
   const isBusy = isSpinning || isProcessingPayment;
 
-  const startSpin = () => {
-    if (isSpinning) return;
+  const clearTimers = () => {
+    if (spinTimeoutRef.current) {
+      clearTimeout(spinTimeoutRef.current);
+      spinTimeoutRef.current = null;
+    }
 
     if (closeTimeoutRef.current) {
       clearTimeout(closeTimeoutRef.current);
       closeTimeoutRef.current = null;
     }
+  };
+
+  useEffect(
+    () => () => {
+      if (spinTimeoutRef.current) {
+        clearTimeout(spinTimeoutRef.current);
+        spinTimeoutRef.current = null;
+      }
+
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+        closeTimeoutRef.current = null;
+      }
+    },
+    []
+  );
+
+  const startSpin = () => {
+    if (isSpinning) return;
+
+    clearTimers();
     
     setIsSpinning(true);
     setWonPrize(null);
@@ -242,10 +267,11 @@ export const GiftsPage: FC = () => {
       });
     }
 
-    setTimeout(() => {
+    spinTimeoutRef.current = setTimeout(() => {
       setIsSpinning(false);
       setWonPrize(winner);
       setShowResult(true);
+      spinTimeoutRef.current = null;
       
       // Haptic feedback on supported devices
       if (navigator.vibrate) {
@@ -296,11 +322,14 @@ export const GiftsPage: FC = () => {
 
   const closeResultPanel = () => {
     setShowResult(false);
+
     if (closeTimeoutRef.current) {
       clearTimeout(closeTimeoutRef.current);
     }
+
     closeTimeoutRef.current = setTimeout(() => {
       setWonPrize(null);
+      closeTimeoutRef.current = null;
     }, 320);
   };
 

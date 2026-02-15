@@ -2,7 +2,7 @@ import { FC, useEffect, useMemo, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useTelegramWebApp } from "@/hooks/useTelegramWebApp";
 import styles from "./LeaderboardPage.module.scss";
-import { buildApiUrl } from "@/lib/api";
+import { HttpClientError, request } from "@/lib/httpClient";
 
 interface LeaderboardUser {
   id?: number | string;
@@ -165,19 +165,10 @@ export const LeaderboardPage: FC = () => {
           console.warn("initData missing: leaderboard request is outside Telegram WebApp context");
         }
 
-        const response = await fetch(buildApiUrl("/api/leaderboard"), {
+        const data = await request<LeaderboardResponse & { error?: string }>("/api/leaderboard", {
           signal: controller.signal,
-          headers: initData ? { "X-Telegram-Init-Data": initData } : undefined,
+          telegramInitData: initData,
         });
-
-        const data = (await response.json()) as LeaderboardResponse & { error?: string };
-
-        if (!response.ok) {
-          if (data?.error === "invalid_init_data") {
-            console.warn("invalid_init_data: leaderboard request must be made inside Telegram");
-          }
-          throw new Error("failed_to_load_leaderboard");
-        }
 
         const list = toLeaderboardArray(data);
 
@@ -186,6 +177,10 @@ export const LeaderboardPage: FC = () => {
         setHasError(false);
         setEmptyReason(list.length === 0 ? "empty_leaderboard" : null);
       } catch (error) {
+        if (error instanceof HttpClientError && error.code === "invalid_init_data") {
+          console.warn("invalid_init_data: leaderboard request must be made inside Telegram");
+        }
+
         console.error("Leaderboard fetch error:", error);
         if (!isMounted) return;
         setHasError(true);

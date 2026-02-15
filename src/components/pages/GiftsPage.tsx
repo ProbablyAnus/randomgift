@@ -6,7 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { RefreshCw } from "lucide-react";
 import { useAdaptivity } from "@/hooks/useAdaptivity";
 import { useTelegramWebApp } from "@/hooks/useTelegramWebApp";
-import { buildApiUrl } from "@/lib/api";
+import { request } from "@/lib/httpClient";
 import bouquetSvg from "@/assets/gifts/bouquet.svg";
 import cakeSvg from "@/assets/gifts/cake.svg";
 import champagneSvg from "@/assets/gifts/champagne.svg";
@@ -263,17 +263,9 @@ export const GiftsPage: FC = () => {
 
     try {
       setIsProcessingPayment(true);
-      const response = await fetch(buildApiUrl(`/api/invoice?amount=${selectedPrice}`), {
-        headers: {
-          "X-Telegram-Init-Data": webApp.initData,
-        },
+      const data = await request<{ invoice_link?: string }>(`/api/invoice?amount=${selectedPrice}`, {
+        telegramInitData: webApp.initData,
       });
-
-      if (!response.ok) {
-        throw new Error("Не удалось создать счет на оплату.");
-      }
-
-      const data = (await response.json()) as { invoice_link?: string };
       if (!data.invoice_link) {
         throw new Error("Ссылка на оплату не получена.");
       }

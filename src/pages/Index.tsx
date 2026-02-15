@@ -1,12 +1,57 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BottomNav, type TabType } from "@/components/BottomNav";
 import { GiftsPage } from "@/components/pages/GiftsPage";
-import { LeaderboardPage } from "@/components/pages/LeaderboardPage";
+import { LeaderboardPage, preloadLeaderboard } from "@/components/pages/LeaderboardPage";
 import { ProfilePage } from "@/components/pages/ProfilePage";
 import { AdaptivityProvider } from "@/hooks/useAdaptivity";
+import { useTelegramWebApp } from "@/hooks/useTelegramWebApp";
+import bouquetSvg from "@/assets/gifts/bouquet.svg";
+import cakeSvg from "@/assets/gifts/cake.svg";
+import champagneSvg from "@/assets/gifts/champagne.svg";
+import diamondSvg from "@/assets/gifts/diamond.svg";
+import elkaSvg from "@/assets/gifts/elka.svg";
+import giftBoxSvg from "@/assets/gifts/gift-box.svg";
+import heartBoxSvg from "@/assets/gifts/heart-box.svg";
+import newTeddySvg from "@/assets/gifts/newteddy.svg";
+import ringSvg from "@/assets/gifts/ring.svg";
+import rocketSvg from "@/assets/gifts/rocket.svg";
+import roseSvg from "@/assets/gifts/rose.svg";
+import teddyBearSvg from "@/assets/gifts/teddy-bear.svg";
+import trophySvg from "@/assets/gifts/trophy.svg";
+
+const preloadImages = (images: string[]) => {
+  if (typeof Image === "undefined") return;
+  images.forEach((src) => {
+    const image = new Image();
+    image.src = src;
+  });
+};
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<TabType>("gifts");
+  const { webApp } = useTelegramWebApp();
+
+  useEffect(() => {
+    preloadLeaderboard(webApp?.initData).catch((error) => {
+      console.warn("leaderboard prefetch failed", error);
+    });
+
+    preloadImages([
+      heartBoxSvg,
+      teddyBearSvg,
+      giftBoxSvg,
+      roseSvg,
+      elkaSvg,
+      newTeddySvg,
+      cakeSvg,
+      bouquetSvg,
+      rocketSvg,
+      champagneSvg,
+      trophySvg,
+      ringSvg,
+      diamondSvg,
+    ]);
+  }, [webApp?.initData]);
 
   const renderPage = () => {
     switch (activeTab) {

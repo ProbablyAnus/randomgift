@@ -1,6 +1,22 @@
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+
+def _load_env_file() -> None:
+    env_path = Path(__file__).resolve().parent / ".env"
+    if env_path.exists():
+        load_dotenv(dotenv_path=env_path)
+        return
+
+    legacy_env_path = env_path.with_name(".evn")
+    if legacy_env_path.exists():
+        load_dotenv(dotenv_path=legacy_env_path)
+
+
+_load_env_file()
+
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 WEB_APP_URL = os.getenv("WEB_APP_URL") or os.getenv("APP_PUBLIC_URL")
 MINI_APP_URL = os.getenv("MINI_APP_URL") or WEB_APP_URL

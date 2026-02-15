@@ -6,45 +6,18 @@ import { buildApiUrl } from "@/lib/api";
 import { getTelegramUser } from "@/hooks/useTelegramWebApp";
 
 interface LeaderboardUser {
-  id?: number | string;
-  _id?: number | string;
   userId?: number | string;
-  user_id?: number | string;
   username?: string;
-  userName?: string;
-  user_name?: string;
-  name?: string;
   firstName?: string;
-  first_name?: string;
   lastName?: string;
-  last_name?: string;
   photoUrl?: string;
-  photo_url?: string;
-  avatar?: string;
-  profilePicture?: string;
   spentStars?: number;
-  spent_stars?: number;
-  starsSpent?: number;
-  totalSpentStars?: number;
-  total_spent_stars?: number;
-  xp?: number;
-  score?: number;
 }
 
-type LeaderboardPayloadObject = {
-  users?: LeaderboardUser[];
+type LeaderboardResponse = {
   leaderboard?: LeaderboardUser[];
-  items?: LeaderboardUser[];
-  rows?: LeaderboardUser[];
-  list?: LeaderboardUser[];
-  data?: LeaderboardPayload;
-  result?: LeaderboardPayload;
-  payload?: LeaderboardPayload;
+  error?: string;
 };
-
-type LeaderboardPayload = LeaderboardUser[] | LeaderboardPayloadObject;
-
-type LeaderboardResponse = LeaderboardPayload | null | undefined;
 
 type LeaderboardEmptyReason = "empty_leaderboard" | "load_error" | null;
 
@@ -55,27 +28,16 @@ let leaderboardCacheInitData: string | undefined;
 const formatXp = (count: number) => `${count} xp`;
 
 const getDisplayName = (user: LeaderboardUser) => {
-  if (user.userName) return user.userName;
   if (user.username) return user.username;
-  if (user.user_name) return user.user_name;
-  if (user.name) return user.name;
-  const fullName = [user.firstName ?? user.first_name, user.lastName ?? user.last_name].filter(Boolean).join(" ");
+  const fullName = [user.firstName, user.lastName].filter(Boolean).join(" ");
   return fullName || "Без имени";
 };
 
-const getPhotoUrl = (user: LeaderboardUser) => user.photoUrl ?? user.photo_url ?? user.avatar ?? user.profilePicture ?? "";
+const getPhotoUrl = (user: LeaderboardUser) => user.photoUrl ?? "";
 
-const getUserId = (user: LeaderboardUser) => user.userId ?? user.user_id ?? user.id ?? user._id;
+const getUserId = (user: LeaderboardUser) => user.userId;
 
-const getXpCount = (user: LeaderboardUser) =>
-  user.spentStars ??
-  user.spent_stars ??
-  user.starsSpent ??
-  user.totalSpentStars ??
-  user.total_spent_stars ??
-  user.xp ??
-  user.score ??
-  0;
+const getXpCount = (user: LeaderboardUser) => user.spentStars ?? 0;
 
 const getPositionLabel = (position: number) => {
   if (position === 1) return "🥇";
@@ -84,67 +46,17 @@ const getPositionLabel = (position: number) => {
   return `#${position}`;
 };
 
-const isRecord = (value: unknown): value is Record<string, unknown> => {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-};
-
-const isLeaderboardUserLike = (value: unknown): value is LeaderboardUser => {
-  if (!isRecord(value)) return false;
-
-  return (
-    "id" in value ||
-    "_id" in value ||
-    "userId" in value ||
-    "user_id" in value ||
-    "username" in value ||
-    "userName" in value ||
-    "user_name" in value ||
-    "name" in value ||
-    "spentStars" in value ||
-    "spent_stars" in value ||
-    "xp" in value ||
-    "score" in value ||
-    "totalSpentStars" in value ||
-    "total_spent_stars" in value
-  );
-};
-
-const collectLeaderboardUsers = (value: unknown, seen: WeakSet<object>): LeaderboardUser[] => {
-  if (!value) return [];
-
-  if (Array.isArray(value)) {
-    return value.flatMap((item) => collectLeaderboardUsers(item, seen));
-  }
-
-  if (!isRecord(value)) return [];
-  if (seen.has(value)) return [];
-  seen.add(value);
-
-  if (isLeaderboardUserLike(value)) {
-    return [value];
-  }
-
-  return Object.values(value).flatMap((item) => collectLeaderboardUsers(item, seen));
-};
-
 const dedupeUsers = (users: LeaderboardUser[]) => {
   const byKey = new Map<string, LeaderboardUser>();
 
   users.forEach((user, index) => {
-    const key = String(getUserId(user) ?? user.username ?? user.userName ?? user.user_name ?? `row-${index}`);
+    const key = String(getUserId(user) ?? user.username ?? `row-${index}`);
     if (!byKey.has(key)) {
       byKey.set(key, user);
     }
   });
 
   return [...byKey.values()];
-};
-
-const toLeaderboardArray = (data: LeaderboardResponse): LeaderboardUser[] => {
-  if (!data) return [];
-
-  const list = collectLeaderboardUsers(data, new WeakSet<object>());
-  return dedupeUsers(list);
 };
 
 const preloadAvatarImage = (photoUrl: string) => {
@@ -158,7 +70,7 @@ const fetchLeaderboard = async (initData?: string) => {
     headers: initData ? { "X-Telegram-Init-Data": initData } : undefined,
   });
 
-  const data = (await response.json()) as LeaderboardResponse & { error?: string };
+  const data = (await response.json()) as LeaderboardResponse;
 
   if (!response.ok) {
     if (data?.error === "invalid_init_data") {
@@ -167,7 +79,7 @@ const fetchLeaderboard = async (initData?: string) => {
     throw new Error("failed_to_load_leaderboard");
   }
 
-  const list = toLeaderboardArray(data);
+  const list = dedupeUsers(Array.isArray(data?.leaderboard) ? data.leaderboard : []);
   list.forEach((user) => preloadAvatarImage(getPhotoUrl(user)));
   return list;
 };
@@ -264,7 +176,7 @@ export const LeaderboardPage: FC = () => {
   }, [emptyReason, hasError]);
 
   const handleUserClick = (user: LeaderboardUser) => {
-    const username = user.username ?? user.userName ?? user.user_name;
+    const username = user.username;
     const userId = getUserId(user);
     const telegramLink = username ? `https://t.me/${username}` : userId ? `tg://user?id=${userId}` : "";
 

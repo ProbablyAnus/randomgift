@@ -6,7 +6,6 @@ from aiogram import Bot, Dispatcher, F, types
 from aiogram.filters import CommandStart
 from aiogram.types import LabeledPrice
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from dotenv import load_dotenv
 
 from config import (
     ALLOWED_PRICES,
@@ -23,7 +22,6 @@ from database import Database
 from payments import build_invoice_payload, parse_invoice_payload
 from security import extract_user_from_init_data, verify_telegram_init_data
 
-load_dotenv()
 validate_config()
 
 logger = logging.getLogger(__name__)

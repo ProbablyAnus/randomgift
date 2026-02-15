@@ -5,14 +5,18 @@ from dotenv import load_dotenv
 
 
 def _load_env_file() -> None:
-    env_path = Path(__file__).resolve().parent / ".env"
-    if env_path.exists():
-        load_dotenv(dotenv_path=env_path)
-        return
+    config_dir = Path(__file__).resolve().parent
+    env_candidates = (
+        config_dir / ".env",
+        config_dir.parent / ".env",
+        config_dir / ".evn",
+        config_dir.parent / ".evn",
+    )
 
-    legacy_env_path = env_path.with_name(".evn")
-    if legacy_env_path.exists():
-        load_dotenv(dotenv_path=legacy_env_path)
+    for env_path in env_candidates:
+        if env_path.exists():
+            load_dotenv(dotenv_path=env_path)
+            return
 
 
 _load_env_file()

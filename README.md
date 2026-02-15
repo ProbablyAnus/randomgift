@@ -22,6 +22,7 @@
 3. Заполните `.env.local` (frontend, Vite):
    - `VITE_NEWS_URL` — ссылка на канал/новости.
    - `VITE_SUPPORT_URL` — ссылка на поддержку.
+   - `VITE_TELEGRAM_APP_URL` — deep link на запуск бота/мини-приложения (например, `https://t.me/<bot_username>/<app_name>?startapp=<payload>`), используется в fallback-экране «Открыть в Telegram».
    - `VITE_API_BASE_URL` — базовый URL API (например, `http://localhost:8080` для локальной разработки без reverse proxy).
 
 ## Полный запуск проекта (пошагово)

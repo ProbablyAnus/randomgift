@@ -466,7 +466,7 @@ export const GiftsPage: FC = () => {
 
       {/* Demo Mode Toggle */}
       <div className="flex items-center justify-between px-4 pt-1 pb-4">
-        <span className="text-foreground text-lg">Демо режим</span>
+        <span className="text-lg" style={{ color: "var(--tg-text)" }}>Демо режим</span>
         <Switch
           checked={demoMode}
           disabled={isBusy}

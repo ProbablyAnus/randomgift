@@ -80,7 +80,8 @@ async def handle_leaderboard(request: web.Request) -> web.Response:
 
     await db.upsert_user(user)
     leaderboard = await db.get_leaderboard()
-    return web.json_response({"leaderboard": leaderboard})
+    leaderboard_response = leaderboard if isinstance(leaderboard, list) else []
+    return web.json_response({"leaderboard": leaderboard_response})
 
 
 async def run_api_server(bot: Bot, db: Database) -> None:

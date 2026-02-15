@@ -105,6 +105,7 @@ export const GiftsPage: FC = () => {
   const webApp = useRequiredTelegramWebApp();
   const [selectedPrice, setSelectedPrice] = useState(25);
   const [demoMode, setDemoMode] = useState(false);
+  const [spinWasDemo, setSpinWasDemo] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
   const [wonPrize, setWonPrize] = useState<{ icon: GiftIcon; label: string; price: number } | null>(null);
   const [showResult, setShowResult] = useState(false);
@@ -182,12 +183,13 @@ export const GiftsPage: FC = () => {
     []
   );
 
-  const startSpin = () => {
+  const startSpin = (mode: "demo" | "paid") => {
     if (isSpinning) return;
 
     clearTimers();
     
     setIsSpinning(true);
+    setSpinWasDemo(mode === "demo");
     setWonPrize(null);
     setShowResult(false);
     
@@ -267,7 +269,7 @@ export const GiftsPage: FC = () => {
         setIsProcessingPayment(false);
 
         if (status === "paid") {
-          startSpin();
+          startSpin("paid");
         } else if (status === "failed") {
           window.alert("Платеж не прошел. Попробуйте снова.");
         }
@@ -295,6 +297,11 @@ export const GiftsPage: FC = () => {
   const handleDisableDemo = () => {
     setDemoMode(false);
     closeResultPanel();
+  };
+
+  const handleDemoModeChange = (checked: boolean) => {
+    if (isBusy) return;
+    setDemoMode(checked);
   };
 
   // Button text based on state
@@ -429,13 +436,13 @@ export const GiftsPage: FC = () => {
                 <img src={wonPrize.icon.src} alt={wonPrize.label} className="gift-icon w-[120px] h-[120px] drop-shadow-xl" />
                 <p className="text-foreground font-semibold text-2xl">Вы выиграли подарок!</p>
                 <p className="text-muted-foreground text-base leading-relaxed">
-                  {demoMode
+                  {spinWasDemo
                     ? "Демо-режим нужен для тестирования шансов выпадения подарков."
                     : "Подарок уже отправлен на ваш аккаунт."}
                 </p>
               </div>
               <div className="win-result-actions">
-                {demoMode && (
+                {spinWasDemo && (
                   <button
                     type="button"
                     className="win-result-primary-button touch-feedback"
@@ -460,13 +467,18 @@ export const GiftsPage: FC = () => {
       {/* Demo Mode Toggle */}
       <div className="flex items-center justify-between px-4 pt-1 pb-4">
         <span className="text-foreground text-lg">Демо режим</span>
-        <Switch checked={demoMode} onCheckedChange={setDemoMode} className="demo-switch" />
+        <Switch
+          checked={demoMode}
+          disabled={isBusy}
+          onCheckedChange={handleDemoModeChange}
+          className="demo-switch"
+        />
       </div>
 
       {/* Get Gift Button */}
       <div className="px-4 pb-3 mt-2">
         <button
-          onClick={demoMode ? startSpin : handlePayment}
+          onClick={demoMode ? () => startSpin("demo") : handlePayment}
           disabled={isBusy}
           className="primary-button touch-feedback"
         >

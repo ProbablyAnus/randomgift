@@ -1,5 +1,5 @@
 import { FC } from "react";
-import StarSvg from "@/assets/gifts/star-badge.svg";
+import { StarIcon } from "@/components/icons/StarIcon";
 interface PriceTabsProps {
   prices: number[];
   selectedPrice: number;
@@ -18,7 +18,7 @@ export const PriceTabs: FC<PriceTabsProps> = ({ prices, selectedPrice, onSelect 
             className={isSelected ? "tg-tab tg-tab--active" : "tg-tab"}
             type="button"
           >
-            <img src={StarSvg} alt="Stars" className="tg-tab__star" />
+            <StarIcon className="tg-tab__star" />
             <span className="tg-tab__text">{price}</span>
           </button>
         );

@@ -1,5 +1,5 @@
 import { FC } from "react";
-import StarSvg from "@/assets/gifts/star-badge.svg";
+import { StarIcon } from "@/components/icons/StarIcon";
 import { useAdaptivity } from "@/hooks/useAdaptivity";
 import { CARD_DIMENSIONS, ICON_SIZES } from "@/components/gifts/constants";
 interface GiftCardProps {
@@ -35,7 +35,7 @@ export const GiftCard: FC<GiftCardProps> = ({ iconPng, iconWebp, label, price, i
         </picture>
         <div className="star-badge star-badge--center star-badge--big">
           <span className="price-row">
-            <img src={StarSvg} alt="Stars" className="star-icon" />
+            <StarIcon className="star-icon" />
             <span className="font-semibold">{price}</span>
           </span>
         </div>

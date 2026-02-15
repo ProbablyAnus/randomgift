@@ -3,6 +3,7 @@ import { BottomNav, type TabType } from "@/components/BottomNav";
 import { OpenInTelegramPage } from "@/components/pages/OpenInTelegramPage";
 import { useTelegramWebAppContext } from "@/contexts/TelegramWebAppContext";
 import { AdaptivityProvider } from "@/hooks/useAdaptivity";
+import ButtonIconSvg from "@/assets/gifts/svg-image-1.svg";
 
 const GiftsPage = lazy(() => import("@/components/pages/GiftsPage").then((module) => ({ default: module.GiftsPage })));
 const LeaderboardPage = lazy(() =>
@@ -50,7 +51,7 @@ const Index = () => {
     const runPreload = async () => {
       if (giftsPreloadedRef.current) return;
       const { GIFT_IMAGE_SOURCES } = await import("@/components/gifts/constants");
-      preloadImages(GIFT_IMAGE_SOURCES);
+      preloadImages([...GIFT_IMAGE_SOURCES, ButtonIconSvg]);
       giftsPreloadedRef.current = true;
     };
 

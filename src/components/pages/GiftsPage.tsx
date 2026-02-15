@@ -1,6 +1,6 @@
 import { FC, useEffect, useMemo, useRef, useState } from "react";
 import { PriceTabs } from "../PriceTabs";
-import StarSvg from "@/assets/gifts/star-badge.svg";
+import { StarIcon } from "@/components/icons/StarIcon";
 import ButtonIcon from "@/assets/gifts/svg-image-1.svg";
 import { Switch } from "@/components/ui/switch";
 import { RefreshCw } from "lucide-react";
@@ -408,7 +408,7 @@ export const GiftsPage: FC = () => {
                 {/* Price badge centered at bottom */}
                 <div className="absolute bottom-3 left-1/2 -translate-x-1/2 star-badge star-badge--center star-badge--tight">
                   <span className="price-row">
-                    <img src={StarSvg} alt="Stars" className="star-icon" />
+                    <StarIcon className="star-icon" />
                     <span className="text-[15px] font-normal">{gift.price}</span>
                   </span>
                 </div>
@@ -507,7 +507,7 @@ export const GiftsPage: FC = () => {
               {/* Price badge centered */}
               <div className="absolute bottom-7 left-1/2 -translate-x-1/2 star-badge star-badge--center star-badge--bottom">
                 <span className="price-row">
-                  <img src={StarSvg} alt="Stars" className="star-icon" />
+                  <StarIcon className="star-icon" />
                   <span className="text-[15px] font-normal">{prize.price}</span>
                 </span>
               </div>

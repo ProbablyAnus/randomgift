@@ -85,6 +85,10 @@ export const useTelegramWebApp = () => {
   const [webApp, setWebApp] = useState<TelegramWebApp | null>(() => {
     return getTelegramWebApp();
   });
+  const [colorScheme, setColorScheme] = useState<TelegramColorScheme>(() => {
+    const scheme = getTelegramWebApp()?.colorScheme;
+    return scheme === "light" ? "light" : "dark";
+  });
   const initializedRef = useRef(false);
 
   useEffect(() => {
@@ -125,7 +129,30 @@ export const useTelegramWebApp = () => {
     }
 
     applyViewportVars(webApp);
+
+    const scheme = webApp?.colorScheme;
+    setColorScheme(scheme === "light" ? "light" : "dark");
   }, [webApp]);
+
+  useEffect(() => {
+    const syncTheme = () => {
+      const scheme = getTelegramWebApp()?.colorScheme;
+      setColorScheme(scheme === "light" ? "light" : "dark");
+    };
+
+    const wa = getTelegramWebApp();
+    wa?.onEvent?.("themeChanged", syncTheme);
+    wa?.onEvent?.("theme_changed", syncTheme);
+    window.addEventListener("focus", syncTheme);
+    document.addEventListener("visibilitychange", syncTheme);
+
+    return () => {
+      wa?.offEvent?.("themeChanged", syncTheme);
+      wa?.offEvent?.("theme_changed", syncTheme);
+      window.removeEventListener("focus", syncTheme);
+      document.removeEventListener("visibilitychange", syncTheme);
+    };
+  }, []);
 
   useEffect(() => {
     const handleViewportChange = () => {
@@ -157,14 +184,13 @@ export const useTelegramWebApp = () => {
 
   return useMemo(() => {
     const hasTelegramWebApp = Boolean(getTelegramWebApp());
-    const scheme: TelegramColorScheme = webApp?.colorScheme === "light" ? "light" : "dark";
 
     return {
       webApp,
       isTelegramContext: hasTelegramWebApp && hasValidInitData(webApp),
-      colorScheme: scheme,
+      colorScheme,
       isExpanded: Boolean(webApp?.isExpanded),
       themeParams: (webApp?.themeParams ?? {}) as TelegramThemeParams,
     };
-  }, [webApp]);
+  }, [colorScheme, webApp]);
 };

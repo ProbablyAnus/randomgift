@@ -607,7 +607,7 @@ html, body, #root {
 
 /* Gift cards */
 .gift-card {
-  background: var(--app-card) !important;
+  background: var(--gift-card-bg) !important;
 }
 
 /* Bottom tabbar */
@@ -950,6 +950,10 @@ html, body, #root {
   --tg-button: #0080FA;
   --tg-button-text: #FFFFFF;
   --tg-hint: #959595;
+  --gift-card-bg: #FFFFFF;
+  --price-pill-bg: #3A3230;
+  --price-pill-border: #3A3230;
+  --price-pill-text: #FFFFFF;
 }
 
 :root[data-theme="light"] {
@@ -958,6 +962,10 @@ html, body, #root {
   --tabbar-bg: rgba(241, 241, 242, 0.75);
   --tg-text: #000000;
   --tg-hint: #959595;
+  --gift-card-bg: #FFFFFF;
+  --price-pill-bg: #F9EAC0;
+  --price-pill-border: #F9EAC0;
+  --price-pill-text: #3A3230;
 }
 
 :root[data-theme="dark"] {
@@ -966,6 +974,9 @@ html, body, #root {
   --tabbar-bg: rgba(30, 30, 30, 0.75);
   --tg-text: #FFFFFF;
   --tg-hint: #8E8E93;
+  --price-pill-bg: #3A3230;
+  --price-pill-border: #3A3230;
+  --price-pill-text: #FFFFFF;
 }
 
 .cbc-tabbar__item {
@@ -1011,9 +1022,9 @@ html, body, #root {
   padding: 6px 12px !important;
   gap: 4px !important;
   border-radius: 999px !important;
-  background: #473f32 !important;
-  border: 1px solid #473f32 !important;
-  color: #FFFFFF !important;
+  background: var(--price-pill-bg) !important;
+  border: 1px solid var(--price-pill-border) !important;
+  color: var(--price-pill-text) !important;
   font-weight: 400 !important;
   line-height: 1 !important;
 }

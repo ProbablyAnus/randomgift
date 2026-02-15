@@ -169,7 +169,11 @@ async def create_invoice_legacy(payload: dict):
 
 
 @app.get("/api/leaderboard")
-async def handle_leaderboard(x_telegram_init_data: str | None = Header(default=None)):
+async def handle_leaderboard(
+    x_telegram_init_data: str | None = Header(default=None),
+    limit: int = Query(default=50, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+):
     if not x_telegram_init_data:
         return JSONResponse(status_code=401, content={"error": "invalid_init_data"})
 
@@ -186,8 +190,14 @@ async def handle_leaderboard(x_telegram_init_data: str | None = Header(default=N
         return JSONResponse(status_code=401, content={"error": "invalid_init_data"})
 
     await app.state.db.upsert_user(user)
-    leaderboard = await app.state.db.get_leaderboard()
-    return {"leaderboard": leaderboard}
+    leaderboard = await app.state.db.get_leaderboard(limit=limit, offset=offset)
+    return {
+        "leaderboard": leaderboard,
+        "pagination": {
+            "limit": limit,
+            "offset": offset,
+        },
+    }
 
 
 async def run_api_server(bot_instance, db_instance, host, port):

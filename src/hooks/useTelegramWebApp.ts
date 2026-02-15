@@ -1,62 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
+import { getTelegramWebApp } from "@/lib/telegram";
 
 // Minimal Telegram WebApp integration (safe fallback for non-Telegram browsers).
 // Theme + language are handled by SettingsProvider.
-
-export type TelegramThemeParams = Record<string, unknown>;
-type TelegramInsets = {
-  top: number;
-  bottom: number;
-  left: number;
-  right: number;
-};
-export type TelegramWebApp = {
-  themeParams?: TelegramThemeParams;
-  colorScheme?: "light" | "dark";
-  isExpanded?: boolean;
-  version?: string;
-  platform?: string;
-  initData?: string;
-  viewportHeight?: number;
-  viewportStableHeight?: number;
-  safeAreaInset?: TelegramInsets;
-  contentSafeAreaInset?: TelegramInsets;
-  initDataUnsafe?: {
-    user?: {
-      id?: number;
-      username?: string;
-      first_name?: string;
-      last_name?: string;
-      photo_url?: string;
-    };
-  };
-  isVersionAtLeast?: (version: string) => boolean;
-  setHeaderColor?: (color: string) => void;
-  setBackgroundColor?: (color: string) => void;
-  setBottomBarColor?: (color: string) => void;
-  onEvent?: (event: string, cb: () => void) => void;
-  offEvent?: (event: string, cb: () => void) => void;
-  openTelegramLink?: (url: string) => void;
-  openLink?: (url: string) => void;
-  openInvoice?: (url: string, cb?: (status: "paid" | "cancelled" | "failed" | "pending") => void) => void;
-  showPopup?: (
-    params: {
-      title?: string;
-      message: string;
-      buttons?: Array<{ id?: string; type?: "default" | "ok" | "close" | "cancel" | "destructive"; text?: string }>;
-    },
-    callback?: (buttonId: string) => void
-  ) => void;
-  expand?: () => void;
-  ready?: () => void;
-};
 
 const setRootPxVar = (name: string, value: number | undefined) => {
   if (typeof value !== "number" || Number.isNaN(value)) return;
   document.documentElement.style.setProperty(name, `${value}px`);
 };
 
-const applyInsets = (prefix: string, insets?: TelegramInsets) => {
+const applyInsets = (prefix: string, insets?: TelegramWebAppInsets) => {
   if (!insets) return;
   setRootPxVar(`--${prefix}-top`, insets.top);
   setRootPxVar(`--${prefix}-bottom`, insets.bottom);
@@ -85,19 +38,17 @@ export const initTelegramWebApp = () => {
   root.style.setProperty("--safe-area-right", "env(safe-area-inset-right, 0px)");
 
   try {
-    const wa: TelegramWebApp | undefined = (window as any)?.Telegram?.WebApp;
-    wa?.ready?.();
-    wa?.expand?.();
-    applyViewportVars(wa);
+    const webApp = getTelegramWebApp();
+    webApp?.ready?.();
+    webApp?.expand?.();
+    applyViewportVars(webApp);
   } catch {
     // ignore
   }
 };
 
 export const useTelegramWebApp = () => {
-  const [webApp, setWebApp] = useState<TelegramWebApp | null>(() => {
-    return ((window as any)?.Telegram?.WebApp as TelegramWebApp) ?? null;
-  });
+  const [webApp, setWebApp] = useState<TelegramWebApp | null>(() => getTelegramWebApp());
 
   useEffect(() => {
     if (webApp) return;
@@ -106,11 +57,11 @@ export const useTelegramWebApp = () => {
     let attempts = 0;
 
     const attachWebApp = () => {
-      const wa = ((window as any)?.Telegram?.WebApp as TelegramWebApp) ?? null;
+      const currentWebApp = getTelegramWebApp();
       attempts += 1;
 
-      if (wa || attempts >= maxAttempts) {
-        setWebApp(wa);
+      if (currentWebApp || attempts >= maxAttempts) {
+        setWebApp(currentWebApp);
         return true;
       }
 
@@ -131,25 +82,24 @@ export const useTelegramWebApp = () => {
   }, [webApp]);
 
   useEffect(() => {
-    const wa = webApp;
     initTelegramWebApp();
-    applyViewportVars(wa);
+    applyViewportVars(webApp);
 
-    const handleViewportChange = () => applyViewportVars(wa);
+    const handleViewportChange = () => applyViewportVars(webApp);
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        applyViewportVars(wa);
+        applyViewportVars(webApp);
       }
     };
 
-    wa?.onEvent?.("viewportChanged", handleViewportChange);
+    webApp?.onEvent?.("viewportChanged", handleViewportChange);
     window.addEventListener("resize", handleViewportChange);
     window.addEventListener("focus", handleViewportChange);
     document.addEventListener("visibilitychange", handleVisibilityChange);
     window.visualViewport?.addEventListener("resize", handleViewportChange);
 
     return () => {
-      wa?.offEvent?.("viewportChanged", handleViewportChange);
+      webApp?.offEvent?.("viewportChanged", handleViewportChange);
       window.removeEventListener("resize", handleViewportChange);
       window.removeEventListener("focus", handleViewportChange);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
@@ -160,7 +110,7 @@ export const useTelegramWebApp = () => {
   return useMemo(() => {
     return {
       webApp,
-      colorScheme: (webApp?.colorScheme as "light" | "dark" | undefined) ?? "dark",
+      colorScheme: webApp?.colorScheme ?? "dark",
       isExpanded: Boolean(webApp?.isExpanded),
       themeParams: webApp?.themeParams ?? {},
     };

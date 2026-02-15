@@ -31,20 +31,10 @@ interface LeaderboardUser {
   score?: number;
 }
 
-type LeaderboardPayloadObject = {
-  users?: LeaderboardUser[];
-  leaderboard?: LeaderboardUser[];
-  items?: LeaderboardUser[];
-  rows?: LeaderboardUser[];
-  list?: LeaderboardUser[];
-  data?: LeaderboardPayload;
-  result?: LeaderboardPayload;
-  payload?: LeaderboardPayload;
-};
-
-type LeaderboardPayload = LeaderboardUser[] | LeaderboardPayloadObject;
-
-type LeaderboardResponse = LeaderboardPayload | null | undefined;
+type LeaderboardResponse = {
+  leaderboard?: unknown;
+  error?: string;
+} | null;
 
 type LeaderboardEmptyReason = "empty_leaderboard" | "load_error" | null;
 
@@ -88,45 +78,6 @@ const isRecord = (value: unknown): value is Record<string, unknown> => {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 };
 
-const isLeaderboardUserLike = (value: unknown): value is LeaderboardUser => {
-  if (!isRecord(value)) return false;
-
-  return (
-    "id" in value ||
-    "_id" in value ||
-    "userId" in value ||
-    "user_id" in value ||
-    "username" in value ||
-    "userName" in value ||
-    "user_name" in value ||
-    "name" in value ||
-    "spentStars" in value ||
-    "spent_stars" in value ||
-    "xp" in value ||
-    "score" in value ||
-    "totalSpentStars" in value ||
-    "total_spent_stars" in value
-  );
-};
-
-const collectLeaderboardUsers = (value: unknown, seen: WeakSet<object>): LeaderboardUser[] => {
-  if (!value) return [];
-
-  if (Array.isArray(value)) {
-    return value.flatMap((item) => collectLeaderboardUsers(item, seen));
-  }
-
-  if (!isRecord(value)) return [];
-  if (seen.has(value)) return [];
-  seen.add(value);
-
-  if (isLeaderboardUserLike(value)) {
-    return [value];
-  }
-
-  return Object.values(value).flatMap((item) => collectLeaderboardUsers(item, seen));
-};
-
 const dedupeUsers = (users: LeaderboardUser[]) => {
   const byKey = new Map<string, LeaderboardUser>();
 
@@ -141,10 +92,11 @@ const dedupeUsers = (users: LeaderboardUser[]) => {
 };
 
 const toLeaderboardArray = (data: LeaderboardResponse): LeaderboardUser[] => {
-  if (!data) return [];
+  const rawLeaderboard = data?.leaderboard ?? [];
+  if (!Array.isArray(rawLeaderboard)) return [];
 
-  const list = collectLeaderboardUsers(data, new WeakSet<object>());
-  return dedupeUsers(list);
+  const users = rawLeaderboard.filter((item): item is LeaderboardUser => isRecord(item));
+  return dedupeUsers(users);
 };
 
 const preloadAvatarImage = (photoUrl: string) => {
@@ -158,7 +110,7 @@ const fetchLeaderboard = async (initData?: string) => {
     headers: initData ? { "X-Telegram-Init-Data": initData } : undefined,
   });
 
-  const data = (await response.json()) as LeaderboardResponse & { error?: string };
+  const data = (await response.json()) as LeaderboardResponse;
 
   if (!response.ok) {
     if (data?.error === "invalid_init_data") {

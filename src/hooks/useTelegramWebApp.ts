@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 // Minimal Telegram WebApp integration (safe fallback for non-Telegram browsers).
 // Theme + language are handled by SettingsProvider.
@@ -98,6 +98,7 @@ export const useTelegramWebApp = () => {
   const [webApp, setWebApp] = useState<TelegramWebApp | null>(() => {
     return ((window as any)?.Telegram?.WebApp as TelegramWebApp) ?? null;
   });
+  const initializedRef = useRef(false);
 
   useEffect(() => {
     if (webApp) return;
@@ -131,17 +132,27 @@ export const useTelegramWebApp = () => {
   }, [webApp]);
 
   useEffect(() => {
-    const wa = webApp;
-    initTelegramWebApp();
-    applyViewportVars(wa);
+    if (!initializedRef.current && webApp) {
+      initTelegramWebApp();
+      initializedRef.current = true;
+    }
 
-    const handleViewportChange = () => applyViewportVars(wa);
+    applyViewportVars(webApp);
+  }, [webApp]);
+
+  useEffect(() => {
+    const handleViewportChange = () => {
+      const currentWebApp = ((window as any)?.Telegram?.WebApp as TelegramWebApp) ?? null;
+      applyViewportVars(currentWebApp);
+    };
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        applyViewportVars(wa);
+        handleViewportChange();
       }
     };
 
+    handleViewportChange();
+    const wa = ((window as any)?.Telegram?.WebApp as TelegramWebApp) ?? null;
     wa?.onEvent?.("viewportChanged", handleViewportChange);
     window.addEventListener("resize", handleViewportChange);
     window.addEventListener("focus", handleViewportChange);
@@ -155,7 +166,7 @@ export const useTelegramWebApp = () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.visualViewport?.removeEventListener("resize", handleViewportChange);
     };
-  }, [webApp]);
+  }, []);
 
   return useMemo(() => {
     return {

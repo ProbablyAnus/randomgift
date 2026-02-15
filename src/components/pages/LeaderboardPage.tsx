@@ -47,6 +47,10 @@ type LeaderboardResponse = LeaderboardPayload | null | undefined;
 
 type LeaderboardEmptyReason = "empty_leaderboard" | "load_error" | null;
 
+let leaderboardCache: LeaderboardUser[] | null = null;
+let leaderboardPrefetchPromise: Promise<LeaderboardUser[]> | null = null;
+let leaderboardCacheInitData: string | undefined;
+
 const formatXp = (count: number) => `${count} xp`;
 
 const getDisplayName = (user: LeaderboardUser) => {
@@ -142,6 +146,53 @@ const toLeaderboardArray = (data: LeaderboardResponse): LeaderboardUser[] => {
   return dedupeUsers(list);
 };
 
+const preloadAvatarImage = (photoUrl: string) => {
+  if (!photoUrl || typeof Image === "undefined") return;
+  const image = new Image();
+  image.src = photoUrl;
+};
+
+const fetchLeaderboard = async (initData?: string) => {
+  const response = await fetch(buildApiUrl("/api/leaderboard"), {
+    headers: initData ? { "X-Telegram-Init-Data": initData } : undefined,
+  });
+
+  const data = (await response.json()) as LeaderboardResponse & { error?: string };
+
+  if (!response.ok) {
+    if (data?.error === "invalid_init_data") {
+      console.warn("invalid_init_data: leaderboard request must be made inside Telegram");
+    }
+    throw new Error("failed_to_load_leaderboard");
+  }
+
+  const list = toLeaderboardArray(data);
+  list.forEach((user) => preloadAvatarImage(getPhotoUrl(user)));
+  return list;
+};
+
+export const preloadLeaderboard = (initData?: string) => {
+  if (leaderboardCache && leaderboardCacheInitData === initData) {
+    return Promise.resolve(leaderboardCache);
+  }
+
+  if (leaderboardPrefetchPromise && leaderboardCacheInitData === initData) {
+    return leaderboardPrefetchPromise;
+  }
+
+  leaderboardCacheInitData = initData;
+  leaderboardPrefetchPromise = fetchLeaderboard(initData)
+    .then((list) => {
+      leaderboardCache = list;
+      return list;
+    })
+    .finally(() => {
+      leaderboardPrefetchPromise = null;
+    });
+
+  return leaderboardPrefetchPromise;
+};
+
 export const LeaderboardPage: FC = () => {
   const { webApp } = useTelegramWebApp();
   const [searchValue, setSearchValue] = useState("");
@@ -153,7 +204,6 @@ export const LeaderboardPage: FC = () => {
 
   useEffect(() => {
     let isMounted = true;
-    const controller = new AbortController();
 
     const fetchLeaderboard = async () => {
       setIsLoading(true);
@@ -164,22 +214,7 @@ export const LeaderboardPage: FC = () => {
         if (!initData) {
           console.warn("initData missing: leaderboard request is outside Telegram WebApp context");
         }
-
-        const response = await fetch(buildApiUrl("/api/leaderboard"), {
-          signal: controller.signal,
-          headers: initData ? { "X-Telegram-Init-Data": initData } : undefined,
-        });
-
-        const data = (await response.json()) as LeaderboardResponse & { error?: string };
-
-        if (!response.ok) {
-          if (data?.error === "invalid_init_data") {
-            console.warn("invalid_init_data: leaderboard request must be made inside Telegram");
-          }
-          throw new Error("failed_to_load_leaderboard");
-        }
-
-        const list = toLeaderboardArray(data);
+        const list = await preloadLeaderboard(initData);
 
         if (!isMounted) return;
         setLeaderboard(list);
@@ -202,7 +237,6 @@ export const LeaderboardPage: FC = () => {
 
     return () => {
       isMounted = false;
-      controller.abort();
     };
   }, [webApp?.initData]);
 

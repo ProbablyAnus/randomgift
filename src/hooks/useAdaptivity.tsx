@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode, FC } from "react";
+import { createContext, useContext, useEffect, useRef, useState, ReactNode, FC } from "react";
 
 type Platform = "ios" | "android" | "desktop";
 type SizeX = "compact" | "regular";
@@ -42,6 +42,8 @@ interface AdaptivityProviderProps {
 }
 
 export const AdaptivityProvider: FC<AdaptivityProviderProps> = ({ children }) => {
+  const rafId = useRef<number | null>(null);
+
   const getViewportSize = () => {
     const viewport = window.visualViewport;
     const width = viewport?.width ?? window.innerWidth;
@@ -60,20 +62,46 @@ export const AdaptivityProvider: FC<AdaptivityProviderProps> = ({ children }) =>
 
   useEffect(() => {
     const handleResize = () => {
-      const { width, height } = getViewportSize();
-      setState((prev) => ({
-        ...prev,
-        sizeX: getSizeX(width),
-        sizeY: getSizeY(height),
-        viewportWidth: width,
-        viewportHeight: height,
-      }));
+      if (rafId.current !== null) {
+        cancelAnimationFrame(rafId.current);
+      }
+
+      rafId.current = requestAnimationFrame(() => {
+        rafId.current = null;
+
+        const { width, height } = getViewportSize();
+        const nextSizeX = getSizeX(width);
+        const nextSizeY = getSizeY(height);
+
+        setState((prev) => {
+          if (
+            prev.viewportWidth === width
+            && prev.viewportHeight === height
+            && prev.sizeX === nextSizeX
+            && prev.sizeY === nextSizeY
+          ) {
+            return prev;
+          }
+
+          return {
+            ...prev,
+            sizeX: nextSizeX,
+            sizeY: nextSizeY,
+            viewportWidth: width,
+            viewportHeight: height,
+          };
+        });
+      });
     };
 
     window.addEventListener("resize", handleResize);
     window.visualViewport?.addEventListener("resize", handleResize);
     window.visualViewport?.addEventListener("scroll", handleResize);
     return () => {
+      if (rafId.current !== null) {
+        cancelAnimationFrame(rafId.current);
+      }
+
       window.removeEventListener("resize", handleResize);
       window.visualViewport?.removeEventListener("resize", handleResize);
       window.visualViewport?.removeEventListener("scroll", handleResize);
